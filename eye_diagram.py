@@ -86,7 +86,7 @@ if __name__ == "__main__":
     ymin = -1.5
     ymax = 1.5
 
-    num_traces = 1000
+    num_traces = 100
 
     for k in range(num_traces):
 
