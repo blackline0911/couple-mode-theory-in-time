@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[24]:
+# In[216]:
 
 
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html#scipy.integrate.solve_ivp
@@ -21,26 +21,26 @@ from random import *
 get_ipython().system('jupyter nbconvert --to script coupled_equation_20250106.ipynb')
 
 
-# In[3]:
+# In[181]:
 
 
 # Some Simulation Settings
 
 # Driving Voltage Setting
-square_wave = 0
+square_wave = 1
 sine_wave =0
-raise_cosine =1
+raise_cosine =0
 
 # Whether Use Pseudo Random Bit Sequence
-PRBS = 1
+PRBS = 0
 
 # Display Settings
 eye_diagram = 1
-show_voltage = 0
+show_voltage = 1
 show_capacitance = 0
 
 
-# In[4]:
+# In[182]:
 
 
 # setting ring parameters
@@ -70,7 +70,7 @@ ng = 4.3
 La = 2*np.pi*radius
 
 
-# In[5]:
+# In[183]:
 
 
 # driving parameters
@@ -88,9 +88,8 @@ vpp = 1
 # driving frequency (GHz)
 f = 50
 w_drive = 2*np.pi*f*1e9
-if raise_cosine:
-    T = 1/(f*1e9)
-    T_normalized = T/t0
+T = 1/(f*1e9)
+T_normalized = T/t0
 
 # series resistance
 R = 53.9
@@ -108,7 +107,7 @@ def Cj(V):
     # return 20e-15
 
 
-# In[6]:
+# In[184]:
 
 
 # calculating ring resonant frequency
@@ -122,7 +121,7 @@ w0 = 102*np.pi*c/(neff*L)
 lambda0 = 2*np.pi*c/w0
 
 
-# In[7]:
+# In[185]:
 
 
 # setting incident light 
@@ -137,7 +136,7 @@ if change_w:
     wl =2*np.pi*c/w
 
 
-# In[8]:
+# In[186]:
 
 
 # calculating parameter in couple mode equation in time
@@ -149,7 +148,7 @@ tu_o = -L*ng/(c*log(alpha))
 tu_e = -L*ng/(c*log(sqrt(1-kappa**2)))
 
 
-# In[ ]:
+# In[187]:
 
 
 # setting solver parameters
@@ -157,7 +156,7 @@ tu_e = -L*ng/(c*log(sqrt(1-kappa**2)))
 
 
 # Highest time accuracy in the result
-dt = 1e-16
+dt = 1e-15
 
 t_min=0
 t_max = 100
@@ -170,7 +169,6 @@ if eye_diagram:
 
     # recording length in each time segment
     number_record = np.array([])
-    plt.figure()
     for r in range(N):
         # t_segment = np.arange(t_min+(r)*T_v1 +r*dt/t0, (r+1)*T_v1, dt/t0)
         num = math.ceil( ( (r+1)*T_v1-dt/t0- (t_min+(r)*T_v1 ) ) / ( dt/t0 ))
@@ -192,7 +190,7 @@ b_init = 1e-6+1j*0
 Q_init = 0
 
 # relative solver tolerance 
-rtol = 1e-15
+rtol = 1e-14
 # absolute solver tolerance
 atol = 1e-20
 # accuracy = atol + abs(y)*rtol
@@ -200,18 +198,14 @@ atol = 1e-20
 # method of solving algorithm
 method = 'RK45'
 
-
-
 # shifting frequency of field in ring from incident light frequency
 w_pround = w
 
 
-# In[10]:
+# In[188]:
 
 
 # normalize factors
-
-
 S0 = 1
 b0 = sqrt(t0)*S0
 tu_t = (1/tu_e+1/tu_o)**(-1)
@@ -226,7 +220,7 @@ w0_bar = w0*t0
 w_pround_bar = w_pround*t0
 
 
-# In[11]:
+# In[189]:
 
 
 # Generating PRBS 
@@ -237,13 +231,19 @@ if PRBS:
 else:
     # Periodic Bit Sequence
     bit_sequence  = np.array([1,0])
-    T_normalized = 1/f/t0
+    T_normalized = 1/(f*1e9)/t0
     for u in range(1,int(t_max/T_normalized)):
         bit_sequence = np.append( bit_sequence , np.array( [1,0]) )
 # prbs = [0,1]
 
 
-# In[12]:
+# In[ ]:
+
+
+
+
+
+# In[190]:
 
 
 # defining functions
@@ -283,7 +283,7 @@ def rcos(t,beta,T,shift,t0=t0):
                 return bit_sequence[int(shift/T_normalized)-1]*sinc((t-shift)*t0/T)*np.cos(np.pi*beta*(t-shift)*t0/T)/(1-(2*beta*(t-shift)*t0/T)**2)
         
 
-def v(w_drive,t):
+def v(w_drive,t,beta=1):
     if square_wave:
         return vpp/2*signal.square(w_drive*t*t0,duty=0.5)+v_bias
     if sine_wave:
@@ -291,7 +291,6 @@ def v(w_drive,t):
     if raise_cosine:
         T_period = 1/(f*1e9)
         T_period_normalized = T_period/t0
-        beta = 1
         # a = np.zeros(len(t_total))
         a=0
         # N = int(t_max*t0//(T_period))
@@ -312,7 +311,7 @@ def S_plus_pround_bar(t):
     return S_plus_pround(t)/S0
 
 
-# In[13]:
+# In[191]:
 
 
 # defining CMT function
@@ -350,7 +349,7 @@ else:
     
 
 
-# In[15]:
+# In[193]:
 
 
 if eye_diagram:
@@ -361,12 +360,13 @@ else:
     Q_bar = (sol.y[1])
 # t_vals = np.arange(t_min*t0,t_max*t0,dt)
 # b_bar_vals = np.interp(t_vals, t_total*t0, b_bar)
-a_bar_vals = b_bar*np.exp(1j*w_pround*t_total*t0)
+# a_bar_vals = b_bar*np.exp(1j*w_pround*t_total*t0)
 
-s_minus_bar = (S_plus(w_pround,t_total)/S0-sqrt(2/tu_e_bar)*a_bar_vals)
+# s_minus_bar = (S_plus(w_pround,t_total)/S0-sqrt(2/tu_e_bar)*a_bar_vals)
+s_minus_bar = (S_plus_pround(t_total)/S0-sqrt(2/tu_e_bar)*b_bar)
 
 
-# In[16]:
+# In[194]:
 
 
 # prepare data for showing
@@ -378,7 +378,18 @@ if show_voltage or show_capacitance:
         C_show[i]=Cj(v_show[i])
 
 
-# In[17]:
+# In[ ]:
+
+
+if show_voltage:
+    plt.figure()
+    plt.plot(t_total*t0, v_show)
+    plt.title("applied voltage")
+    plt.xlabel('t')
+    plt.show()
+
+
+# In[ ]:
 
 
 plt.figure()
@@ -394,8 +405,14 @@ if show_voltage:
     plt.xlabel('t')
     plt.show()
 
+# plt.figure()
+# plt.plot(t_total*t0, abs(a_bar_vals*b0)**2)
+# plt.title(r"|a|^2")
+# plt.xlabel('t')
+# plt.show()
+
 plt.figure()
-plt.plot(t_total*t0, abs(a_bar_vals*b0)**2)
+plt.plot(t_total*t0, abs(b_bar*b0)**2)
 plt.title(r"|a|^2")
 plt.xlabel('t')
 plt.show()
@@ -443,42 +460,44 @@ plt.show()
 # plt.xlabel('t')
 # plt.show()
 
+# plt.figure()
+# plt.plot(t_total*t0, 180/np.pi*np.angle(s_minus_bar*b0*np.exp(-1j*w*t_total*t0)))
+# plt.title(r'phase of s-')
+# plt.xlabel('t')
+# plt.show()
+
 plt.figure()
-plt.plot(t_total*t0, 180/np.pi*np.angle(s_minus_bar*b0*np.exp(-1j*w*t_total*t0)))
+plt.plot(t_total*t0, 180/np.pi*np.angle(s_minus_bar*b0))
 plt.title(r'phase of s-')
 plt.xlabel('t')
 plt.show()
 
 
-# In[ ]:
+# In[215]:
 
 
 if eye_diagram:
     cum_t_index = np.zeros(N)
     seg = t_all_segment[0]
-    margin = 0.2
-    blank = int(margin*len(seg))
     sig = abs(s_minus_bar*S0)**2
     for q in range(N):
         if q==0:
             cum_t_index[q] = (len(t_all_segment[q]))
         else:
             cum_t_index[q] = (len(t_all_segment[q]) + cum_t_index[q-1])
+    
     plt.figure()
+    # discarding the first two bits
     if PRBS:
-        for k in range(1,N):
+        for k in range(2,N):
             sig_segment = sig[int(cum_t_index[k-1]):int(cum_t_index[k])]
             last = t_all_segment[k-1][-1]
             plt.plot( t0*(np.array(t_all_segment[k][:])-last),sig_segment, color='crimson')
     else:
-        for k in range(int(t_max/T_normalized)-1):
-            if k==0:
-                sig_segment = sig[int((1-margin)*len(seg)):int(cum_t_index[k])]
-                plt.plot( t0*(np.array(t_all_segment[0][int((1-margin)*len(seg)):int(cum_t_index[k])])),sig_segment, color='crimson')
-            else:
-                sig_segment = sig[int(cum_t_index[k-1]):int(cum_t_index[k])]
-                last = t_all_segment[k-1][-1]
-                plt.plot( t0*(np.array(t_all_segment[k][:])-last),sig_segment, color='crimson')
+        for k in range(2,int(t_max/T_normalized)):
+            sig_segment = sig[int(cum_t_index[k-1]):int(cum_t_index[k])]
+            last = t_all_segment[k-1][-1]
+            plt.plot( t0*(np.array(t_all_segment[k][:])-last),sig_segment, color='crimson')
 
     plt.grid(color='w')
 
@@ -495,14 +514,14 @@ if eye_diagram:
     fig = plt.gcf()
 
 
-# In[19]:
+# In[198]:
 
 
 if PRBS:
     print( prbs)
 
 
-# In[20]:
+# In[199]:
 
 
 phase_s_max = max(180/np.pi*np.angle(s_minus_bar[-int(len(s_minus_bar)/10*2):-1]*S0*np.exp(-1j*w*t_total[-int(len(s_minus_bar)/10*2):-1]*t0)))
@@ -511,7 +530,7 @@ print('max of s_minus phase = ',phase_s_max)
 print('min of s_minus phase = ',phase_s_min)
 
 
-# In[ ]:
+# In[200]:
 
 
 s_max = max(abs(s_minus_bar[-int(len(s_minus_bar)/10*2):-1]*S0)**2)
@@ -520,14 +539,14 @@ print('max of s_minus = ',s_max)
 print('min of s_minus = ',s_min)
 
 
-# In[22]:
+# In[201]:
 
 
 ER = 10*log10(s_max/s_min)
 print("Extinction ratio = ", ER)
 
 
-# In[23]:
+# In[202]:
 
 
 # Q factor of ring
