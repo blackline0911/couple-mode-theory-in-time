@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[216]:
+# In[1]:
 
 
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html#scipy.integrate.solve_ivp
@@ -21,26 +21,26 @@ from random import *
 get_ipython().system('jupyter nbconvert --to script coupled_equation_20250106.ipynb')
 
 
-# In[181]:
+# In[30]:
 
 
 # Some Simulation Settings
 
 # Driving Voltage Setting
-square_wave = 1
-sine_wave =0
+square_wave = 0
+sine_wave =1
 raise_cosine =0
 
 # Whether Use Pseudo Random Bit Sequence
-PRBS = 0
+PRBS = 1
 
 # Display Settings
 eye_diagram = 1
-show_voltage = 1
+show_voltage = 0
 show_capacitance = 0
 
 
-# In[182]:
+# In[31]:
 
 
 # setting ring parameters
@@ -70,7 +70,7 @@ ng = 4.3
 La = 2*np.pi*radius
 
 
-# In[183]:
+# In[32]:
 
 
 # driving parameters
@@ -86,7 +86,7 @@ v_bias = -1
 vpp = 1
 
 # driving frequency (GHz)
-f = 50
+f = 100
 w_drive = 2*np.pi*f*1e9
 T = 1/(f*1e9)
 T_normalized = T/t0
@@ -107,7 +107,7 @@ def Cj(V):
     # return 20e-15
 
 
-# In[184]:
+# In[33]:
 
 
 # calculating ring resonant frequency
@@ -121,7 +121,7 @@ w0 = 102*np.pi*c/(neff*L)
 lambda0 = 2*np.pi*c/w0
 
 
-# In[185]:
+# In[34]:
 
 
 # setting incident light 
@@ -136,7 +136,7 @@ if change_w:
     wl =2*np.pi*c/w
 
 
-# In[186]:
+# In[35]:
 
 
 # calculating parameter in couple mode equation in time
@@ -148,7 +148,7 @@ tu_o = -L*ng/(c*log(alpha))
 tu_e = -L*ng/(c*log(sqrt(1-kappa**2)))
 
 
-# In[187]:
+# In[78]:
 
 
 # setting solver parameters
@@ -156,7 +156,15 @@ tu_e = -L*ng/(c*log(sqrt(1-kappa**2)))
 
 
 # Highest time accuracy in the result
-dt = 1e-15
+# dt = 1e-15
+df_max =  (c/lambda0**2)*abs( me )*( vpp/2 + abs(v_bias))
+
+print(df_max)
+dt = 1/df_max/100
+print(dt)
+# if dt>t0:
+#     dt = t0/10
+# print(dt)
 
 t_min=0
 t_max = 100
@@ -202,7 +210,7 @@ method = 'RK45'
 w_pround = w
 
 
-# In[188]:
+# In[64]:
 
 
 # normalize factors
@@ -220,7 +228,7 @@ w0_bar = w0*t0
 w_pround_bar = w_pround*t0
 
 
-# In[189]:
+# In[65]:
 
 
 # Generating PRBS 
@@ -237,13 +245,7 @@ else:
 # prbs = [0,1]
 
 
-# In[ ]:
-
-
-
-
-
-# In[190]:
+# In[66]:
 
 
 # defining functions
@@ -311,7 +313,25 @@ def S_plus_pround_bar(t):
     return S_plus_pround(t)/S0
 
 
-# In[191]:
+# In[67]:
+
+
+t_max
+
+
+# In[68]:
+
+
+len(t_total)
+
+
+# In[69]:
+
+
+number_record
+
+
+# In[70]:
 
 
 # defining CMT function
@@ -329,7 +349,7 @@ def CMT(t_bar,eqs):
     return [ f1,f2 ]
 
 
-# In[ ]:
+# In[71]:
 
 
 # solving CMT
@@ -349,7 +369,7 @@ else:
     
 
 
-# In[193]:
+# In[72]:
 
 
 if eye_diagram:
@@ -366,7 +386,7 @@ else:
 s_minus_bar = (S_plus_pround(t_total)/S0-sqrt(2/tu_e_bar)*b_bar)
 
 
-# In[194]:
+# In[73]:
 
 
 # prepare data for showing
@@ -378,7 +398,7 @@ if show_voltage or show_capacitance:
         C_show[i]=Cj(v_show[i])
 
 
-# In[ ]:
+# In[47]:
 
 
 if show_voltage:
@@ -389,7 +409,7 @@ if show_voltage:
     plt.show()
 
 
-# In[ ]:
+# In[55]:
 
 
 plt.figure()
@@ -398,18 +418,25 @@ plt.title("b_bar")
 plt.xlabel('t')
 plt.show()
 
+
+# In[56]:
+
+
 if show_voltage:
     plt.figure()
     plt.plot(t_total*t0, v_show)
     plt.title("applied voltage")
     plt.xlabel('t')
     plt.show()
-
 # plt.figure()
 # plt.plot(t_total*t0, abs(a_bar_vals*b0)**2)
 # plt.title(r"|a|^2")
 # plt.xlabel('t')
 # plt.show()
+
+
+# In[57]:
+
 
 plt.figure()
 plt.plot(t_total*t0, abs(b_bar*b0)**2)
@@ -417,11 +444,9 @@ plt.title(r"|a|^2")
 plt.xlabel('t')
 plt.show()
 
-plt.figure()
-plt.plot(t_total*t0, Q_bar)
-plt.title("normalized Q")
-plt.xlabel('t')
-plt.show()
+
+# In[59]:
+
 
 if show_capacitance:
     plt.figure()
@@ -430,13 +455,16 @@ if show_capacitance:
     plt.xlabel('t')
     plt.show()
 
+
+# In[60]:
+
+
 if show_capacitance:
     plt.figure()
     plt.plot(t_total*t0, (sol.y[1])*C_show)
     plt.title("Q")
     plt.xlabel('t')
     plt.show()
-
 # plt.figure()
 # plt.plot(t_total[-int(len(s_minus_bar)/10*2):-1]*t0, (sol.y[1][-int(len(s_minus_bar)/10*2):-1])*C_show[-int(len(s_minus_bar)/10*2):-1])
 # plt.title("Q")
@@ -447,6 +475,10 @@ if show_capacitance:
 # plt.title("Q")
 # plt.xlabel('t')
 # plt.show()
+
+
+# In[61]:
+
 
 plt.figure()
 plt.plot(t_total*t0, abs(s_minus_bar*S0)**2)
@@ -466,6 +498,10 @@ plt.show()
 # plt.xlabel('t')
 # plt.show()
 
+
+# In[62]:
+
+
 plt.figure()
 plt.plot(t_total*t0, 180/np.pi*np.angle(s_minus_bar*b0))
 plt.title(r'phase of s-')
@@ -473,7 +509,7 @@ plt.xlabel('t')
 plt.show()
 
 
-# In[215]:
+# In[ ]:
 
 
 if eye_diagram:
@@ -514,14 +550,14 @@ if eye_diagram:
     fig = plt.gcf()
 
 
-# In[198]:
+# In[50]:
 
 
 if PRBS:
     print( prbs)
 
 
-# In[199]:
+# In[51]:
 
 
 phase_s_max = max(180/np.pi*np.angle(s_minus_bar[-int(len(s_minus_bar)/10*2):-1]*S0*np.exp(-1j*w*t_total[-int(len(s_minus_bar)/10*2):-1]*t0)))
@@ -530,7 +566,7 @@ print('max of s_minus phase = ',phase_s_max)
 print('min of s_minus phase = ',phase_s_min)
 
 
-# In[200]:
+# In[52]:
 
 
 s_max = max(abs(s_minus_bar[-int(len(s_minus_bar)/10*2):-1]*S0)**2)
@@ -539,14 +575,14 @@ print('max of s_minus = ',s_max)
 print('min of s_minus = ',s_min)
 
 
-# In[201]:
+# In[53]:
 
 
 ER = 10*log10(s_max/s_min)
 print("Extinction ratio = ", ER)
 
 
-# In[202]:
+# In[54]:
 
 
 # Q factor of ring
