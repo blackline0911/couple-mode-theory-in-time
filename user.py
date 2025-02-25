@@ -14,15 +14,14 @@ class time():
                  ring,
                  driver):
         self.N=N
-        w_pround = 2*np.pi*c/(lambda_incident*1e-6)
-        # f0 = ring.w_res/2/np.pi
-        # f_pround = w_pround/2/np.pi
-        df_max =  (c/ring.lambda0**2)*abs( ring.me )*( driver.vpp/2 + abs(driver.v_bias))
+        w_pround = 2*np.pi*c/(lambda_incident)*t0
+        df_max =  (c/ring.lambda0**2)*abs( ring.me*1e-12/1e-6 )*( driver.vpp/2 + abs(driver.v_bias))
         if df_max < driver.f_drive*1e9:
             self.dt = 1/(driver.f_drive*1e9)/10
         self.dt = (1/df_max/100)
         inte = (math.log10(self.dt))//1
         self.dt = 10**(inte-1)
+
         self.t_max = math.ceil( 1/(driver.f_drive*1e9)*N/t0 )
         self.T_normalized = 1/(driver.f_drive*1e9)/t0
         
@@ -69,11 +68,12 @@ class ring():
         self.alpha = alpha
         self.me = me
         self.kappa = (1-self.gamma**2)**0.5
-        self.tu_e = -self.L*1e-6*self.ng/(c*log(sqrt(1-self.kappa**2)))
-        self.tu_o = -self.L*1e-6*self.ng/(c*log(alpha))
-        self.tu_t = (1/self.tu_e+1/self.tu_o)**(-1)
-        self.w_res = 102*np.pi*c/(self.neff*self.L)
-        self.lambda0 = 2*np.pi*c/self.w_res
+        self.tu_e_bar = -self.L*self.ng/(c*log(sqrt(1-self.kappa**2)))/t0
+        self.tu_o_bar = -self.L*self.ng/(c*log(alpha))/t0
+        self.tu_t_bar = (1/self.tu_e_bar+1/self.tu_o_bar)**(-1)
+        self.w_res_bar = 102*np.pi*c/(self.neff*self.L)*t0
+        self.lambda0 = 2*np.pi*c*t0/self.w_res_bar
+
 
 class driver():
     Cj = 0
@@ -104,6 +104,8 @@ class driver():
                        PRBS = 0,
                        ):
         self.time = time
+        self.square_wave = square_wave
+        self.sine_wave = sine_wave
         if square_wave:
             self.v = self.vpp/2*signal.square(self.w_drive*time.t_total*t0,duty=0.5)+self.v_bias
         if sine_wave:
@@ -123,11 +125,23 @@ class driver():
         self.Cj = self.Cj_V(self.v_bias)
 
         return
-    
+
+    def refering_v(self,t):
+        if self.square_wave:
+            return self.vpp/2*signal.square(self.w_drive*t*t0,duty=0.5)+self.v_bias
+        if self.sine_wave:
+            return self.vpp/2*np.exp(1j*self.w_drive*t*t0)+self.v_bias
+
+    def refering_Cj(self,voltage):
+        return self.Cj_V(voltage)
+        
     def Cj_V(self,vol):
         return 3.7675e-14/( (2.5485-vol)**0.5 )
     
     def varying_Cj(self):
+        """
+        call this function when you want to analyze large signal 
+        """
         self.Cj = self.Cj_V(self.v)
         self.Cj_dict = dict(zip(self.v,self.Cj))
         return 

@@ -2,7 +2,7 @@ from scipy import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-c = 299792458
+c = 299792458*1e6
 t0 = 1e-12
 rtol = 1e-14
 atol = 1e-20
