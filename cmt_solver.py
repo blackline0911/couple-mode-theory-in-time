@@ -61,26 +61,26 @@ def solving(ring,
     Q_record = np.array([])
     b_init=0+1j*0
     Q_init=0
-    # for i in range(time.N):
-    #     if i==0:
-    #         sol =  solve_ivp(CMT ,[0+time.T_normalized*i ,time.T_normalized*(i+1)], [b_init, Q_init],method=method,t_eval = time.t_all_segment[i] ,atol = atol,rtol = rtol)
-    #         b = sol.y[0]
-    #         b_record = np.append(b_record,b)
-    #         q = sol.y[1]
-    #         Q_record = np.append(Q_record,q)
-    #     else:
-    #         sol =  solve_ivp(CMT ,[0 ,time.T_normalized*(i+1)], [b_init, Q_init],method=method,t_eval = np.append( np.array( [time.t_all_segment[i][0]-time.dt/t0]), time.t_all_segment[i]  ),atol = atol,rtol = rtol)
-    #         b = sol.y[0]
-    #         b_record = np.append(b_record,b[1::])
-    #         q = sol.y[1]
-    #         Q_record = np.append(Q_record,q[1::])
-    #     b_init = b[-1]
-    #     Q_init = q[-1]
-    sol = solve_ivp(CMT ,[0,time.t_max], [b_init, Q_init],method=method,t_eval = time.t_total,atol = atol,rtol = rtol)
-    # b_bar = b_record
-    # Q_bar = Q_record
-    b_bar = sol.y[0]
-    Q_bar = sol.y[1]
+    for i in range(time.N):
+        # if i==0:
+        sol =  solve_ivp(CMT ,[0 ,time.t_max], [b_init, Q_init],method=method,t_eval = time.t_all_segment[i] ,atol = atol,rtol = rtol)
+        b = sol.y[0]
+        b_record = np.append(b_record,sol.y[0])
+        q = sol.y[1]
+        Q_record = np.append(Q_record,sol.y[1])
+        # else:
+            # sol =  solve_ivp(CMT ,[0 ,time.t_max], [b_init, Q_init],method=method,t_eval = np.append( ( [time.t_all_segment[i-1][-1]]), time.t_all_segment[i]  ),atol = atol,rtol = rtol)
+            # b = sol.y[0]
+            # b_record = np.append(b_record,b[1::])
+            # q = sol.y[1]
+            # Q_record = np.append(Q_record,q[1::])
+        b_init = sol.y[0][-1]
+        Q_init = sol.y[1][-1]
+    # sol = solve_ivp(CMT ,[0,time.t_max], [b_init, Q_init],method=method,t_eval = time.t_total,atol = atol,rtol = rtol)
+    b_bar = b_record
+    Q_bar = Q_record
+    # b_bar = sol.y[0]
+    # Q_bar = sol.y[1]
     s_minus_bar = (1-sqrt(2/ring.tu_e_bar)*b_bar)
 
     return b_bar*b0, Q_bar*driver.Cj , s_minus_bar*S0

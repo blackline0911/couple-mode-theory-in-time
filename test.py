@@ -18,7 +18,7 @@ ring_mod = ring(radius=5.0,
             me=37.2)
 
 v = driver(f_drive=100,v_bias=-1,vpp=0,R=53.9)
-t = time(N=10,
+t = time(N=2,
          lambda_incident=1.5488,
          ring=ring_mod,
          driver=v)
@@ -27,7 +27,6 @@ print(t.dt)
 
 # ploting(t.t_all_segment[0][:],t.t_all_segment[0][:],'time','time test',filename='test_time')
 ploting(t.t_total*t0,v.v,'time','time test',filename='test_time')
-print(v.v_dict[0.0])
 v.varying_Cj()
 b,Q,s_minus = solving(ring_mod,v,t,lambda_incident=1.5488,Pin=1)
 
@@ -41,3 +40,5 @@ np.savetxt("b_bar.txt", b/b0, fmt="%.8f", delimiter="\n")
 np.savetxt("Q_bar.txt", Q/v.Cj, fmt="%.8f", delimiter="\n")
 np.savetxt("s_minus_power.txt", abs(s_minus)**2, fmt="%.8f", delimiter="\n")
 np.savetxt("s_minus_phase.txt", 180/np.pi*np.angle(s_minus), fmt="%.8f", delimiter="\n")
+
+print(len(t.t_total))

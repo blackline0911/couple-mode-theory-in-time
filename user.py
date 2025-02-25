@@ -31,12 +31,14 @@ class time():
         # recording length in each time segment
         self.number_record = np.array([])
         for r in range(self.N):
-            num = math.ceil( ( (r+1)*self.T_normalized-self.dt/t0- (0+(r)*self.T_normalized ) ) / ( self.dt/t0 ))
-            t_segment = np.linspace(0+(r)*self.T_normalized , (r+1)*self.T_normalized-self.dt/t0, num )
-            self.number_record= np.append(self.number_record,num)
+            # num = math.ceil( ( (r+1)*self.T_normalized-self.dt/t0- (0+(r)*self.T_normalized ) ) / ( self.dt/t0 ))
+            # t_segment = np.linspace(0+(r)*self.T_normalized , (r+1)*self.T_normalized-self.dt/t0, num )
+            t_segment = np.arange( 0+r*self.T_normalized ,  (r+1)*self.T_normalized, self.dt/t0)
+            self.number_record= np.append(self.number_record,len(t_segment))
             self.t_total=np.append(self.t_total,t_segment)
-            self.t_all_segment[r][0] = t_segment[0]
-            self.t_all_segment[r].extend(t_segment[1:])
+            self.t_all_segment[r] = t_segment
+            # self.t_all_segment[r][0] = t_segment[0]
+            # self.t_all_segment[r].extend(t_segment[1:])
         
         return
     
