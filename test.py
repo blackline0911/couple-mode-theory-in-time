@@ -17,8 +17,8 @@ ring_mod = ring(radius=5.0,
             alpha = 0.95246,
             me=37.2)
 
-v = driver(f_drive=100,v_bias=-1,vpp=0,R=53.9)
-t = time(N=2,
+v = driver(f_drive=50,v_bias=-1,vpp=0,R=53.9)
+t = time(N=10,
          lambda_incident=1.5488,
          ring=ring_mod,
          driver=v)
@@ -41,4 +41,3 @@ np.savetxt("Q_bar.txt", Q/v.Cj, fmt="%.8f", delimiter="\n")
 np.savetxt("s_minus_power.txt", abs(s_minus)**2, fmt="%.8f", delimiter="\n")
 np.savetxt("s_minus_phase.txt", 180/np.pi*np.angle(s_minus), fmt="%.8f", delimiter="\n")
 
-print(len(t.t_total))
