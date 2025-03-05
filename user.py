@@ -84,6 +84,10 @@ class driver(time) :
                  v_bias,
                  vpp,
                  R:float,
+                 square_wave = 0,
+                 sine_wave =1,
+                 raise_cosine =0,
+                 PRBS = 0,
                  ):
         """
         input argments:
@@ -97,33 +101,49 @@ class driver(time) :
         self.v_bias = v_bias
         self.vpp=vpp
         self.R = R
-        return 
-    def create_voltage(self, 
-                       time,
-                       square_wave = 0,
-                       sine_wave =1,
-                       raise_cosine =0,
-                       PRBS = 0,
-                       ):
-        self.time = time
+
         self.square_wave = square_wave
         self.sine_wave = sine_wave
         self.raise_cosine = raise_cosine
         self.PRBS = PRBS
-        if square_wave:
+        return 
+    def create_voltage(self, 
+                       time,
+                       ):
+        """
+        This function creates a voltage array according to the time array refered to the time object.mro
+        Hence the voltage value only exists in the specified time.mro
+        Since I have no idea what time will solve_ivp solver need , so this function is only working for analysis and plotting
+        """
+        self.time = time
+        # Generating PRBS 
+        if self.PRBS:
+            self.prbs =np.zeros(self.time.N)
+            for i in range(self.time.N):
+                self.prbs[i] = randint(0,1)
+        else:
+            # Periodic Bit Sequence (this part only used when raise cosine is true while PRBS is false)
+            # create a dummy bit sequence : 0,1,0,1,0,1...
+            self.bit_sequence  = np.array([])
+            T_normalized = self.time.T_normalized
+            for u in range(int(self.time.t_max/T_normalized)):
+                self.bit_sequence = np.append( self.bit_sequence , u%2 )
+
+        
+        if self.square_wave:
             self.v = self.vpp/2*signal.square(self.w_drive*time.t_total*t0,duty=0.5)+self.v_bias
-        if sine_wave:
+        if self.sine_wave:
             self.v = self.vpp/2*np.exp(1j*self.w_drive*time.t_total*t0)+self.v_bias
-        if raise_cosine:
+        if self.raise_cosine:
             T_period_normalized = self.time.T_normalized
             a=0
-            if PRBS:
+            if self.PRBS:
                 for i in range(self.time.N):
-                    a +=  (self.vpp*self.rcos(t, beta, T_period,(i+1)*T_period_normalized))
+                    a +=  (self.vpp*self.rcos(self.time.t_total,(i+1)*T_period_normalized))
             else:
                 for i in range(len(self.bit_sequence)):
-                    a +=  (self.vpp*rcos(t, beta, T_period,(i+1)*T_period_normalized))
-            return a+self.v_bias-self.vpp/2  
+                    a +=  (self.vpp*self.rcos(self.time.t_total, (i+1)*T_period_normalized))
+            self.v = a+self.v_bias-self.vpp/2  
     
         # self.v_dict = dict(zip(time.t_total,self.v))
         self.Cj = self.Cj_V(self.v_bias)
@@ -144,27 +164,16 @@ class driver(time) :
         if self.raise_cosine:
             T_period_normalized = self.time.T_normalized
             a=0
-            if self.PRBS:
-                for i in range(self.time.N):
-                    a +=  (self.vpp*self.rcos(t, T_period_normalized,beta = 1,shift=(i+1)*T_period_normalized))
-            else:
-                for i in range(len(self.bit_sequence)):
-                    a +=  (self.vpp*self.rcos(t,  T_period_normalized,beta = 1,shift=(i+1)*T_period_normalized))
+            for i in range(self.time.N):
+                a +=  (self.vpp*self.rcos(t,shift=(i+1)*T_period_normalized))
             return a+self.v_bias-self.vpp/2  
-        if self.raise_cosine:
-            def rcos(t,beta,T):
-                a = np.zeros(len(t))
-                for i in range(len(t)):
-                    if not (beta==0): 
-                        if (t[i]==T/2/beta or t[i]==-T/2/beta):
-                            # a[i] = np.pi/4/T*( sinc(1/2/beta))
-                            a[i] = np.pi/4*( driver.sinc(1/2/beta))
-                    
-                    a[i]=driver.sinc(t[i]/T)*np.cos(np.pi*beta*t[i]/T)/(1-(2*beta*t[i]/T)**2)
-                return a
             
 
     def refering_Cj(self,voltage):
+        """
+        input
+        t: given a arbitary voltage value, this function can return the corresponding capacitance value
+        """
         return self.Cj_V(voltage)
         
     def Cj_V(self,vol):
@@ -178,11 +187,14 @@ class driver(time) :
         # self.Cj_dict = dict(zip(self.v,self.Cj))
         return 
 
-    def sinc(t):
-        if t==0:
-            return 1
+    def sinc(self,t):
+        if isinstance(t, np.ndarray):
+            return np.where(t==0,1,np.sin(np.pi*t)/(np.pi*t))
         else:
-            return np.sin(np.pi*t)/(np.pi*t)
+            if t==0:
+                return 1
+            else:
+                return np.sin(np.pi*t)/(np.pi*t)
 
     def rcos(self, 
              t, 
@@ -194,30 +206,33 @@ class driver(time) :
             T:period of a bit 
             t: giving time second(normalized)
         """
-        # Generating PRBS 
-        if self.PRBS:
-            prbs =np.zeros(self.time.N)
-            for i in range(self.time.N):
-                prbs[i] = randint(0,1)
+        T = self.time.T_normalized
+        assert beta !=0, "The raise cosine function is degraded to sinc function !"
+
+        if isinstance(t, np.ndarray):
+            """When input is a numpy array"""
+            if self.PRBS:
+                ans  = np.where( ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ),
+                                 self.prbs[int(shift/T)-1]*np.pi/4*self.sinc((1/2/beta)),
+                                 self.prbs[int(shift/T)-1] * self.sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
+                return ans
+            else:
+                ans  = np.where( ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ),
+                                 self.bit_sequence[int(shift/T)-1]*np.pi/4*self.sinc((1/2/beta)),
+                                 self.bit_sequence[int(shift/T)-1]*self.sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2) )
+                return ans
         else:
-            # Periodic Bit Sequence (this part only used when raise cosine is true while PRBS is false)
-            # create a dummy bit sequence : 1,0,1,0,1,0
-            self.bit_sequence  = np.array([1,0])
-            T_normalized = self.time.T_normalized
-            for u in range(1,int(self.time.t_max/T_normalized)):
-                self.bit_sequence = np.append( self.bit_sequence , np.array( [1,0]) )
-        
-        if not (beta==0):
-            if ((t-shift)==T_normalized/2/beta or (t-shift)==( -T_normalized/2/beta)):
+            """When input is a float number"""
+            if ((t-shift)==T/2/beta or (t-shift)==( -T/2/beta)):
                 if self.PRBS:
-                    return prbs[int(shift/T_normalized)-1]*np.pi/4*self.sinc(1/2/beta)
+                    return self.prbs[int(shift/T)-1]*np.pi/4*self.sinc(1/2/beta)
                 else:
-                    return self.bit_sequence[int(shift/T_normalized)-1]*np.pi/4*self.sinc(1/2/beta)
+                    return self.bit_sequence[int(shift/T)-1]*np.pi/4*self.sinc(1/2/beta)
             else:
                 if self.PRBS:
-                    return prbs[int(shift/T_normalized)-1]*self.sinc((t-shift)/T_normalized)*np.cos(np.pi*beta*(t-shift)/T_normalized)/(1-(2*beta*(t-shift)/T_normalized)**2)
+                    return self.prbs[int(shift/T)-1]*self.sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
                 else:
-                    return self. bit_sequence[int(shift/T_normalized)-1]*self.sinc((t-shift)/T_normalized)*np.cos(np.pi*beta*(t-shift)/T_normalized)/(1-(2*beta*(t-shift)/T_normalized)**2)
+                    return self. bit_sequence[int(shift/T)-1]*self.sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
 
 
 
