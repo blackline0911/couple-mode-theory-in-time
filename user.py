@@ -43,9 +43,6 @@ class time():
         return
     
     
-    # def create_array(self):
-    #     return
-    
 class ring():
     def __init__(self,radius:float, 
                  neff:float,
@@ -97,7 +94,7 @@ class driver(time) :
         R:series resistance of PN junction 
         """
         self.f_drive = f_drive*1e9
-        self.w_drive = 2*np.pi*f_drive
+        self.w_drive = 2*np.pi*self.f_drive
         self.v_bias = v_bias
         self.vpp=vpp
         self.R = R
@@ -111,8 +108,8 @@ class driver(time) :
                        time,
                        ):
         """
-        This function creates a voltage array according to the time array refered to the time object.mro
-        Hence the voltage value only exists in the specified time.mro
+        This function creates a voltage array according to the time array refered to the time object.
+        Hence the voltage value only exists in the specified time.
         Since I have no idea what time will solve_ivp solver need , so this function is only working for analysis and plotting
         """
         self.time = time
@@ -131,9 +128,9 @@ class driver(time) :
 
         
         if self.square_wave:
-            self.v = self.vpp/2*signal.square(self.w_drive*time.t_total*t0,duty=0.5)+self.v_bias
+            self.v = self.vpp/2*signal.square(self.w_drive*self.time.t_total*t0,duty=0.5)+self.v_bias
         if self.sine_wave:
-            self.v = self.vpp/2*np.exp(1j*self.w_drive*time.t_total*t0)+self.v_bias
+            self.v = self.vpp/2*np.exp(1j*self.w_drive*self.time.t_total*t0)+self.v_bias
         if self.raise_cosine:
             T_period_normalized = self.time.T_normalized
             a=0
