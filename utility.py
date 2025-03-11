@@ -1,6 +1,7 @@
 from scipy import *
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 c = 299792458*1e6
 t0 = 1e-12
@@ -33,6 +34,8 @@ def ploting(x,y,x_label, title,filename='',figcolor='w',line_color='b',
        if(filename!=''):
               plt.savefig(filename)
        return
+
+
 
 if __name__=='__main__':
     x = np.linspace(0,10,1000)

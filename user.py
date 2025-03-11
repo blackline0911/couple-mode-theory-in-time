@@ -20,7 +20,7 @@ class time():
             self.dt = 1/(driver.f_drive)/10
         self.dt = (1/df_max/100)
         inte = (math.log10(self.dt))//1
-        self.dt = 10**(inte-1)
+        self.dt = 10**(inte-2)
 
         self.t_max = math.ceil( 1/(driver.f_drive)*N/t0 )
         self.T_normalized = 1/(driver.f_drive)/t0
@@ -44,6 +44,7 @@ class time():
     
     
 class ring():
+    scaning = False
     def __init__(self,radius:float, 
                  neff:float,
                  ng:float,
@@ -72,6 +73,43 @@ class ring():
         self.tu_t_bar = (1/self.tu_e_bar+1/self.tu_o_bar)**(-1)
         self.w_res_bar = 102*np.pi*c/(self.neff*self.L)*t0
         self.lambda0 = 2*np.pi*c*t0/self.w_res_bar
+    
+    # def scan_frequency(self,wl_min:float,wl_max:float,period,lambda_incident,points = 10):
+    #     """
+    #     Call this function when you wants to perform frequency scan of the ring.
+    #     I will perform resonant frequency scan, instead of incident frequency scan
+    #     input:
+    #     wl_min: minimum scanning wavelength (um)
+    #     wl_max: maximum scanning wavelength (um)
+    #     period: the period of each scanning wavelength (ps)
+    #     lambda_incident: incident laser wavelength (um)
+    #     points: scan wavelength points
+    #     """
+    #     self.scaning = True
+    #     self.w_res_bar_zero = self.w_res_bar
+    #     self.f_min_bar = c/wl_min*t0
+    #     self.f_max_bar = c/wl_max*t0
+    #     self.f_in_bar = c/lambda_incident*t0
+    #     self.scan_pt = points
+    #     # storing original resonant frequency
+    #     self.scanning_period = period
+
+    #     # Alert that wavelength range is too large that accuracy is low
+
+
+    # def f_res(self,t,):
+    #     """
+    #     return the scanning resonant frequency of the specified time  
+    #     input:
+    #     t: specified time (ps)
+    #     """
+    #     f_num = t//self.scanning_period
+    #     t_mod = t%self.scanning_period
+    #     f_res = 
+
+
+
+
 
 
 class driver(time) :
