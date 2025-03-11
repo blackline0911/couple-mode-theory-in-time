@@ -7,14 +7,21 @@ from scipy.signal import *
 from scipy import signal
 from random import *
 from utility import *
+from cmt_solver import *
 
-class time():
+class time(simulation):
+    def share_with(self, other_instance):
+        """將自己的屬性傳給另一個子類別"""
+        for key, value in self.__dict__.items():
+            setattr(other_instance, key, value)
+    def set_dt(self):
+        
     def __init__(self,N:int,
-                 lambda_incident:float,
                  ring,
                  driver):
+        super().__init__()
         self.N=N
-        w_pround = 2*np.pi*c/(lambda_incident)*t0
+        
         df_max =  (c/ring.lambda0**2)*abs( ring.me*1e-12/1e-6 )*( driver.vpp/2 + abs(driver.v_bias))
         if df_max < driver.f_drive:
             self.dt = 1/(driver.f_drive)/10
@@ -43,7 +50,7 @@ class time():
         return
     
     
-class ring():
+class ring(simulation):
     scaning = False
     def __init__(self,radius:float, 
                  neff:float,
@@ -74,25 +81,25 @@ class ring():
         self.w_res_bar = 102*np.pi*c/(self.neff*self.L)*t0
         self.lambda0 = 2*np.pi*c*t0/self.w_res_bar
     
-    # def scan_frequency(self,wl_min:float,wl_max:float,period,lambda_incident,points = 10):
-    #     """
-    #     Call this function when you wants to perform frequency scan of the ring.
-    #     I will perform resonant frequency scan, instead of incident frequency scan
-    #     input:
-    #     wl_min: minimum scanning wavelength (um)
-    #     wl_max: maximum scanning wavelength (um)
-    #     period: the period of each scanning wavelength (ps)
-    #     lambda_incident: incident laser wavelength (um)
-    #     points: scan wavelength points
-    #     """
-    #     self.scaning = True
-    #     self.w_res_bar_zero = self.w_res_bar
-    #     self.f_min_bar = c/wl_min*t0
-    #     self.f_max_bar = c/wl_max*t0
-    #     self.f_in_bar = c/lambda_incident*t0
-    #     self.scan_pt = points
-    #     # storing original resonant frequency
-    #     self.scanning_period = period
+    def scan_frequency(self,wl_min:float,wl_max:float,period,lambda_incident,points = 10):
+        """
+        Call this function when you wants to perform frequency scan of the ring.
+        I will perform resonant frequency scan, instead of incident frequency scan
+        input:
+        wl_min: minimum scanning wavelength (um)
+        wl_max: maximum scanning wavelength (um)
+        period: the period of each scanning wavelength (ps)
+        lambda_incident: incident laser wavelength (um)
+        points: scan wavelength points
+        """
+        self.scaning = True
+        self.w_res_bar_zero = self.w_res_bar
+        self.f_min_bar = c/wl_min*t0
+        self.f_max_bar = c/wl_max*t0
+        self.f_in_bar = c/lambda_incident*t0
+        self.scan_pt = points
+        # storing original resonant frequency
+        self.scanning_period = period
 
     #     # Alert that wavelength range is too large that accuracy is low
 
@@ -109,11 +116,12 @@ class ring():
 
 
 
-
-
-
-class driver(time) :
+class driver(simulation) :
     Cj = 0
+    def share_with(self, other_instance):
+        """將自己的屬性傳給另一個子類別"""
+        for key, value in self.__dict__.items():
+            setattr(other_instance, key, value)
     def __init__(self,
                  f_drive,
                  v_bias,
@@ -222,14 +230,6 @@ class driver(time) :
         # self.Cj_dict = dict(zip(self.v,self.Cj))
         return 
 
-    def sinc(self,t):
-        if isinstance(t, np.ndarray):
-            return np.where(t==0,1,np.sin(np.pi*t)/(np.pi*t))
-        else:
-            if t==0:
-                return 1
-            else:
-                return np.sin(np.pi*t)/(np.pi*t)
 
     def rcos(self, 
              t, 
@@ -248,26 +248,26 @@ class driver(time) :
             """When input is a numpy array"""
             if self.PRBS:
                 ans  = np.where( ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ),
-                                 self.prbs[int(shift/T)-1]*np.pi/4*self.sinc((1/2/beta)),
-                                 self.prbs[int(shift/T)-1] * self.sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
+                                 self.prbs[int(shift/T)-1]*np.pi/4*sinc((1/2/beta)),
+                                 self.prbs[int(shift/T)-1] * sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
                 return ans
             else:
                 ans  = np.where( ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ),
-                                 self.bit_sequence[int(shift/T)-1]*np.pi/4*self.sinc((1/2/beta)),
-                                 self.bit_sequence[int(shift/T)-1]*self.sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2) )
+                                 self.bit_sequence[int(shift/T)-1]*np.pi/4*sinc((1/2/beta)),
+                                 self.bit_sequence[int(shift/T)-1]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2) )
                 return ans
         else:
             """When input is a float number"""
             if ((t-shift)==T/2/beta or (t-shift)==( -T/2/beta)):
                 if self.PRBS:
-                    return self.prbs[int(shift/T)-1]*np.pi/4*self.sinc(1/2/beta)
+                    return self.prbs[int(shift/T)-1]*np.pi/4*sinc(1/2/beta)
                 else:
-                    return self.bit_sequence[int(shift/T)-1]*np.pi/4*self.sinc(1/2/beta)
+                    return self.bit_sequence[int(shift/T)-1]*np.pi/4*sinc(1/2/beta)
             else:
                 if self.PRBS:
-                    return self.prbs[int(shift/T)-1]*self.sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+                    return self.prbs[int(shift/T)-1]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
                 else:
-                    return self. bit_sequence[int(shift/T)-1]*self.sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+                    return self. bit_sequence[int(shift/T)-1]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
 
 
 

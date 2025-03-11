@@ -35,7 +35,14 @@ def ploting(x,y,x_label, title,filename='',figcolor='w',line_color='b',
               plt.savefig(filename)
        return
 
-
+def sinc(self,t):
+        if isinstance(t, np.ndarray):
+            return np.where(t==0,1,np.sin(np.pi*t)/(np.pi*t))
+        else:
+            if t==0:
+                return 1
+            else:
+                return np.sin(np.pi*t)/(np.pi*t)
 
 if __name__=='__main__':
     x = np.linspace(0,10,1000)
