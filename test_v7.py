@@ -1,29 +1,23 @@
 class Parent:
-    """父類別，所有子類別繼承自它"""
-    pass
+    def __init__(self, name):
+        self.name = name
 
 class ChildA(Parent):
-    def __init__(self):
-        self.attr_a = "我是子類 A"
+    def __init__(self, name):
+        super().__init__(name)
 
-    def update_child_b(self, other_instance):
-        """使用 setattr() 修改另一個子類別的屬性"""
-        if isinstance(other_instance, ChildB):  # 確保是 ChildB
-            setattr(other_instance, "attr_b", "我是 A 修改的屬性")
-        else:
-            raise TypeError("只能修改 ChildB 的屬性")
+    def do_something_with_b(self, b_instance):
+        # 透過實例 b_instance 來呼叫 ChildB 的函式
+        print(f"ChildA: 我可以呼叫 ChildB 的方法：{b_instance.some_method_in_b()}")
 
 class ChildB(Parent):
-    def __init__(self):
-        self.attr_b = "我是子類 B"
+    def __init__(self, name):
+        super().__init__(name)
 
-# 創建實例
-a = ChildA()
-b = ChildB()
+    def some_method_in_b(self):
+        return "我是ChildB的方法"
 
-print("修改前:", b.attr_b)  # ✅ "我是子類 B"
-
-# 讓 ChildA 修改 ChildB 的屬性
-a.update_child_b(b)
-
-print("修改後:", b.attr_b)  # ✅ "我是 A 修改的屬性"
+# 建立實例並呼叫
+a = ChildA("A的名字")
+b = ChildB("B的名字")
+a.do_something_with_b(b)
