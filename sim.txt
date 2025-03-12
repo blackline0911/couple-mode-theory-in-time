@@ -1,0 +1,24 @@
+This script is used to save the simulation variable that A simulation used. 
+Just for Future checking or further research
+
+Parameter of ring modulator
+	Structure parameter : 
+		radius : 31.41592653589793 um
+		neff : 2.51464
+		Group index : 4.3
+		couple through coefficient : 0.95012
+		Linear attenuation coefficient : 0.95246
+		modulation efficiency : 37.2 pm/V
+		FCA coefficient ratio : 1
+	Physical parameter : 
+		intrinsic photon life time : 9.251342293048564 ps
+		couple extrinsic photon life time : 8.806590144935825 ps
+		resonant frequency : 193.53752674027618 THz
+		resonant wavelength : 1.5490146177300075 um
+		Q factor : 2743.213254074814
+Current Simulation mode is voltage_drive
+
+	Driver information : 
+	Driving Signal is sine wave
+		Driving frequency is 100.0 GHz
+		Bias voltage is -1 V

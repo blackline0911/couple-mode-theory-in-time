@@ -59,7 +59,9 @@ def solving(ring,
             voltage = driver.refering_v(t_bar)
             cj = driver.refering_Cj(voltage)
 
-            f1 = 1j*2*np.pi*(ring.f_res_bar-f_pround_bar)*b_bar- (1/ring.tu_e_bar + 1/ring.tu_o_bar*(1+ring.FCA_coeff_ratio*abs(b_bar)**2))*b_bar + sqrt(2/ring.tu_e_bar) *1 + \
+            f1 = 1j*2*np.pi*(ring.f_res_bar-f_pround_bar)*b_bar- \
+                (1/ring.tu_e_bar + 1/ring.tu_o_bar*(1+ring.FCA_coeff_ratio*t0*S0**2*abs(b_bar)**2))*b_bar +\
+                      sqrt(2/ring.tu_e_bar) *1 + \
                 1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar
 
             f2 = (voltage/(driver.R * cj )*t0) - (1/( driver.R*cj ) )*Q_pround*t0
@@ -73,8 +75,11 @@ def solving(ring,
                 q = sol.y[1]
                 Q_record = np.append(Q_record,sol.y[1])
             else:
-                sol =  solve_ivp(CMT ,[time.t_all_segment[i-1][-1] ,time.t_all_segment[i][-1]], [b_init, Q_init],\
-                    method=method,t_eval = np.append(  np.array([time.t_all_segment[i-1][-1]]), np.array(time.t_all_segment[i])  ),atol = atol,rtol = rtol)
+                sol =  solve_ivp(CMT ,[time.t_all_segment[i-1][-1] ,time.t_all_segment[i][-1]], 
+                                [b_init, Q_init],
+                                method=method,
+                                t_eval = np.append(  np.array([time.t_all_segment[i-1][-1]]), np.array(time.t_all_segment[i])  ),
+                                atol = atol,rtol = rtol)
                 b = sol.y[0]
                 b_record = np.append(b_record,b[1::])
                 q = sol.y[1]
@@ -91,7 +96,7 @@ def solving(ring,
             voltage = driver.refering_v(t_bar)
             cj = driver.refering_Cj(voltage)
 
-            f1 = 1j*2*np.pi*(f_res_bar-f_pround_bar)*b_bar- (1/ring.tu_e_bar + 1/ring.tu_o_bar*(1+ring.FCA_coeff_ratio*abs(b_bar)**2))*b_bar + sqrt(2/ring.tu_e_bar) *1 + \
+            f1 = 1j*2*np.pi*(f_res_bar-f_pround_bar)*b_bar- (1/ring.tu_e_bar + 1/ring.tu_o_bar*(1+ring.FCA_coeff_ratio*t0*S0**2*abs(b_bar)**2))*b_bar + sqrt(2/ring.tu_e_bar) *1 + \
                 1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar
 
             f2 = (voltage/(driver.R * cj )*t0) - (1/( driver.R*cj ) )*Q_pround*t0

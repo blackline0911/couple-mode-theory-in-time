@@ -12,7 +12,7 @@ from ring import *
 from driver import *
 
 
-class time():
+class time(simulation):
     
     dt = 0
     t_total = np.array([])
@@ -26,8 +26,8 @@ class time():
     def main(self, ring, driver=None,N=0,t_max = 0,buffer=0):
         # 根據 mode 建立對應的子類別實例
         if self.mode == "voltage_drive":
-            if N==0:
-                assert False ,"please specify N"
+            if N==0 or driver==None:
+                assert False ,"please specify N or you forgot to give the driver"
             self.N=N
             sim_time = VoltageDriveTime(N)
             self.dt = sim_time.set_dt(ring, driver)

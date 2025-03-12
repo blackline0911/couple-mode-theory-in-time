@@ -2,6 +2,7 @@ from utility import *
 import numpy as np
 from cmath import *
 from time_class import *
+from sim import simulation
 
 class ring():
     def __init__(self,radius:float, 
@@ -10,7 +11,7 @@ class ring():
                  gamma:float,
                  alpha:float,
                  me:float,
-                 FCA_coeff_ratio = 1e-3):
+                 FCA_coeff_ratio = 1):
         """
         input argments:
         radius : radius of ring (micron)
@@ -71,3 +72,20 @@ class ring():
             else:
                 return -(self.f_max_bar-self.f_min_bar)/self.time.t_max*(t-self.time.buffer)+ self.f_res_bar+ \
                     (self.f_in_bar-self.f_min_bar)
+
+
+class Transfer_function():
+    def __init__(self,ring, time,sim):
+        self.ring = ring
+        self.time = time
+    def mapping(self,data):
+        """
+        Convert the frequency scanning time domain signal to transfer function of ring
+        """
+        i = int( np.argwhere(self.time.t_total==self.time.buffer)[0] )
+        f_res_bar = self.ring.w_res(self.time.t_total)
+        L = len(f_res_bar)
+        wl = c/(self.ring.f_res_bar + self.ring.f_in_bar -f_res_bar)*t0
+        wl = wl[i:L-1]
+        data = data[i:L-1]
+        return wl, data

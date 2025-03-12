@@ -4,11 +4,12 @@ class simulation():
     voltage_drive = False
     scan_frequency = False
     mode = None
-    def __init__(self,mode):
-        self.mode = mode
-        modes = {"voltage_drive", "scan_frequency"}
-        assert mode in modes, f"Please choose a simulation mode from {modes}"
-
+    lambda_incident = 0
+    def __init__(self,lambda_incident):
+        
+        self.lambda_incident = lambda_incident
+        print(self.lambda_incident)
+        
     def set_dt(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")
 
