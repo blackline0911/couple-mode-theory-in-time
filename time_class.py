@@ -23,14 +23,20 @@ class time(simulation):
         modes = {"voltage_drive", "scan_frequency"}
         assert mode in modes, f"Please choose a simulation mode from {modes}"
 
-    def main(self, ring, driver=None,N=0,t_max = 0,buffer=0):
+    def main(self, ring, driver=None,N=0,t_max = 0,buffer=80,resolution:int=2):
         # 根據 mode 建立對應的子類別實例
+        """
+        resolution : time resolution level , dt = 1e-(12+resolution)
+        In scan frequency mode, the length of t_max may affect the accuracy of result.
+        It is better to set t_max = 10000 (ps), but be aware of simulation time
+        """
         if self.mode == "voltage_drive":
             if N==0 or driver==None:
                 assert False ,"please specify N or you forgot to give the driver"
             self.N=N
+            self.resolution = resolution
             sim_time = VoltageDriveTime(N)
-            self.dt = sim_time.set_dt(ring, driver)
+            self.dt = sim_time.set_dt(ring, driver,self.resolution)
             self.t_total, self.t_all_segment, self.t_max= sim_time.create_time_array(N)
             self.T_normalized = driver.f_drive*t0
         elif self.mode == "scan_frequency":
@@ -38,8 +44,9 @@ class time(simulation):
                 assert False ,"please specify t_max and buffer"
             self.buffer = buffer
             self.t_max = t_max
+            self.resolution = resolution
             sim_time = ScanFrequencyTime(t_max,buffer)
-            self.dt = sim_time.set_dt(ring)
+            self.dt = sim_time.set_dt(ring,self.resolution)
             self.t_total = sim_time.create_time_array()
         else:
             raise ValueError("Unknown mode!")
@@ -50,15 +57,15 @@ class VoltageDriveTime():
     def __init__(self,N:int):
         self.N =N
     """在 voltage_drive 模式底下的子類別"""
-    def set_dt(self, ring, driver):
+    def set_dt(self, ring, driver,resolution):
         self.ring = ring
         self.driver = driver
         df_max =  (c/ring.lambda0**2)*abs( ring.me*1e-12/1e-6 )*( driver.vpp/2 + abs(driver.v_bias))
         if df_max < driver.f_drive:
             self.dt = 1/(driver.f_drive)/10
-        dt = (1/df_max/100)
+        dt = (1/df_max/10)
         inte = (math.log10(dt))//1
-        dt = 10**(inte-2)
+        dt = 10**(inte-resolution)
         return dt
     
     def create_time_array(self, N):
@@ -89,15 +96,15 @@ class ScanFrequencyTime():
         self.buffer = buffer
         # buffer stands for the time of Transient mode
     """在 scan_frequency 模式底下的子類別"""
-    def set_dt(self, ring):
+    def set_dt(self, ring,resolution):
         self.ring = ring
-        if abs(ring.f_min_bar-ring.f_res_bar)>abs(ring.f_max_bar-ring.f_res_bar):
-            df_max = abs(ring.f_min_bar-ring.f_res_bar)/t0
+        if abs(ring.f_start_bar-ring.f_res_bar)>abs(ring.f_end_bar-ring.f_res_bar):
+            df_max = abs(ring.f_start_bar-ring.f_res_bar)/t0
         else:
-            df_max = abs(ring.f_max_bar-ring.f_res_bar)/t0
-        dt = (1/df_max/100)
+            df_max = abs(ring.f_end_bar-ring.f_res_bar)/t0
+        dt = (1/df_max/10)
         inte = (math.log10(dt))//1
-        dt = 10**(inte-1)
+        dt = 10**(inte-resolution)
         self.dt = dt
         return dt
 

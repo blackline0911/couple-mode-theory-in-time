@@ -8,7 +8,6 @@ class simulation():
     def __init__(self,lambda_incident):
         
         self.lambda_incident = lambda_incident
-        print(self.lambda_incident)
         
     def set_dt(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")

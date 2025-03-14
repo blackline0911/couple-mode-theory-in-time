@@ -5,16 +5,17 @@ Just for Future checking or further research
 
 from test import *
 import numpy as np
-import ring, driver, time_class, cmt_solver 
+import ring, driver, time_class, cmt_solver ,utility
 
 filename = 'sim.txt'
 
+os.chdir("./data/")
 with open(filename, 'w') as f:
     f.write('This script is used to save the simulation variable that A simulation used. \nJust for Future checking or further research\n\n')
 
     f.write("Parameter of ring modulator\n")
     f.write("\tStructure parameter : \n")
-    f.write("\t\tradius : ")
+    f.write("\t\tcavity length : ")
     f.write(str(ring_mod.L)+' um')
     f.write('\n')
 
@@ -61,7 +62,7 @@ with open(filename, 'w') as f:
 
     f.write("\t\tQ factor : ")
     f.write(str(ring_mod.Q))
-    f.write('\n')
+    f.write('\n\n')
 
     m = t.mode
     f.write("Current Simulation mode is "+t.mode+'\n\n')
@@ -70,5 +71,30 @@ with open(filename, 'w') as f:
         if v.sine_wave:
             f.write("\tDriving Signal is sine wave\n")
             f.write("\t\tDriving frequency is "+str(v.f_drive/1e9)+" GHz\n")
-            f.write("\t\tBias voltage is "+str(v.v_bias)+" V")
-            f.write("\t\tPeak to Peak voltage is "+str(v.vpp)+" V")
+            f.write("\t\tBias voltage is "+str(v.v_bias)+" V\n")
+            f.write("\t\tPeak to Peak voltage is "+str(v.vpp)+" V\n\n")
+        if v.square_wave:
+            f.write("\tDriving Signal is square wave\n")
+            f.write("\t\tDriving frequency is "+str(v.f_drive/1e9)+" GHz\n")
+            f.write("\t\tBias voltage is "+str(v.v_bias)+" V\n")
+            f.write("\t\tPeak to Peak voltage is "+str(v.vpp)+" V\n\n")
+        if v.raise_cosine:
+            f.write("\tDriving Signal is raise_cosine signal\n")
+            f.write("\t\tDriving frequency is "+str(v.f_drive/1e9)+" GHz\n")
+            f.write("\t\tBias voltage is "+str(v.v_bias)+" V\n")
+            f.write("\t\tPeak to Peak voltage is "+str(v.vpp)+" V\n\n")
+    if m == "scan_frequency":
+        f.write("\tThe start wavelength is "+str(c/ring_mod.f_start_bar*t0)+" um\n")
+        f.write("\tThe end wavelength is "+str(c/ring_mod.f_end_bar*t0)+" um\n")
+        f.write("\tscanning frequency range for better accuracy is "+str(ring_mod.f_res_bar/ring_mod.Q)+" THz\n")
+        f.write("\tCurrent frequency range is "+str(abs(ring_mod.f_end_bar-ring_mod.f_start_bar))+" THz\n")
+        f.write("\tThe time for scanning : "+str(t.t_max)+" ps \n")
+        f.write("\t\tNote. This time value may affect the accuracy of Transfer function. above 10000 ps is better.  \n")
+        if  ring_mod.Q >ring_mod.f_res_bar/abs(ring_mod.f_end_bar-ring_mod.f_start_bar):
+            f.write("\t\tWarning : This Transfer function result may not be accurate.\n\n")
+
+    f.write("Simulation Parameters\n")
+    f.write("\ttime scaling : "+str(utility.t0)+" sec\n")
+    f.write("\ttime resolution : "+str(t.dt)+" sec\n")
+    f.write("\tMax time range : "+str(t.t_max)+" ps\n")
+

@@ -1,7 +1,5 @@
-
 import numpy as np
 from cmath import *
-import math
 from scipy.signal import *
 from scipy import signal
 from random import *
@@ -67,9 +65,12 @@ class driver() :
             
             if self.square_wave:
                 self.v = self.vpp/2*signal.square(self.w_drive*self.time.t_total*t0,duty=0.5)+self.v_bias
+                assert not (self.sine_wave or self.raise_cosine) , "Only one kind of signal should apply "
             if self.sine_wave:
                 self.v = self.vpp/2*np.exp(1j*self.w_drive*self.time.t_total*t0)+self.v_bias
+                assert not (self.square_wave or self.raise_cosine) , "Only one kind of signal should apply "
             if self.raise_cosine:
+                assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
                 T_period_normalized = self.time.T_normalized
                 a=0
                 if self.PRBS:
@@ -95,10 +96,13 @@ class driver() :
             if self.square_wave:
                 """Do not use square wave is better, 
                 since the discontinuous in the transition can result in artifitial peak in large signal analysis"""
+                assert not (self.sine_wave or self.raise_cosine) , "Only one kind of signal should apply "
                 return self.vpp/2*signal.square(self.w_drive*t*t0,duty=0.5)+self.v_bias
             if self.sine_wave:
+                assert not (self.square_wave or self.raise_cosine) , "Only one kind of signal should apply "
                 return self.vpp/2*np.exp(1j*self.w_drive*t*t0)+self.v_bias
             if self.raise_cosine:
+                assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
                 T_period_normalized = self.time.T_normalized
                 a=0
                 for i in range(self.time.N):
