@@ -5,13 +5,15 @@ from time_class import *
 from sim import simulation
 
 class ring():
+    
     def __init__(self,L:float, 
                  neff:float,
                  ng:float,
                  gamma:float,
                  alpha:float,
                  me:float,
-                 FCA_coeff_ratio = 0):
+                 cross_section:float,
+                ):
         """
         input argments:
         radius : radius of ring (micron)
@@ -28,15 +30,46 @@ class ring():
         self.gamma=gamma
         self.alpha = alpha
         self.me = me
+        self.vg = c/ng*t0
+        self.round_trip_time = self.L*self.ng/(c*t0)
+        self.cross_section =  cross_section #um^2
         self.kappa = (1-self.gamma**2)**0.5
         self.tu_e_bar = -self.L*self.ng/(c*log(sqrt(1-self.kappa**2)))/t0
         self.tu_o_bar = -self.L*self.ng/(c*log(alpha))/t0
+        self.alpha_linear = 1/(self.vg*1e-4*self.tu_o_bar)
         self.tu_t_bar = (1/self.tu_e_bar+1/self.tu_o_bar)**(-1)
         # self.f_res_bar = 51*c/(self.neff*self.L)*t0
         self.f_res_bar = self.find_res_frequency()
         self.lambda0 = c*t0/self.f_res_bar
-        self.FCA_coeff_ratio = FCA_coeff_ratio
         self.Q = np.real( ( (1/self.tu_e_bar + 1/self.tu_o_bar  )/(self.f_res_bar*np.pi) )**(-1) )
+        
+
+        self.FCA_coeff_factor = 1
+        self.TPA_fit_factor = 1
+        #unit of TPA coeff : 1/(cm* mJ) 
+        #  beta_TPA in 1e-9 order
+        beta_TPA = 5  #1e-13
+        self.TPA_coeff = beta_TPA/(self.round_trip_time*self.cross_section)
+        self.TPA_coeff_order = np.log10(1e-13/(1e-12*1e-8)*t0) + np.log10(self.TPA_coeff)//1
+        self.TPA_coeff = self.TPA_coeff / ( 10**(np.log10(self.TPA_coeff)//1) )
+        # self.TPA_coeff_ratio = self.TPA_coeff* (10**(self.TPA_coeff_order)*t0) *t0/ (1/self.tu_e_bar)
+        
+        print("TPA 係數：",self.TPA_coeff*10**( self.TPA_coeff_order))
+        # print(self.round_trip_time )
+        # print(self.cross_section )
+        # print(self.TPA_coeff )
+        # print(self.TPA_coeff_order )
+        # print("TPA_coeff_ratio = ",self.TPA_coeff_ratio )
+
+        self.tau_eff = 20      #1e-9
+        self.sigma_FCA = 1.04  #1e-17
+        self.FCA_coeff = beta_TPA*self.tau_eff*self.sigma_FCA/(2*self.round_trip_time**2*self.cross_section**2) 
+        self.FCA_coeff_order = np.log10(1e-13*1e-9*1e-17/( (1e-12)**2*(1e-4)**4 ) *t0**2) + np.log10(self.FCA_coeff)//1
+        # print(self.FCA_coeff_order)
+        self.FCA_coeff = self.FCA_coeff / ( 10**(np.log10(self.FCA_coeff)//1) )
+        # print("self.FCA_coeff = ",self.FCA_coeff*10**(self.FCA_coeff_order))
+        # self.FCA_coeff_ratio = 0
+        
 
     def scan_frequency(self,wl_start:float,wl_end:float,lambda_incident,time):
         """
@@ -46,6 +79,8 @@ class ring():
         wl_min: start scanning wavelength (um)
         wl_max: Ending scanning wavelength (um)
         lambda_incident: incident laser wavelength (um)
+
+        
         """
         self.time = time
         self.f_start_bar = c/wl_start*t0
@@ -54,6 +89,7 @@ class ring():
         # print(self.f_end_bar)
         self.f_in_bar = c/lambda_incident*t0
         self.f_res = np.zeros(len(self.time.t_total))
+        
 
     def w_res(self,t):
         """

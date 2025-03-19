@@ -7,8 +7,9 @@ c = 299792458*1e6
 t0 = 1e-12
 rtol = 1e-15
 atol = 1e-20
+h=6.626e-34
 
-def ploting(x,y,x_label, title,filename='',figcolor='w',line_color='b',
+def ploting(x,*arg,x_label, title,filename='',figcolor='w',line_color='b',
             grid_color='g',grid_style='--',grid_alpha=0.5):
        """
        input argments:
@@ -25,7 +26,8 @@ def ploting(x,y,x_label, title,filename='',figcolor='w',line_color='b',
                         If unspecified, the figure will not be saved.
        """
        plt.figure()
-       plt.plot(x,y,color=line_color)
+       for i in arg:
+           plt.plot(x,i)
        plt.xlabel(x_label)
        plt.title(title)
        plt.grid(color=grid_color,linestyle=grid_style, alpha=grid_alpha)
@@ -33,9 +35,10 @@ def ploting(x,y,x_label, title,filename='',figcolor='w',line_color='b',
        ax.set_facecolor(figcolor)
        if(filename!=''):
               plt.savefig(filename)
+       plt.show()
        return
 
-def sinc(self,t):
+def sinc(t):
         if isinstance(t, np.ndarray):
             return np.where(t==0,1,np.sin(np.pi*t)/(np.pi*t))
         else:

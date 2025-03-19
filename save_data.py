@@ -9,7 +9,7 @@ import ring, driver, time_class, cmt_solver ,utility
 
 filename = 'sim.txt'
 
-os.chdir("./data/")
+# os.chdir("./data/")
 with open(filename, 'w') as f:
     f.write('This script is used to save the simulation variable that A simulation used. \nJust for Future checking or further research\n\n')
 
@@ -62,6 +62,14 @@ with open(filename, 'w') as f:
 
     f.write("\t\tQ factor : ")
     f.write(str(ring_mod.Q))
+    f.write('\n')
+
+    f.write("\t\tGroup velocity : ")
+    f.write(str(ring_mod.vg/t0)+" um/s")
+    f.write('\n')
+
+    f.write("\t\tRound Trip time : ")
+    f.write(str(ring_mod.round_trip_time)+" ps")
     f.write('\n\n')
 
     m = t.mode
@@ -97,4 +105,5 @@ with open(filename, 'w') as f:
     f.write("\ttime scaling : "+str(utility.t0)+" sec\n")
     f.write("\ttime resolution : "+str(t.dt)+" sec\n")
     f.write("\tMax time range : "+str(t.t_max)+" ps\n")
+    f.write("\tInput Laser Power : "+str(Pin)+" mW\n")
 
