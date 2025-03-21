@@ -47,6 +47,8 @@ def sinc(t):
             else:
                 return np.sin(np.pi*t)/(np.pi*t)
 
+def dB(x):
+     return 10*np.log10(x)
 if __name__=='__main__':
     x = np.linspace(0,10,1000)
     y = x**2

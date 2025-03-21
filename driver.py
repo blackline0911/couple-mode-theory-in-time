@@ -4,13 +4,13 @@ from scipy.signal import *
 from scipy import signal
 from random import *
 from utility import *
-
+from sim import simulation
 from time_class import *
 
 
-class driver() :
+class driver(simulation) :
     Cj = 0
-
+    id='driver'
     def __init__(self,
                  f_drive,
                  v_bias,

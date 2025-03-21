@@ -6,7 +6,7 @@ from cmath import *
 from utility import *
 from driver import driver
 from ring import ring
-from time_class import *
+from time_class import time
 
 # relative solver tolerance 
 rtol = 1e-14
@@ -19,11 +19,10 @@ method = 'RK45'
 
      
 
-def solving(ring, 
+def solving(sim,
+            ring, 
             driver,
             time,
-            lambda_incident,
-            Pin,
             ):
     """
     ring : ring object
@@ -34,32 +33,29 @@ def solving(ring,
     """
 
     # normalize factors
-    S0 = sqrt(Pin)
-    print("S0 = ",S0)
+    S0 = np.real(sqrt(sim.Pin))
+
     b0 = sqrt(t0)*S0
 
     
     # normalized dw/dlambda
     D_bar = -2*np.pi*c/ring.lambda0**2 * t0
 
-    # normalized frequency
-    f_pround_bar = c/(lambda_incident)*t0
 
-    # Note. photon energy is in unit. mJ, and normalized by t0
-    photon_energy = h*c/lambda_incident*1000/t0
+    # photon_energy = h*c/lambda_incident*1000/t0
     # print("photon_energy = ",photon_energy," fJ")
-    FCA_coeff = ring.FCA_coeff/(photon_energy)
-    order = ring.FCA_coeff_order+np.log10(1/t0)
-    FCA_coeff = FCA_coeff * 10**(order)
+    # FCA_coeff = ring.FCA_coeff/(photon_energy)
+    # order = ring.FCA_coeff_order+np.log10(1/t0)
+    # FCA_coeff = FCA_coeff * 10**(order)
     # print("FCA_coeff = ",FCA_coeff)
     # print("order = ",order)
     # print("ring.tu_o_bar = ",ring.tu_o_bar)
-    FCA = FCA_coeff*ring.FCA_coeff_factor
-    print("alpha FCA = ",FCA)
-    TPA = ring.TPA_coeff*10**( ring.TPA_coeff_order)*ring.TPA_fit_factor
-    print("alpha TPA = ",TPA)
-    TPA_ratio = TPA/ring.alpha_linear
-    FCA_ratio = FCA/ring.alpha_linear
+    # FCA = FCA_coeff*ring.FCA_coeff_factor
+    # print("alpha FCA = ",FCA)
+    # TPA = ring.TPA_coeff*10**( ring.TPA_coeff_order)*ring.TPA_fit_factor
+    # print("alpha TPA = ",TPA)
+    # TPA_ratio = TPA/ring.alpha_linear
+    # FCA_ratio = FCA/ring.alpha_linear
 
 #     """Since the length of solution function array may not be the same as t_eval argument we specified when the time in single solve_ivp is long.
 #     Hence, we divide the time according to the Baud Rate, and solve coupled differential equation by each time segments. 
@@ -75,9 +71,9 @@ def solving(ring,
             voltage = driver.refering_v(t_bar)
             cj = driver.refering_Cj(voltage)
 
-            f1 = 1j*2*np.pi*(ring.f_res_bar-f_pround_bar)*b_bar- \
-                (1/ring.tu_e_bar + ring.vg*1e-4*ring.alpha_linear*(1+TPA_ratio*S0**2*abs(b_bar)**2\
-                    + FCA_ratio*S0**4*abs(b_bar)**4) )*b_bar +\
+            f1 = 1j*2*np.pi*(ring.f_res_bar-sim.f_pround_bar)*b_bar- \
+                (1/ring.tu_e_bar + ring.vg*1e-4*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
+                    + ring.FCA_ratio*t0**2*S0**4*abs(b_bar)**4) )*b_bar +\
                       sqrt(2/ring.tu_e_bar) *1 + \
                 1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar
 
@@ -113,10 +109,10 @@ def solving(ring,
             voltage = driver.refering_v(t_bar)
             cj = driver.refering_Cj(voltage)
 
-            f1 = 1j*2*np.pi*(f_res_bar-f_pround_bar)*b_bar \
+            f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar)*b_bar \
                 - (1/ring.tu_e_bar + \
-                   ring.vg*1e-4*ring.alpha_linear*(1+TPA_ratio*S0**2*abs(b_bar)**2\
-                    + FCA_ratio*S0**4*abs(b_bar)**4) )*b_bar + \
+                   ring.vg*1e-4*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
+                    + ring.FCA_ratio*t0**2*S0**4*abs(b_bar)**4) )*b_bar + \
                 sqrt(2/ring.tu_e_bar) *1 + \
                 1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar
 
@@ -126,5 +122,7 @@ def solving(ring,
         b_bar = sol.y[0]
         Q_bar = sol.y[1]
     s_minus_bar = (1-sqrt(2/ring.tu_e_bar)*b_bar)
+    # s_minus_bar = (1-1j*sqrt(2/ring.tu_e_bar)*b_bar)
+    # whether need j ?
 
     return b_bar*b0, Q_bar*driver.Cj , s_minus_bar*S0           

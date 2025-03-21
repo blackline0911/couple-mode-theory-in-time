@@ -13,15 +13,14 @@ from driver import *
 
 
 class time(simulation):
-    
+    id='time'
     dt = 0
     t_total = np.array([])
     t_max = 0
     buffer = 0
     def __init__(self,mode):
+        super().__init__()
         self.mode = mode
-        modes = {"voltage_drive", "scan_frequency"}
-        assert mode in modes, f"Please choose a simulation mode from {modes}"
 
     def main(self, ring, driver=None,N=0,t_max = 0,buffer=80,resolution:int=2):
         # 根據 mode 建立對應的子類別實例
@@ -54,19 +53,28 @@ class time(simulation):
     
 
 class VoltageDriveTime():
+    dt=0
     def __init__(self,N:int):
         self.N =N
     """在 voltage_drive 模式底下的子類別"""
     def set_dt(self, ring, driver,resolution):
         self.ring = ring
         self.driver = driver
-        df_max =  (c/ring.lambda0**2)*abs( ring.me*1e-12/1e-6 )*( driver.vpp/2 + abs(driver.v_bias))
+        if  (not driver.vpp==0) and (not driver.v_bias==0):
+            df_max =  (c/ring.lambda0**2)*abs( ring.me*1e-12/1e-6 )*( driver.vpp/2 + abs(driver.v_bias))
+        else:
+            df_max = abs(c/ring.lambda_incident-c/ring.lambda0)
+        print("df_max = ",df_max)
+        self.dt = (1/df_max/10)
+        print("dt_v1 = ",self.dt)
         if df_max < driver.f_drive:
             self.dt = 1/(driver.f_drive)/10
-        dt = (1/df_max/10)
-        inte = (math.log10(dt))//1
-        dt = 10**(inte-resolution)
-        return dt
+        print("dt_v1 = ",self.dt)
+        inte = (math.log10(self.dt))//1
+        print("inte = ",inte)
+        self.dt = 10**(inte-resolution)
+        print("dt_v1 = ",self.dt)
+        return self.dt
     
     def create_time_array(self, N):
         self.N = N

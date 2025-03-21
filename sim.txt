@@ -1,33 +1,44 @@
 This script is used to save the simulation variable that A simulation used. 
 Just for Future checking or further research
 
+Simulation Parameters and Settings
+	time scaling : 1e-12 sec
+	Simulation mode = scan_frequency
+	Input Laser Power : 10 mW
+
+	Input Laser wavelength : 1.5488 um
+
 Parameter of ring modulator
 	Structure parameter : 
 		cavity length : 31.41592653589793 um
-		neff : 2.51464
 		Group index : 4.3
 		couple through coefficient : 0.95012
 		Linear attenuation coefficient : 0.95246
-		modulation efficiency : 37.2 pm/V
-		FCA coefficient ratio : 0
+		modulation efficiency : 37.2 pm/V (for reverse bias)
+		mode cross section : 0.11 um^2
+		Linear absorption coefficient: (15.503972979464853+0j) 1/cm
+		Two Photon Absorption coefficient : 0.0100874104846447 1/cm
+		Two Photon Absorption coefficient ratio (compared to Linear absorption): 0.0006506339051290636
+		Free Carrier Absorption coefficient : 0.1485211959094846 1/cm
+		Free Carrier Absorption coefficient ratio (compared to Linear absorption): 0.009579557195191336
 	Physical parameter : 
 		intrinsic photon life time : 9.251342293048564 ps
 		couple extrinsic photon life time : 8.806590144935825 ps
 		resonant frequency : 193.53752674027618 THz
 		resonant wavelength : 1.5490146177300075 um
 		Q factor : 2743.213254074814
+		Group velocity : 69719176279069.77 um/s
+		Round Trip time : 0.45060667971961155 ps
 
-Current Simulation mode is scan_frequency
+		Input Laser photon energy : 0.0001282557351955062 pJ
 
-	The start wavelength is 1.5480000000000003 um
-	The end wavelength is 1.5498 um
+	The start wavelength is 1.5500000000000003 um
+	The end wavelength is 1.5480000000000003 um
 	scanning frequency range for better accuracy is 0.07055139677995954 THz
-	Current frequency range is 0.2249295918152825 THz
-	The time for scanning : 10000 ps 
-		Note. This time value may affect the accuracy of Transfer function. above 10000 ps is better.  
+	Current frequency range is 0.24988952071350923 THz
 		Warning : This Transfer function result may not be accurate.
 
-Simulation Parameters
-	time scaling : 1e-12 sec
-	time resolution : 1e-14 sec
-	Max time range : 10000 ps
+Simulation Parameter of time 
+	time resolution : 1e-15 sec
+	Max time range : 200 ps
+		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
