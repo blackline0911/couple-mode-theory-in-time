@@ -122,7 +122,5 @@ def solving(sim,
         b_bar = sol.y[0]
         Q_bar = sol.y[1]
     s_minus_bar = (1-sqrt(2/ring.tu_e_bar)*b_bar)
-    # s_minus_bar = (1-1j*sqrt(2/ring.tu_e_bar)*b_bar)
-    # whether need j ?
 
     return b_bar*b0, Q_bar*driver.Cj , s_minus_bar*S0           

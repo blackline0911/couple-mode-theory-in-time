@@ -17,10 +17,10 @@ Parameter of ring modulator
 		modulation efficiency : 37.2 pm/V (for reverse bias)
 		mode cross section : 0.11 um^2
 		Linear absorption coefficient: (15.503972979464853+0j) 1/cm
-		Two Photon Absorption coefficient : 0.0100874104846447 1/cm
-		Two Photon Absorption coefficient ratio (compared to Linear absorption): 0.0006506339051290636
-		Free Carrier Absorption coefficient : 0.1485211959094846 1/cm
-		Free Carrier Absorption coefficient ratio (compared to Linear absorption): 0.009579557195191336
+		Two Photon Absorption coefficient : 0.0 1/cm
+		Two Photon Absorption coefficient ratio (compared to Linear absorption): 0.0
+		Free Carrier Absorption coefficient : 0.0 1/cm
+		Free Carrier Absorption coefficient ratio (compared to Linear absorption): 0.0
 	Physical parameter : 
 		intrinsic photon life time : 9.251342293048564 ps
 		couple extrinsic photon life time : 8.806590144935825 ps

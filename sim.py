@@ -1,5 +1,6 @@
 import numpy as np
 from utility import *
+from cmath import *
 class simulation():
     voltage_drive = False
     scan_frequency = False
@@ -30,7 +31,7 @@ class simulation():
          # normalized input laser frequency
         self.f_pround_bar = c/(self.lambda_incident)*t0
         self.Pin = experiment_condition["Pin"]
-        
+        self.b0 = np.real(sqrt(t0)*sqrt(self.Pin))
     def set_dt(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")
 
@@ -142,6 +143,10 @@ class simulation():
 
                         f.write("\t\tQ factor : ")
                         f.write(str(ob.Q))
+                        f.write('\n')
+
+                        f.write("\t\tLineWidth : ")
+                        f.write(str(c*1e-9/ob.f_res_bar**2*ob.f_res_bar/ob.Q)+" nm")
                         f.write('\n')
 
                         f.write("\t\tGroup velocity : ")

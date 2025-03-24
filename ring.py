@@ -19,6 +19,8 @@ class ring(simulation):
                  beta_TPA = 5,  #1e-13 (cm/mW)
                  tau_eff = 20,  # ns
                  sigma_FCA = 1.04,  #1e-17 cm^2
+                 FCA_fit_factor = 1,
+                 TPA_fit_factor = 1
                 ):
         """
         input argments:
@@ -52,7 +54,7 @@ class ring(simulation):
         self.kappa = (1-self.gamma**2)**0.5
         self.tu_e_bar = -self.L*self.ng/(c*log(sqrt(1-self.kappa**2)))/t0
         self.tu_o_bar = -self.L*self.ng/(c*log(alpha))/t0
-        self.alpha_linear = 1/(self.vg*1e-4*self.tu_o_bar)
+        self.alpha_linear = np.real(1/(self.vg*1e-4*self.tu_o_bar))
         self.tu_t_bar = (1/self.tu_e_bar+1/self.tu_o_bar)**(-1)
         self.beta_TPA = beta_TPA  #1e-13 (cm/mW)
         self.tau_eff = tau_eff      #1e-9  s,
@@ -60,6 +62,8 @@ class ring(simulation):
         super().__init__()
         self.lambda_incident = lambda_incident
         self.photon_energy = h*c/self.lambda_incident*1000/t0  #mJ
+        self.FCA_fit_factor = FCA_fit_factor
+        self.TPA_fit_factor = TPA_fit_factor
         # Note. photon energy is in unit. mJ, and normalized by t0
 
         if (lambda0==None):
@@ -81,9 +85,7 @@ class ring(simulation):
         input:
         wl_min: start scanning wavelength (um)
         wl_max: Ending scanning wavelength (um)
-        lambda_incident: incident laser wavelength (um)
-
-        
+        lambda_incident: incident laser wavelength (um)        
         """
         self.time = time
         self.f_start_bar = c/wl_start*t0
@@ -94,8 +96,6 @@ class ring(simulation):
         self.f_res = np.zeros(len(self.time.t_total))
     
     def handle_nonlinear(self):
-        self.FCA_fit_factor = 0.9
-        self.TPA_fit_factor = 1
         #unit of TPA coeff : 1/(cm* mJ) 
         #  beta_TPA in 1e-9 order
         self.TPA_coeff = self.beta_TPA/(self.round_trip_time*self.cross_section)
@@ -105,10 +105,7 @@ class ring(simulation):
         self.TPA_coeff = self.TPA_coeff*self.TPA_fit_factor
         self.TPA_ratio = self.TPA_coeff/self.alpha_linear
         # Note. The unit TPA_coeff here is  1/(cm*mJ), not 1/cm
-
-
-        
-        
+     
         self.FCA_coeff = self.beta_TPA*self.tau_eff*self.sigma_FCA/ \
             (2*self.photon_energy*self.round_trip_time**2*self.cross_section**2) 
         self.FCA_coeff_order = np.log10(1e-13*1e-9*1e-17/( 1e-12*(1e-12)**2*(1e-4)**4 ) ) + np.log10(self.FCA_coeff)//1

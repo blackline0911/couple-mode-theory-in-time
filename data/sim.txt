@@ -3,42 +3,43 @@ Just for Future checking or further research
 
 Simulation Parameters and Settings
 	time scaling : 1e-12 sec
-	Simulation mode = scan_frequency
-	Input Laser Power : 10 mW
+	Simulation mode = voltage_drive
+	Input Laser Power : 2 mW
 
-	Input Laser wavelength : 1.32105 um
+	Input Laser wavelength : 1.558 um
 
 Parameter of ring modulator
 	Structure parameter : 
-		cavity length : 314.1592653589793 um
-		Group index : 3.93
-		couple through coefficient : (0.9534149149242422+0j)
-		Linear attenuation coefficient : 0.9534149149242422
-		modulation efficiency : 0 pm/V (for reverse bias)
-		mode cross section : 0.2 um^2
-		Linear absorption coefficient: (1.5185002532972582+0j) 1/cm
-		Two Photon Absorption coefficient : 0.0006070413688596618 1/cm
-		Two Photon Absorption coefficient ratio (compared to Linear absorption): 0.0003997637587096462
-		Free Carrier Absorption coefficient : 0.0003211349565073253 1/cm
-		Free Carrier Absorption coefficient ratio (compared to Linear absorption): 0.00021148166146829126
+		cavity length : 31.41592653589793 um
+		Group index : 3.98
+		couple through coefficient : 0.947582
+		Linear attenuation coefficient : 0.953553
+		modulation efficiency : 39.3 pm/V (for reverse bias)
+		mode cross section : 0.11 um^2
+		Linear absorption coefficient: 15.138904384722725 1/cm
+		Two Photon Absorption coefficient : 0.0021796917127624225 1/cm
+		Two Photon Absorption coefficient ratio (compared to Linear absorption): 0.00014397948869814098
+		Free Carrier Absorption coefficient : 0.007750840498923825 1/cm
+		Free Carrier Absorption coefficient ratio (compared to Linear absorption): 0.000511981600646445
 	Physical parameter : 
-		intrinsic photon life time : 86.32905337238144 ps
-		couple extrinsic photon life time : 86.32905337238144 ps
-		resonant frequency : 226.93584094410107 THz
-		resonant wavelength : 1.321045 um
-		Q factor : 30773.716392926795
-		Group velocity : 76283068193384.22 um/s
-		Round Trip time : 4.118335468135054 ps
+		intrinsic photon life time : 8.769360484424253 ps
+		couple extrinsic photon life time : 7.746270408093366 ps
+		resonant frequency : 192.24200726415518 THz
+		resonant wavelength : 1.5594534319861857 um
+		Q factor : 2484.068532266565
+		LineWidth : 0.6277819680615966 nm
+		Group velocity : 75324738190954.78 um/s
+		Round Trip time : 0.4170731593683846 ps
 
-		Input Laser photon energy : 0.00015036711908769537 pJ
-
-	The start wavelength is 1.3209500000000003 um
-	The end wavelength is 1.3211 um
-	scanning frequency range for better accuracy is 0.00737433977900249 THz
-	Current frequency range is 0.025768544588032682 THz
-		Warning : This Transfer function result may not be accurate.
+		Input Laser photon energy : 0.0001274983842559692 pJ
 
 Simulation Parameter of time 
 	time resolution : 1e-14 sec
 	Max time range : 2000 ps
 		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
+	Driver information : 
+	Driving Signal is sine wave
+		Driving frequency is 50.0 GHz
+		Bias voltage is -1 V
+		Peak to Peak voltage is 1 V
+

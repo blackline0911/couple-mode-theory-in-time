@@ -24,9 +24,9 @@ wl_max = 1.3211
 # wl_max = 1.548
 ring_mod = ring(L=2*np.pi*50, 
             ng=3.93, 
-            gamma = sqrt(1-0.091), 
-            # alpha = np.exp(-0.63*2*np.pi*50*1e-4),
-            alpha=sqrt(1-0.091),
+            gamma = sqrt(1-0.085), 
+            alpha = np.exp(-0.63*2*np.pi*50*1e-4),
+            # alpha=sqrt(1-0.091),
             me=0,
             cross_section=0.2,
             lambda_incident=wl_in,
@@ -64,7 +64,6 @@ if sim.mode=="voltage_drive":
     ploting(t.t_total,v.v,x_label='time',title='voltage',filename='voltage')
 else:
     T = Transfer_function(ring_mod,t)
-    print(sim.Pin)
     wl,data_NL = T.mapping(abs(s_minus)**2/sim.Pin)     
     wl,data = T.mapping(abs(s1)**2/sim1.Pin)     
     ploting(wl*1000,10*np.log10(data_NL),10*np.log10(data),x_label='wavelength (nm)',title='Transfer function',filename='T')

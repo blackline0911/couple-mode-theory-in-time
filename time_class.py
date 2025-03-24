@@ -30,13 +30,14 @@ class time(simulation):
         It is better to set t_max = 10000 (ps), but be aware of simulation time
         """
         if self.mode == "voltage_drive":
+            self.buffer = buffer
             if N==0 or driver==None:
                 assert False ,"please specify N or you forgot to give the driver"
             self.N=N
             self.resolution = resolution
             sim_time = VoltageDriveTime(N)
             self.dt = sim_time.set_dt(ring, driver,self.resolution)
-            self.t_total, self.t_all_segment, self.t_max= sim_time.create_time_array(N)
+            self.t_total, self.t_all_segment, self.t_max= sim_time.create_time_array(N,self.buffer)
             self.T_normalized = driver.f_drive*t0
         elif self.mode == "scan_frequency":
             if buffer==0 or t_max==0:
@@ -76,7 +77,7 @@ class VoltageDriveTime():
         print("dt_v1 = ",self.dt)
         return self.dt
     
-    def create_time_array(self, N):
+    def create_time_array(self, N,buffer):
         self.N = N
         t_total = np.array([])
         t_all_segment = np.zeros((self.N,1)).tolist()
@@ -94,7 +95,7 @@ class VoltageDriveTime():
             t_all_segment[r] = t_segment
             # self.t_all_segment[r][0] = t_segment[0]
             # self.t_all_segment[r].extend(t_segment[1:])
-        
+        self.time_wo_buffer = t_total[int(buffer/(self.dt/t0-1)):len(t_total)-1]
         return t_total, t_all_segment, self.t_max
 
 class ScanFrequencyTime():
