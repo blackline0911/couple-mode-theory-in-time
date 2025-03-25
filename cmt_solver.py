@@ -64,6 +64,7 @@ def solving(sim,
     Q_record = np.array([])
     b_init=0+1j*0
     Q_init=0
+    vg_in_cm = ring.vg*1e-4
     # notes: time_range argument should be slightly exclude the t_eval
     if time.mode == "voltage_drive":
         def CMT(t_bar,eqs):
@@ -72,7 +73,7 @@ def solving(sim,
             cj = driver.refering_Cj(voltage)
 
             f1 = 1j*2*np.pi*(ring.f_res_bar-sim.f_pround_bar)*b_bar- \
-                (1/ring.tu_e_bar + ring.vg*1e-4*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
+                (1/ring.tu_e_bar + vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
                     + ring.FCA_ratio*t0**2*S0**4*abs(b_bar)**4) )*b_bar +\
                       sqrt(2/ring.tu_e_bar) *1 + \
                 1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar
@@ -111,7 +112,7 @@ def solving(sim,
 
             f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar)*b_bar \
                 - (1/ring.tu_e_bar + \
-                   ring.vg*1e-4*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
+                   vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
                     + ring.FCA_ratio*t0**2*S0**4*abs(b_bar)**4) )*b_bar + \
                 sqrt(2/ring.tu_e_bar) *1 + \
                 1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar

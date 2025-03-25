@@ -109,20 +109,20 @@ class simulation():
                         f.write('\n')
 
                         f.write("\t\tTwo Photon Absorption coefficient : ")
-                        f.write(str(ob.TPA_coeff*t0*self.Pin)+" 1/cm")
+                        f.write(str(ob.TPA_coeff)+" 1/cm.mJ")
                         f.write('\n')
 
-                        f.write("\t\tTwo Photon Absorption coefficient ratio (compared to Linear absorption): ")
-                        f.write(str(np.real(ob.TPA_ratio*t0*self.Pin)))
-                        f.write('\n')
+                        # f.write("\t\tTwo Photon Absorption coefficient ratio (compared to Linear absorption): ")
+                        # f.write(str(np.real(ob.TPA_ratio*t0*self.Pin)))
+                        # f.write('\n')
 
                         f.write("\t\tFree Carrier Absorption coefficient : ")
-                        f.write(str(ob.FCA_coeff*t0**2*self.Pin**2)+" 1/cm")
+                        f.write(str(ob.FCA_coeff)+" 1/cm.mJ^2")
                         f.write('\n')
 
-                        f.write("\t\tFree Carrier Absorption coefficient ratio (compared to Linear absorption): ")
-                        f.write(str(np.real(ob.FCA_ratio*t0**2*self.Pin**2)))
-                        f.write('\n')
+                        # f.write("\t\tFree Carrier Absorption coefficient ratio (compared to Linear absorption): ")
+                        # f.write(str(np.real(ob.FCA_ratio*t0**2*self.Pin**2)))
+                        # f.write('\n')
 
                         f.write("\tPhysical parameter : \n")
                         f.write("\t\tintrinsic photon life time : ")

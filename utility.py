@@ -10,7 +10,7 @@ atol = 1e-20
 h=6.626e-34
 
 def ploting(x,*arg,x_label, title,filename='',figcolor='w',line_color='b',
-            grid_color='g',grid_style='--',grid_alpha=0.5):
+            grid_color='g',grid_style='--',grid_alpha=0.5,leg=['']):
        """
        input argments:
               x:x
@@ -26,8 +26,14 @@ def ploting(x,*arg,x_label, title,filename='',figcolor='w',line_color='b',
                         If unspecified, the figure will not be saved.
        """
        plt.figure()
+       n=0
        for i in arg:
-           plt.plot(x,i)
+            if (not leg==''):
+                plt.plot(x,i,label=leg[n])
+                plt.legend()
+            else:
+                plt.plot(x,i)
+            n+=1
        plt.xlabel(x_label)
        plt.title(title)
        plt.grid(color=grid_color,linestyle=grid_style, alpha=grid_alpha)
@@ -49,7 +55,3 @@ def sinc(t):
 
 def dB(x):
      return 10*np.log10(x)
-if __name__=='__main__':
-    x = np.linspace(0,10,1000)
-    y = x**2
-    ploting(x,y,r"$\alpha$",r'$|\alpha|^2$','testing.png')
