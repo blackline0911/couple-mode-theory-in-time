@@ -22,14 +22,15 @@ wl_min = 1.32078
 wl_max = 1.32085
 # wl_min = 1.32085
 # wl_max = 1.32078
-ring_mod = ring(L=2*np.pi*100, 
-            ng=3.93, 
-            gamma = sqrt(1-0.082), 
-            alpha = np.exp(-0.85*2*np.pi*50*1e-4),
+ring_mod = ring(2*np.pi*50, 
+            3.93, 
+            np.exp(-0.85/2*2*np.pi*50*1e-4),
             # alpha=sqrt(1-0.091),
-            me=0,
-            cross_section=0.2,
-            lambda_incident=wl_in,
+            0,
+            0.2,
+            wl_in,
+            sqrt(1-0.082),
+            sqrt(1-0.082),
             lambda0=1.32082,
             tau_eff=20,
             TPA_fit_factor=1,

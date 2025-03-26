@@ -8,11 +8,11 @@ class ring(simulation):
     id='ring'
     def __init__(self,L:float, 
                  ng:float,
-                 gamma:float,
                  alpha:float,
                  me:float,
                  cross_section:float,
                  lambda_incident:float,
+                 *gamma,
                  neff=None,
                  band = "C",
                  lambda0=None,
@@ -27,7 +27,7 @@ class ring(simulation):
         L : Length of cavity (micron)
         neff : effective phase index of waveguide in ring
         ng: group index of waveguide in ring
-        gamma:couple through coefficient of the bus waveguide of ring
+        gamma:amplitude couple through coefficient of the bus waveguide of ring
         alpha:round trip amplitude attenuation coefficient (one for no loss)
         me : modulation efficiency (pm/reverse voltage)
         band : specify operating wavelength, "C" for 1550nm, "O" for 1310nm
@@ -41,7 +41,8 @@ class ring(simulation):
         """
         self.L=L
         self.ng=ng
-        self.gamma=gamma
+        self.gamma=np.real(gamma)
+        assert (not np.imag(g)==0.0 for g in gamma) , "\nCoupling coefficient shall not over one\n"
         self.alpha = alpha
         self.me = me
         self.vg = c/ng*t0
@@ -52,8 +53,10 @@ class ring(simulation):
         self.round_trip_time = self.L*self.ng/(c*t0)
         self.cross_section =  cross_section #um^2
         self.kappa = (1-self.gamma**2)**0.5
-        self.tu_e_bar = -self.L*self.ng/(c*log(sqrt(1-self.kappa**2)))/t0
-        self.tu_o_bar = -self.L*self.ng/(c*log(alpha))/t0
+        self.tu_e_bar = -self.L*self.ng/(c*np.log(sqrt(1-k**2)))/t0 for k in self.kappa
+        # self.tu_e_bar = -self.L*self.ng/(c*log((1-self.kappa**2)))/t0
+        self.tu_o_bar = -self.L*self.ng/(c*np.log(alpha))/t0
+        # self.tu_o_bar = -self.L*self.ng/(c*1/2*log(alpha))/t0
         self.alpha_linear = np.real(1/(self.vg*1e-4*self.tu_o_bar))
         self.tu_t_bar = (1/self.tu_e_bar+1/self.tu_o_bar)**(-1)
         self.beta_TPA = beta_TPA  #1e-13 (cm/mW)
