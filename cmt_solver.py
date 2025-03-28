@@ -109,12 +109,12 @@ def solving(sim,
             b_bar , Q_pround = eqs
             voltage = driver.refering_v(t_bar)
             cj = driver.refering_Cj(voltage)
-
+            
             f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar)*b_bar \
-                - (1/ring.tu_e_bar + \
+                - (ring.tu_e_bar_total_inv + \
                    vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
                     + ring.FCA_ratio*t0**2*S0**4*abs(b_bar)**4) )*b_bar + \
-                sqrt(2/ring.tu_e_bar) *1 + \
+                ring.input_kappa *1 + \
                 1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar
 
             f2 = (voltage/(driver.R * cj )*t0) - (1/( driver.R*cj ) )*Q_pround*t0
@@ -122,6 +122,6 @@ def solving(sim,
         sol = solve_ivp(CMT ,[0,time.t_max+time.buffer], [b_init, Q_init],method=method,t_eval = time.t_total,atol = atol,rtol = rtol)
         b_bar = sol.y[0]
         Q_bar = sol.y[1]
-    s_minus_bar = (1-sqrt(2/ring.tu_e_bar)*b_bar)
+    s_minus_bar = (1-ring.input_kappa*b_bar)
 
     return b_bar*b0, Q_bar*driver.Cj , s_minus_bar*S0           

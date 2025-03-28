@@ -7,7 +7,6 @@ from sim import simulation
 class ring(simulation):
     id='ring'
     def __init__(self,L:float, 
-                 ng:float,
                  alpha:float,
                  me:float,
                  cross_section:float,
@@ -16,28 +15,36 @@ class ring(simulation):
                  neff=None,
                  band = "C",
                  lambda0=None,
+                 FSR = None,
+                 ng = None,
+                 FSR_shift = 0,
                  beta_TPA = 5,  #1e-13 (cm/mW)
                  tau_eff = 20,  # ns
                  sigma_FCA = 1.04,  #1e-17 cm^2
                  FCA_fit_factor = 1,
-                 TPA_fit_factor = 1
+                 TPA_fit_factor = 1,
+                 input_port = 1,
                 ):
         """
-        input argments:
-        L : Length of cavity (micron)
-        neff : effective phase index of waveguide in ring
-        ng: group index of waveguide in ring
-        gamma:amplitude couple through coefficient of the bus waveguide of ring
-        alpha:round trip amplitude attenuation coefficient (one for no loss)
-        me : modulation efficiency (pm/reverse voltage)
-        band : specify operating wavelength, "C" for 1550nm, "O" for 1310nm
-        cross_section : mode area in waveguide (um^2)
-        lambda0 : specify resonant wavelength ,calculate automatically if ungiven
+        input argments:\n
+        \tL : Length of cavity (micron)\n
+        \tneff : effective phase index of waveguide in ring\n
+        \tng: group index of waveguide in ring\n
+        \tgamma:amplitude couple through coefficient of the bus waveguide of ring\n
+        \t(gamma can input multiple values for multi-port ring (or add-drop ring), \n
+        \tthe first gamma is port of input Laser by default (can specified by input port ))\n
+        \talpha:round trip amplitude attenuation coefficient (one for no loss)\n
+        \tme : modulation efficiency (pm/reverse voltage)\n
+        \tband : specify operating wavelength, "C" for 1550nm, "O" for 1310nm\n
+        \tcross_section : mode area in waveguide (um^2)\n
+        \tlambda0 : specify resonant wavelength ,calculate automatically if ungiven\n
+        \tFSR_shift : specify the peak of simulation shifted by the peak near 1310 nm or 1550 nm\n
+        \t(positive means simulate longer resonant wavelength, negative means simulate shorter resonant wavelength)
 
-        NonLinear absorption parameter:
-        beta_TPA : Two Photon Absorption coefficient (cm/mW, normalized by 1e-13)
-        tau_eff : effective carrier life time (ns)
-        sigma_FCA :Free carrier absorption area (cm^2, normalized by 1e-17)
+        \tNonLinear absorption parameter:\n
+        \tbeta_TPA : Two Photon Absorption coefficient (cm/mW, normalized by 1e-13)\n
+        \ttau_eff : effective carrier life time (ns)\n
+        \tsigma_FCA :Free carrier absorption area (cm^2, normalized by 1e-17)\n
         """
         self.L=L
         self.ng=ng
@@ -45,20 +52,46 @@ class ring(simulation):
         assert (not np.imag(g)==0.0 for g in gamma) , "\nCoupling coefficient shall not over one\n"
         self.alpha = alpha
         self.me = me
-        self.vg = c/ng*t0
         self.band = band
         self.support_band = {"C","O"}
         assert self.band in self.support_band, f"The simulation only support {self.support_band} bands \n"
+        if (lambda0==None):
+            self.neff=neff
+            m = self.find_reference_res_wavelength()
+        else:
+            self.lambda0 = lambda0
+            self.lambda0_reference = lambda0
+        if FSR==None:
+            self.ng = ng
+            self.vg = c/self.ng*t0
+        elif ng==None:
+            self.FSR = FSR
+            self.ng = self.lambda0_reference**2/(self.FSR*self.L)
+            self.vg = c/self.ng*t0
+        else:
+            assert False, "\nDo not specify FSR and ng at the same time \nYou have to specify one of them.\n"
         
+        if (lambda0==None):
+            self.FSR_shift = FSR_shift
+            self.f_res_bar = self.find_accurate_res_frequency(m)
+            self.lambda0 = c*t0/self.f_res_bar
+        else:
+            self.f_res_bar = c*t0/self.lambda0
+
         self.round_trip_time = self.L*self.ng/(c*t0)
         self.cross_section =  cross_section #um^2
         self.kappa = (1-self.gamma**2)**0.5
-        self.tu_e_bar = -self.L*self.ng/(c*np.log(sqrt(1-k**2)))/t0 for k in self.kappa
-        # self.tu_e_bar = -self.L*self.ng/(c*log((1-self.kappa**2)))/t0
+        self.tu_e_bar = -self.L*self.ng/(c*np.log((1-self.kappa**2)**0.5))/t0
         self.tu_o_bar = -self.L*self.ng/(c*np.log(alpha))/t0
-        # self.tu_o_bar = -self.L*self.ng/(c*1/2*log(alpha))/t0
+        self.kappa_total = 0
+        self.tu_e_bar_total_inv = 0
+        for tu_e_bar in self.tu_e_bar:
+            self.kappa_total += (2/tu_e_bar)**0.5 
+            self.tu_e_bar_total_inv += 1/tu_e_bar
+        assert input_port>0 , "\nInput port should start from one\n"
+        self.input_kappa = (2/self.tu_e_bar[input_port-1])**0.5 
         self.alpha_linear = np.real(1/(self.vg*1e-4*self.tu_o_bar))
-        self.tu_t_bar = (1/self.tu_e_bar+1/self.tu_o_bar)**(-1)
+        self.tu_t_bar = (self.tu_e_bar_total_inv+1/self.tu_o_bar)**(-1)
         self.beta_TPA = beta_TPA  #1e-13 (cm/mW)
         self.tau_eff = tau_eff      #1e-9  s,
         self.sigma_FCA = sigma_FCA  #1e-17 cm^2
@@ -69,14 +102,9 @@ class ring(simulation):
         self.TPA_fit_factor = TPA_fit_factor
         # Note. photon energy is in unit. mJ, and normalized by t0
 
-        if (lambda0==None):
-            self.neff=neff
-            self.f_res_bar = self.find_res_frequency()
-            self.lambda0 = c*t0/self.f_res_bar
-        else:
-            self.lambda0 = lambda0
-            self.f_res_bar = c*t0/self.lambda0
-        self.Q = np.real( ( (1/self.tu_e_bar + 1/self.tu_o_bar  )/(self.f_res_bar*np.pi) )**(-1) )
+        
+        self.Q = np.real( ( (self.tu_e_bar_total_inv + 1/self.tu_o_bar  )/(self.f_res_bar*np.pi) )**(-1) )
+        # self.Q = np.real( ( (1/self.tu_e_bar + 1/self.tu_o_bar  )/(self.f_res_bar*np.pi) )**(-1) )
         
 
         self.handle_nonlinear()
@@ -132,7 +160,7 @@ class ring(simulation):
             else:
                 return -(self.f_end_bar-self.f_start_bar)/self.time.t_max*(t-self.time.buffer)+ self.f_res_bar+ (self.f_in_bar-self.f_start_bar)
 
-    def find_res_frequency(self):
+    def find_reference_res_wavelength(self):
         if self.band=="C":
             f_band = c/1.55*t0
             m = self.neff*self.L/1.55
@@ -141,12 +169,26 @@ class ring(simulation):
             m = self.neff*self.L/1.31
         a = np.ceil(m)*c/self.neff/self.L*t0 - f_band
         b = f_band - np.floor(m)*c/self.neff/self.L*t0
-       
         if a<b:
             m= np.ceil(m)
         if a>b:
             m=np.floor(m)
-        return m*c/self.neff/self.L*t0
+        self.lambda0_reference = (self.neff*self.L)/m
+        
+        return m
+    
+    def find_accurate_res_frequency(self,m):
+        f0_v0 = c*t0/self.lambda0_reference
+        m_pround = m - self.FSR_shift
+        # Assume the specified neff (self.neff) is index of resonant wavelength near 1550 or 1310 nm 
+        # solving index at shifted resonance frequency
+        A = 1
+        B = -(2*self.neff-self.ng)
+        C = -(self.ng-self.neff)/(f0_v0*self.L)*m_pround*c*t0
+        n = np.real((-B+sqrt(B**2-4*A*C))/(2*A))
+        assert np.imag((-B+sqrt(B**2-4*A*C))/(2*A))==0.0 , "\nimaginary part of index is supposed to be zero\n"
+        
+        return m_pround*c/n/self.L*t0
 
 class Transfer_function():
     def __init__(self,ring, time):

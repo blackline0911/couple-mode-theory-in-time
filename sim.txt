@@ -6,34 +6,35 @@ Simulation Parameters and Settings
 	Simulation mode = scan_frequency
 	Input Laser Power : 10 mW
 
-	Input Laser wavelength : 1.3208 um
+	Input Laser wavelength : 1.32105 um
 
 Parameter of ring modulator
 	Structure parameter : 
 		cavity length : 314.1592653589793 um
 		Group index : 3.93
-		couple through coefficient : (0.9581231653602788+0j)
-		Linear attenuation coefficient : 0.9736498493559456
+		couple through coefficient : [0.95812317 0.95812317]
+		Round trip loss : 0.9867369707049318
 		modulation efficiency : 0 pm/V (for reverse bias)
 		mode cross section : 0.2 um^2
-		Linear absorption coefficient: 0.8500000000000003 1/cm
+		Linear absorption coefficient: 0.42500000000000143 1/cm
 		Two Photon Absorption coefficient : 60704136.88596618 1/cm.mJ
-		Free Carrier Absorption coefficient : 5.096415616424348e+18 1/cm.mJ^2
+		Free Carrier Absorption coefficient : 5.097380262021036e+18 1/cm.mJ^2
 	Physical parameter : 
-		intrinsic photon life time : 154.22434048573376 ps
-		couple extrinsic photon life time : 96.27015222084891 ps
+		intrinsic photon life time : 308.4486809714666 ps
+		couple extrinsic photon life time (port 1 ) : 96.27015222084891 ps
+		couple extrinsic photon life time (port 2 ) : 96.27015222084891 ps
 		resonant frequency : 226.97449917475507 THz
 		resonant wavelength : 1.32082 um
-		Q factor : 42264.2666194247
-		LineWidth : 0.031251459108317996 nm
+		Q factor : 29689.983955206262
+		LineWidth : 0.04448705671221452 nm
 		Group velocity : 76283068193384.22 um/s
 		Round Trip time : 4.118335468135054 ps
 
-		Input Laser photon energy : 0.00015039558045941854 pJ
+		Input Laser photon energy : 0.00015036711908769537 pJ
 
 	The start wavelength is 1.32078 um
 	The end wavelength is 1.32085 um
-	scanning frequency range for better accuracy is 0.005370364076551546 THz
+	scanning frequency range for better accuracy is 0.007644817171918819 THz
 	Current frequency range is 0.012029144958887628 THz
 		Warning : This Transfer function result may not be accurate.
 

@@ -18,27 +18,24 @@ experiment_condition ={"mode":"scan_frequency",
                         # "Pin":Pin} 
 sim = simulation()
 sim.main(experiment_condition=experiment_condition)
-wl_1 = 1.557
-wl_2 = 1.562
-# wl_1 = 1.5506
-# wl_2 = 1.551
-# wl_1 = 1.562
-# wl_2 = 1.557
-wl_start = wl_1
-wl_end = wl_2
-ring_mod = ring(L=2*np.pi*5, 
-            ng=3.98, 
-            gamma = sqrt(0.947582),
-            alpha = sqrt(0.953553),
-            me=39.3,
-            cross_section=0.5*0.22,
-            lambda_incident=wl_in,
+FSR = 0.019431
+ring_mod = ring(2*np.pi*5, 
+            sqrt(0.953553),
+            39.3,
+            0.5*0.22,
+            wl_in,
+            sqrt(0.947582),
+            FSR = FSR,
             neff=2.680503,
             tau_eff=20,
             sigma_FCA=1.04,
             beta_TPA=5,
+            FSR_shift=-1,
             TPA_fit_factor=1,
             FCA_fit_factor=1)
+
+wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q*3/2
+wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q*3/2 
 
 v = driver(f_drive=50,
            v_bias=0,
@@ -46,7 +43,7 @@ v = driver(f_drive=50,
            R=53.9)
 if sim.mode == "scan_frequency":
     t = time(mode = "scan_frequency")
-    ring_mod.scan_frequency(wl_start ,wl_end,t)
+    ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=5000,resolution=2,buffer=500)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
     v.create_voltage(time=t)

@@ -92,7 +92,7 @@ class simulation():
                         f.write(str(ob.gamma))
                         f.write('\n')
 
-                        f.write("\t\tLinear attenuation coefficient : ")
+                        f.write("\t\tRound trip loss : ")
                         f.write(str(np.real(ob.alpha)))
                         f.write('\n')
 
@@ -128,10 +128,10 @@ class simulation():
                         f.write("\t\tintrinsic photon life time : ")
                         f.write(str(np.real(ob.tu_o_bar))+' ps')
                         f.write('\n')
-
-                        f.write("\t\tcouple extrinsic photon life time : ")
-                        f.write(str(np.real(ob.tu_e_bar))+' ps')
-                        f.write('\n')
+                        for i in range(len(ob.tu_e_bar)):
+                            f.write("\t\tcouple extrinsic photon life time (port "+str(i+1)+" ) : ")
+                            f.write(str(np.real(ob.tu_e_bar[i]))+' ps')
+                            f.write('\n')
 
                         f.write("\t\tresonant frequency : ")
                         f.write(str(ob.f_res_bar)+' THz')
