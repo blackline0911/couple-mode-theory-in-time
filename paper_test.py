@@ -8,9 +8,13 @@ from time_class import time
 from cmt_solver import *
 
 wl_in = 1.32105
-# wl_res = 1.3194
-# wl_in = 1.5488
-Pin = 10 #mW
+wl_res = 1.321045
+Pin = 2.5 #mW
+kd = sqrt(0.091)
+alpha_linear = 0.63
+tau_eff=14
+# wl_min =  1.32078
+# wl_max =  1.32085
 # experiment_condition ={"mode":"voltage_drive",
 #                         "lambda_incident":wl_in,
 #                         "Pin":Pin} 
@@ -21,23 +25,20 @@ sim = simulation()
 sim.main(experiment_condition=experiment_condition)
 
 ring_mod = ring(2*np.pi*50,  
-            np.exp(-0.85/2*2*np.pi*50*1e-4),
-            # alpha=sqrt(1-0.091),
+            np.exp(-alpha_linear/2*2*np.pi*50*1e-4),
             0,
             0.2,
             wl_in,
-            sqrt(1-0.082),
-            sqrt(1-0.082),
+            sqrt(1-kd**2),
+            sqrt(1-kd**2),
             ng = 3.93,
-            # lambda0=1.3194+0.00141,
-            lambda0=1.32082,
-            tau_eff=20,
+            lambda0=wl_res,
+            tau_eff=tau_eff,
             TPA_fit_factor=1,
             FCA_fit_factor=1)
-wl_min =  1.32078
-wl_max =  1.32085
-# wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/2
-# wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/2 
+
+wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/2
+wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/2 
 v = driver(f_drive=100,
            v_bias=0,
            vpp=0,
@@ -65,7 +66,7 @@ sim1.main(experiment_condition=experiment_condition)
 b1,Q1,s1 = solving(sim1,ring_mod,v,t)
 
 os.chdir("./data/")
-# sim.save_data(ring_mod,t,v)
+sim.save_data(ring_mod,t,v)
 
 
 if sim.mode=="voltage_drive":

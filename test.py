@@ -19,13 +19,13 @@ sim = simulation()
 sim.main(experiment_condition=experiment_condition)
 wl_start = 1.55
 wl_end = 1.548
-ring_mod = ring(L=2*np.pi*5, 
+ring_mod = ring(2*np.pi*5, 
+            0.95246,
+            37.2,
+            0.5*0.22,
+            wl_in,
+            0.95012, 
             ng=4.3, 
-            gamma = 0.95012, 
-            alpha = 0.95246,
-            me=37.2,
-            cross_section=0.5*0.22,
-            lambda_incident=wl_in,
             neff=2.51464,
             )
 

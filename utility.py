@@ -28,7 +28,7 @@ def ploting(x,*arg,x_label, title,filename='',figcolor='w',line_color='b',
        plt.figure()
        n=0
        for i in arg:
-            if (not leg==''):
+            if (not leg==['']):
                 plt.plot(x,i,label=leg[n])
                 plt.legend()
             else:
