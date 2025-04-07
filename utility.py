@@ -2,6 +2,7 @@ from scipy import *
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import pickle
 
 c = 299792458*1e6
 t0 = 1e-12
@@ -25,7 +26,7 @@ def ploting(x,*arg,x_label, title,filename='',figcolor='w',line_color='b',
               filename: set the file name of the figure you plot. 
                         If unspecified, the figure will not be saved.
        """
-       plt.figure()
+       fig=plt.figure()
        n=0
        for i in arg:
             if (not leg==['']):
@@ -40,7 +41,9 @@ def ploting(x,*arg,x_label, title,filename='',figcolor='w',line_color='b',
        ax = plt.gca()
        ax.set_facecolor(figcolor)
        if(filename!=''):
-              plt.savefig(filename)
+            plt.savefig(filename)
+            with open(filename, "wb") as f:
+                pickle.dump(fig, f)
        plt.show()
        return
 

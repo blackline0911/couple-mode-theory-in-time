@@ -10,6 +10,7 @@ from time_class import *
 
 class driver(simulation) :
     Cj = 0
+    varying_cj = 0
     id='driver'
     def __init__(self,
                  f_drive,
@@ -49,6 +50,7 @@ class driver(simulation) :
         """
         self.time = time
         if time.mode == "voltage_drive":
+            self.Cj = self.Cj_V(self.v_bias)
             # Generating PRBS 
             if self.PRBS:
                 self.prbs =np.zeros(self.time.N)
@@ -82,9 +84,7 @@ class driver(simulation) :
                 self.v = a+self.v_bias-self.vpp/2  
         if time.mode == "scan_frequency":
             self.v = self.v_bias*np.ones(len(time.t_total))
-            # self.v_dict = dict(zip(time.t_total,self.v))
             self.Cj = self.Cj_V(self.v_bias)
-
             return
 
     def refering_v(self,t):
@@ -117,7 +117,10 @@ class driver(simulation) :
         input
         t: given a arbitary voltage value, this function can return the corresponding capacitance value
         """
-        return self.Cj_V(voltage)
+        if self.varying_cj:
+            return self.Cj_V(voltage)
+        else:
+            return float(self.Cj)
         
     def Cj_V(self,vol):
         return 3.7675e-14/( (2.5485-vol)**0.5 )
@@ -126,8 +129,8 @@ class driver(simulation) :
         """
         call this function when you want to analyze large signal 
         """
+        self.varying_cj=1
         self.Cj = self.Cj_V(self.v)
-        # self.Cj_dict = dict(zip(self.v,self.Cj))
         return 
 
 

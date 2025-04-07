@@ -81,14 +81,15 @@ class ring(simulation):
         self.round_trip_time = self.L*self.ng/(c*t0)
         self.cross_section =  cross_section #um^2
         self.kappa = (1-self.gamma**2)**0.5
-        self.tu_e_bar = -self.L*self.ng/(c*np.log((1-self.kappa**2)**0.5))/t0
-        self.tu_o_bar = -self.L*self.ng/(c*np.log(alpha))/t0
+        self.tu_e_bar = -self.L*self.ng/(c*t0*np.log((1-self.kappa**2)**0.5))
+        self.tu_o_bar = -self.L*self.ng/(c*t0*np.log(alpha))
         self.kappa_total = 0
         self.tu_e_bar_total_inv = 0
         for tu_e_bar in self.tu_e_bar:
             self.kappa_total += (2/tu_e_bar)**0.5 
             self.tu_e_bar_total_inv += 1/tu_e_bar
         assert input_port>0 , "\nInput port should start from one\n"
+        
         self.input_kappa = (2/self.tu_e_bar[input_port-1])**0.5 
         self.alpha_linear = np.real(1/(self.vg*1e-4*self.tu_o_bar))
         self.tu_t_bar = (self.tu_e_bar_total_inv+1/self.tu_o_bar)**(-1)

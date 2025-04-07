@@ -7,10 +7,16 @@ from driver import driver
 from time_class import time
 from cmt_solver import *
 
+# refering:
+# Raman gain and nonlinear optical absorption measurements in a low-loss silicon waveguide
 wl_in = 1.32105
-# wl_in = 1.5488
-Pin = 15 #mW
-# Pin = 1  #mW
+wl_res = 1.321045
+Pin = 2.5 #mW
+kd = sqrt(0.091)
+alpha_linear = 10**(0.22/10)
+tau_eff=14
+wl_min =  1.32078
+wl_max =  1.32085
 # experiment_condition ={"mode":"voltage_drive",
 #                         "lambda_incident":wl_in,
 #                         "Pin":Pin} 
@@ -19,18 +25,17 @@ experiment_condition ={"mode":"scan_frequency",
                         "Pin":Pin} 
 sim = simulation()
 sim.main(experiment_condition=experiment_condition)
-wl_min = 1.32095
-wl_max = 1.3211
-# wl_min = 1.55
-# wl_max = 1.548
-ring_mod = ring(L=2*np.pi*50, 
-            ng=3.93, 
-            gamma = sqrt(1-0.091), 
-            alpha = np.exp(-0.63*2*np.pi*50*1e-4),
-            me=37.2,
-            cross_section=0.2,
-            lambda_incident=wl_in,
-            lambda0=1.321045
+ring_mod = ring(2*np.pi*50,  
+            np.exp(-alpha_linear/2*2*np.pi*50*1e-4),
+            0,
+            0.2,
+            wl_in,
+            sqrt(1-kd**2),
+            sqrt(1-kd**2),
+            ng = 3.93,
+            lambda0=wl_res,
+            tau_eff=tau_eff,
+            sigma_FCA = 1.45,
             )
 
 v = driver(f_drive=100,
@@ -48,6 +53,7 @@ else:
 
 v.create_voltage(time=t)
 v.varying_Cj()
+sim.save_data(ring_mod,t,v)
 
 b,Q,s_minus = solving(sim,ring_mod,v,t)
 b0 = np.real(sqrt(t0)*sqrt(Pin))
@@ -80,4 +86,3 @@ np.savetxt('T_NL.txt',data,fmt="%.8f", delimiter="\n")
 np.savetxt('wl.txt',wl,fmt="%.8f", delimiter="\n")
 
 
-sim.save_data(ring_mod,t,v)

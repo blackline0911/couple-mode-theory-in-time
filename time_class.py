@@ -23,7 +23,6 @@ class time(simulation):
         self.mode = mode
 
     def main(self, ring, driver=None,N=0,t_max = 0,buffer=80,resolution:int=2):
-        # 根據 mode 建立對應的子類別實例
         """
         resolution : time resolution level , dt = 1e-(12+resolution)
         In scan frequency mode, the length of t_max may affect the accuracy of result.
@@ -38,7 +37,7 @@ class time(simulation):
             sim_time = VoltageDriveTime(N)
             self.dt = sim_time.set_dt(ring, driver,self.resolution)
             self.t_total, self.t_all_segment, self.t_max= sim_time.create_time_array(N,self.buffer)
-            self.T_normalized = driver.f_drive*t0
+            self.T_normalized = 1/(driver.f_drive*t0)
         elif self.mode == "scan_frequency":
             if buffer==0 or t_max==0:
                 assert False ,"please specify t_max and buffer"
@@ -65,16 +64,16 @@ class VoltageDriveTime():
             df_max =  (c/ring.lambda0**2)*abs( ring.me*1e-12/1e-6 )*( driver.vpp/2 + abs(driver.v_bias))
         else:
             df_max = abs(c/ring.lambda_incident-c/ring.lambda0)
-        print("df_max = ",df_max)
+        # print("df_max = ",df_max)
         self.dt = (1/df_max/10)
-        print("dt_v1 = ",self.dt)
+        # print("dt_v1 = ",self.dt)
         if df_max < driver.f_drive:
             self.dt = 1/(driver.f_drive)/10
-        print("dt_v1 = ",self.dt)
+        # print("dt_v1 = ",self.dt)
         inte = (math.log10(self.dt))//1
-        print("inte = ",inte)
+        # print("inte = ",inte)
         self.dt = 10**(inte-resolution)
-        print("dt_v1 = ",self.dt)
+        # print("dt_v1 = ",self.dt)
         return self.dt
     
     def create_time_array(self, N,buffer):

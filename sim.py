@@ -1,6 +1,7 @@
 import numpy as np
 from utility import *
 from cmath import *
+import matplotlib.pyplot as plt
 class simulation():
     voltage_drive = False
     scan_frequency = False
@@ -38,6 +39,49 @@ class simulation():
     def create_time_array(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")
     
+    def eye_diagram(self,time,driver,signal,filename,discarding=2):
+        assert self.mode=="voltage_drive", "\neye diagram only available at voltage driving mode\n"
+        N = time.N
+        cum_t_index = np.zeros(N)
+        seg = time.t_all_segment[0]
+        sig = signal
+        for q in range(N):
+            if q==0:
+                cum_t_index[q] = (len(time.t_all_segment[q]))
+            else:
+                cum_t_index[q] = (len(time.t_all_segment[q]) + cum_t_index[q-1])
+        
+        plt.figure()
+        # discarding the first two bits
+        assert N>discarding, "\nAvailable Bit number is not enough\n"
+        if driver.PRBS:
+            for k in range( discarding+1,N):
+                sig_segment = sig[int(cum_t_index[k-1]):int(cum_t_index[k])]
+                last = time.t_all_segment[k-1][-1]
+                print(len(t0*(np.array(time.t_all_segment[k][:])-last)))
+                print((t0*(np.array(time.t_all_segment[k][:])-last)))
+                plt.plot( t0*(np.array(time.t_all_segment[k][:])-last),sig_segment)
+        else:
+            for k in range( discarding+1,int(time.t_max/time.T_normalized)):
+                sig_segment = sig[int(cum_t_index[k-1]):int(cum_t_index[k])]
+                last = time.t_all_segment[k-1][-1]
+                plt.plot( t0*(np.array(time.t_all_segment[k][:])-last),sig_segment, color='crimson')
+
+        plt.grid(color='w')
+
+        ax = plt.gca()
+        ax.set_facecolor('k')
+        ax.set_xticks(np.linspace(0,time.T_normalized,15))
+        # ax.set_yticks(np.linspace(v_bias+vpp/2,v_bias-vpp/2,15))
+        ax.tick_params(axis='both', which='major', labelsize=7)
+        plt.xlabel("time (second)")
+        plt.ylabel("Output Power (mW)")
+        plt.title("Eye")
+        # ax.set_xticklabels([])
+        # ax.set_yticklabels([])
+        # plt.colorbar()
+        fig = plt.gcf()
+        plt.show()
     def save_data(self,*obj):
         with open(self.filename, 'w') as f:
             f.write('This script is used to save the simulation variable that A simulation used. \nJust for Future checking or further research\n\n')
