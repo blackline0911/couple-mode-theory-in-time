@@ -14,9 +14,10 @@ wl_res = 1.321045
 Pin = 10 #mW
 kd = sqrt(0.091)
 alpha_linear = 0.63
-tau_eff=14
+tau_eff=20
 radius = 50
-mode = "scan_frequency"
+# mode = "scan_frequency"
+mode = "voltage_drive"
 
 experiment_condition ={"mode":mode,
                         "lambda_incident":wl_in,
@@ -50,7 +51,7 @@ if sim.mode == "scan_frequency":
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
 else:
     t = time(mode = sim.mode)
-    t.main(ring_mod,v,N=50,resolution=2)
+    t.main(ring_mod,v,N=10000,resolution=1)
 
 v.create_voltage(time=t)
 v.varying_Cj()
@@ -69,6 +70,9 @@ sim.save_data(ring_mod,t,v)
 
 if sim.mode=="voltage_drive":
     ploting(t.t_total,v.v,x_label='time',title='voltage',filename='voltage')
+    ploting(t.t_total,N,x_label='time (ps)',title='Free carrier density (cm^-3)',filename='Free_carrier_density')
+    ploting(t.t_total,abs(b)**2,x_label='time (ps)',title='b (mJ)',filename='b_test')
+    
 else:
     T = Transfer_function(ring_mod,t)
     wl,data_NL = T.mapping(abs(s_minus)**2/sim.Pin)     

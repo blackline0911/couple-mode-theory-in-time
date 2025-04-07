@@ -30,8 +30,8 @@ ring_mod = ring(2*np.pi*5,
             beta_TPA=5,
             FSR_shift=0,)
 
-wl_min =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q*2
-wl_max =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q*2 
+wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q*2
+wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q*2 
 
 v = driver(f_drive=50,
            v_bias=0,
@@ -39,7 +39,8 @@ v = driver(f_drive=50,
            R=53.9)
 
 os.chdir("./test_fit/")
-exp_data = read_excel.load_excel_data("D:/Homework/Master_degree/ring/CMT/nonlinear/ring spectrum.xlsx", '10dbm')
+#exp_data = read_excel.load_excel_data("D:/Homework/Master_degree/ring/CMT/nonlinear/ring spectrum.xlsx", '10dbm')
+exp_data = read_excel.load_excel_data("D:/Master_degree/paper/微分方程/ring spectrum.xlsx", '10dbm')
 wl = exp_data[:,0]
 idx_1 = np.argmin(np.abs(wl-1.56*1e-6))
 idx_2 = np.argmin(np.abs(wl-1.57*1e-6))
@@ -55,7 +56,7 @@ ploting(wl[idx_1:idx_2],
 if sim.mode == "scan_frequency":
     t = time(mode = "scan_frequency")
     ring_mod.scan_frequency(wl_min ,wl_max,t)
-    t.main(ring_mod,t_max=200000,resolution=1,buffer=100)
+    t.main(ring_mod,t_max=10000,resolution=1,buffer=100)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
     v.create_voltage(time=t)
     b,Q,s_minus,N = solving(sim,ring_mod,v,t)

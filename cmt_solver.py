@@ -63,7 +63,7 @@ def solving(sim,
             f1 = 1j*2*np.pi*(ring.f_res_bar-sim.f_pround_bar)*b_bar- \
                 (ring.tu_e_bar_total_inv + vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
                     + N*1e-5/(vg_in_cm*ring.alpha_linear) ) )*b_bar + \
-                      sqrt(2/ring.tu_e_bar) *1 + \
+                      ring.input_kappa *1 + \
                 1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar
             # f1 = 1j*2*np.pi*(ring.f_res_bar-sim.f_pround_bar)*b_bar- \
             #     (1/ring.tu_e_bar + vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\

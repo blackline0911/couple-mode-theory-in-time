@@ -58,8 +58,8 @@ class simulation():
             for k in range( discarding+1,N):
                 sig_segment = sig[int(cum_t_index[k-1]):int(cum_t_index[k])]
                 last = time.t_all_segment[k-1][-1]
-                print(len(t0*(np.array(time.t_all_segment[k][:])-last)))
-                print((t0*(np.array(time.t_all_segment[k][:])-last)))
+                # print(len(t0*(np.array(time.t_all_segment[k][:])-last)))
+                # print((t0*(np.array(time.t_all_segment[k][:])-last)))
                 plt.plot( t0*(np.array(time.t_all_segment[k][:])-last),sig_segment)
         else:
             for k in range( discarding+1,int(time.t_max/time.T_normalized)):

@@ -10,6 +10,16 @@ rtol = 1e-15
 atol = 1e-20
 h=6.626e-34
 
+def show(filename):
+    """
+    Showing matplotplib.pyplot figure saved by picke.dump()
+    """
+    f = open(filename,'rb')
+    pickle.load(f)
+    plt.show()
+    f.close()
+    return 
+
 def ploting(x,*arg,x_label, title,filename='',figcolor='w',line_color='b',
             grid_color='g',grid_style='--',grid_alpha=0.5,leg=['']):
        """
