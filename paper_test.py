@@ -11,13 +11,13 @@ from cmt_solver import *
 # "Measurement_of_the_Nonlinear_Loss_and_Effective_Free_Carrier_Lifetime_in_Silicon_Microring_Resonators"
 wl_in = 1.32105
 wl_res = 1.321045
-Pin = 10 #mW
+Pin = 15 #mW
 kd = sqrt(0.091)
 alpha_linear = 0.63
-tau_eff=20
+tau_eff=14
 radius = 50
-# mode = "scan_frequency"
-mode = "voltage_drive"
+mode = "scan_frequency"
+# mode = "voltage_drive"
 
 experiment_condition ={"mode":mode,
                         "lambda_incident":wl_in,
@@ -36,6 +36,7 @@ ring_mod = ring(2*np.pi*radius,
             # FSR=0.00141,
             lambda0=wl_res,
             tau_eff=tau_eff,
+            sigma_FCA=1.04,
             TPA_fit_factor=1,
             FCA_fit_factor=1)
 wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q*2
@@ -47,7 +48,7 @@ v = driver(f_drive=100,
 if sim.mode == "scan_frequency":
     t = time(mode = sim.mode)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
-    t.main(ring_mod,t_max=5000,resolution=2,buffer=1000)
+    t.main(ring_mod,t_max=10000,resolution=2,buffer=1000)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
 else:
     t = time(mode = sim.mode)

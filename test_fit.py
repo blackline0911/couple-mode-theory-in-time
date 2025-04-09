@@ -8,9 +8,9 @@ from time_class import time
 from cmt_solver import *
 import read_excel
 
-wl_in = 1.5593
+wl_in = 1.558
 Pin = 10 #mW
-FSR = 0.0195
+FSR = 0.019431
 mode = "scan_frequency"
 experiment_condition ={"mode":mode,
                         "lambda_incident":wl_in,
@@ -25,13 +25,15 @@ ring_mod = ring(2*np.pi*5,
             (0.947582),
             FSR = FSR,
             neff=2.680503,
-            tau_eff=20,
+            tau_eff=30,
             sigma_FCA=1.04,
             beta_TPA=5,
             FSR_shift=0,)
 
-wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q*2
-wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q*2 
+wl_min =  1.562
+wl_max =  1.557 
+# wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q*2
+# wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q*2 
 
 v = driver(f_drive=50,
            v_bias=0,
@@ -40,23 +42,23 @@ v = driver(f_drive=50,
 
 os.chdir("./test_fit/")
 #exp_data = read_excel.load_excel_data("D:/Homework/Master_degree/ring/CMT/nonlinear/ring spectrum.xlsx", '10dbm')
-exp_data = read_excel.load_excel_data("D:/Master_degree/paper/微分方程/ring spectrum.xlsx", '10dbm')
-wl = exp_data[:,0]
-idx_1 = np.argmin(np.abs(wl-1.56*1e-6))
-idx_2 = np.argmin(np.abs(wl-1.57*1e-6))
-ploting(wl[:],
-        exp_data[:,1]-exp_data[:,3],
-        x_label='wl',title='spectrum',filename='exp_data_all')
+# exp_data = read_excel.load_excel_data("D:/Master_degree/paper/微分方程/ring spectrum.xlsx", '10dbm')
+# wl = exp_data[:,0]
+# idx_1 = np.argmin(np.abs(wl-1.56*1e-6))
+# idx_2 = np.argmin(np.abs(wl-1.57*1e-6))
+# ploting(wl[:],
+#         exp_data[:,1]-exp_data[:,3],
+#         x_label='wl',title='spectrum',filename='exp_data_all')
 
-ploting(wl[idx_1:idx_2],
-        exp_data[idx_1:idx_2,1]-exp_data[idx_1:idx_2,3],
-        x_label='wl',title='spectrum',filename='exp_data',leg=['0V'])
+# ploting(wl[idx_1:idx_2],
+#         exp_data[idx_1:idx_2,1]-exp_data[idx_1:idx_2,3],
+#         x_label='wl',title='spectrum',filename='exp_data',leg=['0V'])
 
 
 if sim.mode == "scan_frequency":
     t = time(mode = "scan_frequency")
     ring_mod.scan_frequency(wl_min ,wl_max,t)
-    t.main(ring_mod,t_max=10000,resolution=1,buffer=100)
+    t.main(ring_mod,t_max=5000,resolution=2,buffer=100)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
     v.create_voltage(time=t)
     b,Q,s_minus,N = solving(sim,ring_mod,v,t)

@@ -7,6 +7,7 @@ class simulation():
     scan_frequency = False
     mode = None
     filename = 'sim.txt'
+    discarding = 2
     def __init__(self):
         pass
     def main(self,experiment_condition):
@@ -39,38 +40,32 @@ class simulation():
     def create_time_array(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")
     
-    def eye_diagram(self,time,driver,signal,filename,discarding=2):
+    def eye_diagram(self,time,driver,signal,filename):
         assert self.mode=="voltage_drive", "\neye diagram only available at voltage driving mode\n"
         N = time.N
-        cum_t_index = np.zeros(N)
-        seg = time.t_all_segment[0]
-        sig = signal
-        for q in range(N):
-            if q==0:
-                cum_t_index[q] = (len(time.t_all_segment[q]))
-            else:
-                cum_t_index[q] = (len(time.t_all_segment[q]) + cum_t_index[q-1])
+        cum_t_index, sig= self.discard_func(time,signal)
         
         plt.figure()
         # discarding the first two bits
-        assert N>discarding, "\nAvailable Bit number is not enough\n"
+        
         if driver.PRBS:
-            for k in range( discarding+1,N):
-                sig_segment = sig[int(cum_t_index[k-1]):int(cum_t_index[k])]
-                last = time.t_all_segment[k-1][-1]
-                # print(len(t0*(np.array(time.t_all_segment[k][:])-last)))
-                # print((t0*(np.array(time.t_all_segment[k][:])-last)))
-                plt.plot( t0*(np.array(time.t_all_segment[k][:])-last),sig_segment)
+           step = cum_t_index[1]-cum_t_index[0]
+           for k in range(N-self.discarding-1):
+                sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+1]-step*self.discarding)]
+                last = time.t_all_segment[k+self.discarding-1][-1]
+                plt.plot( (np.array(time.t_all_segment[k+self.discarding][:])-last),sig_segment, color='crimson')
+
         else:
-            for k in range( discarding+1,int(time.t_max/time.T_normalized)):
-                sig_segment = sig[int(cum_t_index[k-1]):int(cum_t_index[k])]
-                last = time.t_all_segment[k-1][-1]
-                plt.plot( t0*(np.array(time.t_all_segment[k][:])-last),sig_segment, color='crimson')
+            step = cum_t_index[1]-cum_t_index[0]
+            for k in range(N-self.discarding-1):
+                sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+1]-step*self.discarding)]
+                last = time.t_all_segment[k+self.discarding-1][-1]
+                plt.plot( (np.array(time.t_all_segment[k+self.discarding][:])-last),sig_segment, color='crimson')
 
         plt.grid(color='w')
 
         ax = plt.gca()
-        ax.set_facecolor('k')
+        # ax.set_facecolor('k')
         ax.set_xticks(np.linspace(0,time.T_normalized,15))
         # ax.set_yticks(np.linspace(v_bias+vpp/2,v_bias-vpp/2,15))
         ax.tick_params(axis='both', which='major', labelsize=7)
@@ -80,7 +75,11 @@ class simulation():
         # ax.set_xticklabels([])
         # ax.set_yticklabels([])
         # plt.colorbar()
+        plt.grid(color='g',linestyle='--', alpha=0.5)
         fig = plt.gcf()
+        plt.savefig(filename)
+        with open(filename, "wb") as f:
+            pickle.dump(fig, f)
         plt.show()
     def save_data(self,*obj):
         with open(self.filename, 'w') as f:
@@ -215,3 +214,14 @@ class simulation():
                                 f.write("\t\tWarning : This Transfer function result may not be accurate.\n\n")
 
                     
+    def discard_func(self,time,signal):
+        N = time.N
+        t = time.t_total
+        assert N>self.discarding, "\nAvailable Bit number is not enough\n"
+        cum_t_index = np.zeros(N)
+        seg = time.t_all_segment[0]
+        sig = signal
+        cum_t_index[0] = (len(time.t_all_segment[0]))
+        for q in range(1,N):
+            cum_t_index[q] = (len(time.t_all_segment[q]) + cum_t_index[q-1])
+        return cum_t_index[self.discarding::], sig[int(cum_t_index[self.discarding-1])::]
