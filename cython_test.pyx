@@ -92,3 +92,13 @@ def naive_convolve(cnp.ndarray f, cnp.ndarray g):
             h[x, y] = value
     z = factorial(5,1)
     return h
+
+
+cpdef test(cnp.ndarray[DTYPE_t, ndim=1] t):
+    cdef cnp.ndarray[DTYPE_t, ndim=1] b = np.zeros(len(t),dtype=DTYPE)
+    cdef DTYPE_t x
+    for i in range(len(t)):
+        x = t[i]**0.5
+        b[i] = x
+
+    return b

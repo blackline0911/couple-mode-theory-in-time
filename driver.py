@@ -6,7 +6,7 @@ from random import *
 from utility import *
 from sim import simulation
 from time_class import *
-
+import raise_cosine
 
 class driver(simulation) :
     Cj = 0
@@ -62,7 +62,7 @@ class driver(simulation) :
                 self.bit_sequence  = np.array([])
                 T_normalized = self.time.T_normalized
                 for u in range(int(self.time.t_max/T_normalized)):
-                    self.bit_sequence = np.append( self.bit_sequence , u%2 )
+                    self.bit_sequence = (np.append( self.bit_sequence , float(u%2) ))
 
             
             if self.square_wave:
@@ -72,15 +72,17 @@ class driver(simulation) :
                 self.v = self.vpp/2*np.exp(1j*self.w_drive*self.time.t_total*t0)+self.v_bias
                 assert not (self.square_wave or self.raise_cosine) , "Only one kind of signal should apply "
             if self.raise_cosine:
-                assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
-                T_period_normalized = self.time.T_normalized
-                a=0
+                # assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
+                # T_period_normalized = self.time.T_normalized
+                # a=0
                 if self.PRBS:
-                    for i in range(self.time.N):
-                        a +=  (self.vpp*self.rcos(self.time.t_total,(i+1)*T_period_normalized))
+                #     for i in range(self.time.N):
+                #         a +=  (self.vpp*self.rcos(self.time.t_total,(i+1)*T_period_normalized))
+                    a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized)
                 else:
-                    for i in range(len(self.bit_sequence)):
-                        a +=  (self.vpp*self.rcos(self.time.t_total, (i+1)*T_period_normalized))
+                #     for i in range(len(self.bit_sequence)):
+                #         a +=  (self.vpp*self.rcos(self.time.t_total, (i+1)*T_period_normalized))
+                    a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized)
                 self.v = a+self.v_bias-self.vpp/2  
         if time.mode == "scan_frequency":
             self.v = self.v_bias*np.ones(len(time.t_total))

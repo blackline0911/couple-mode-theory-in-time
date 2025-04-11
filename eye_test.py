@@ -13,7 +13,7 @@ Pin = 1 #mW
 FSR = 0.0195
 # mode = "scan_frequency"
 mode = "voltage_drive"
-bit_num = 50
+bit_num = 200
 v_bias = -1
 vpp = 1
 experiment_condition ={"mode":mode,
@@ -40,7 +40,7 @@ v = driver(f_drive=20,
            R=53.9,
            raise_cosine=1,
            sine_wave=0,
-           PRBS=1)
+           PRBS=0)
 
 os.chdir("./eye_diagram_test/")
 t = time(mode = sim.mode)
@@ -84,16 +84,16 @@ if sim.mode == "voltage_drive":
     t3 = timer.time()
     print("Time for b,Q,s_minus,N = solving(sim,ring_mod,v,t) = ",t3-t2)
     ploting(t.t_total,v.v,x_label='time (ps)',title='voltage (V)',filename='voltage')
-    v.varying_Cj()
-    b1,Q1,s_minus1,N1 = solving(sim,ring_mod,v,t)
-    ploting(t.t_total,Q,Q1,x_label='time (ps)',title='Q',filename='Q',leg=['fixed Cj','varying Cj'])
-    ploting(t.t_total,v.Cj,x_label='time (ps)',title='capacitance (C)',filename='capacitance_varying')
-    voltage = np.linspace(-2,0,1000)
-    ploting(voltage,v.Cj_V(voltage),x_label='time (ps)',title='capacitance vs voltage',filename='capacitance _vs_voltage')
-    ploting(t.t_total,abs(s_minus)**2,abs(s_minus1)**2,x_label='time (ps)',title='output Power',filename='output Power')
-    ploting(t.t_total,10*np.log10(abs(s_minus)**2),10*np.log10(abs(s_minus1)**2),x_label='time (ps)',title='output Power (dB)',filename='output Power dB')
-    ploting(t.t_total,180/np.pi*np.angle(s_minus),180/np.pi*np.angle(s_minus1),x_label='time (ps)',title='s_minus phase',filename='s_minus phase',leg=['varying Cj','Cj=20fF'])
-    sim.eye_diagram(t,v,abs(s_minus)**2,filename='eye')
-    sim.eye_diagram(t,v,abs(s_minus1)**2,filename='eye2')
+    # v.varying_Cj()
+    # b1,Q1,s_minus1,N1 = solving(sim,ring_mod,v,t)
+    # ploting(t.t_total,Q,Q1,x_label='time (ps)',title='Q',filename='Q',leg=['fixed Cj','varying Cj'])
+    # ploting(t.t_total,v.Cj,x_label='time (ps)',title='capacitance (C)',filename='capacitance_varying')
+    # voltage = np.linspace(-2,0,1000)
+    # ploting(voltage,v.Cj_V(voltage),x_label='time (ps)',title='capacitance vs voltage',filename='capacitance _vs_voltage')
+    # ploting(t.t_total,abs(s_minus)**2,abs(s_minus1)**2,x_label='time (ps)',title='output Power',filename='output Power')
+    # ploting(t.t_total,10*np.log10(abs(s_minus)**2),10*np.log10(abs(s_minus1)**2),x_label='time (ps)',title='output Power (dB)',filename='output Power dB')
+    # ploting(t.t_total,180/np.pi*np.angle(s_minus),180/np.pi*np.angle(s_minus1),x_label='time (ps)',title='s_minus phase',filename='s_minus phase',leg=['varying Cj','Cj=20fF'])
+    # sim.eye_diagram(t,v,abs(s_minus)**2,filename='eye')
+    # sim.eye_diagram(t,v,abs(s_minus1)**2,filename='eye2')
 
 ploting(t.t_total,(ring_mod.TPA_coeff*t0*sim.Pin*abs(b/sim.b0)**2 + N*ring_mod.sigma_FCA*1e-17 ) ,x_label='time (ps)',title="NonLinear Loss (1/cm)",filename='NonLinear Loss')

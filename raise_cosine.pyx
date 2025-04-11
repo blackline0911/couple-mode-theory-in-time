@@ -5,10 +5,12 @@ from cpython.array cimport array
 cnp.import_array()
 
 DTYPE = np.float64
-ctypedef cnp.float64_t data_type
+ctypedef cnp.float64_t float_data_type
+ctypedef cnp.int64_t int_data_type
+ctypedef cnp.ndarray array_type
 
 cpdef object sinc(x):
-    cdef data_type p = np.pi
+    cdef float_data_type p = np.pi
     if isinstance(x, cnp.ndarray):
         return np.where(x==0,1,np.sin(p*x)/(p*x))
     else:
@@ -17,14 +19,24 @@ cpdef object sinc(x):
         else:
             return np.sin(p*x)/(p*x)
 
-cpdef data_type raise_cos(BS,t,shift,beta,T):
-    cdef array ans = 0
-    if isinstance(t,cnp.ndarray):
-        ans = np.where( ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ),
-                        BS[int(shift/T)-1]*np.pi/4*sinc((1/2/beta)),
-                        BS[int(shift/T)-1] * sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
-        return ans
+cpdef raise_cos(cnp.ndarray[float_data_type, ndim=1] BS,t,shift,beta,T):
+    #cdef cnp.ndarray[float_data_type, ndim=1] ans = np.zeros(len(t),dtype=DTYPE)
+    #if isinstance(t,cnp.ndarray):
+    #    ans = np.where( ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ),
+    #                    BS[int(shift/T)-1]*np.pi/4*sinc((1/2/beta)),
+    #                    BS[int(shift/T)-1] * sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
+    #    return ans
+    #else:
+    if ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ):
+        s = BS[int(shift/T)-1]*np.pi/4*sinc((1/2/beta))
     else:
-        return BS[int(shift/T)-1]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
-
-cpdef 
+        s = BS[int(shift/T)-1]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+    return s
+cpdef create_rcos_signal(cnp.ndarray[float_data_type, ndim=1] BS,cnp.ndarray[float_data_type, ndim=1] t,T_normalized):
+    cdef float_data_type beta = 1.0
+    cdef cnp.ndarray[float_data_type, ndim=1] rcos_signal = np.zeros(len(t))
+    for i in range(len(t)):
+        passed_T_num = int(t[i]//T_normalized)
+        for j in range(passed_T_num+1):
+            rcos_signal[i] += raise_cos(BS,t[i],(j+1)*T_normalized,beta,T_normalized)
+    return rcos_signal
