@@ -6,13 +6,14 @@ from ring import *
 from driver import driver
 from time_class import time
 from cmt_solver import *
+import time as timer
 
 wl_in = 1.5468
 Pin = 1 #mW
 FSR = 0.0195
 # mode = "scan_frequency"
 mode = "voltage_drive"
-bit_num = 100
+bit_num = 50
 v_bias = -1
 vpp = 1
 experiment_condition ={"mode":mode,
@@ -48,7 +49,7 @@ if sim.mode == "scan_frequency":
     ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=5000,resolution=1,buffer=100)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
-    v.create_voltage(time=t)
+    # v.create_voltage(time=t)
     sim.save_data(ring_mod,t,v)
     b,Q,s_minus,N = solving(sim,ring_mod,v,t)
     T = Transfer_function(ring_mod,t)
@@ -73,9 +74,15 @@ if sim.mode == "scan_frequency":
     
 if sim.mode == "voltage_drive":
     sim.save_data(ring_mod,t,v)
+    t1 = timer.time()
     t.main(ring_mod,N=bit_num,driver=v)
-    v.create_voltage(time=t)
+    t2 = timer.time()
+    print("Time for t.main(ring_mod,N=bit_num,driver=v) = ",t2-t1)
+    # v.create_voltage(time=t)
+    t2 = timer.time()
     b,Q,s_minus,N = solving(sim,ring_mod,v,t)
+    t3 = timer.time()
+    print("Time for b,Q,s_minus,N = solving(sim,ring_mod,v,t) = ",t3-t2)
     ploting(t.t_total,v.v,x_label='time (ps)',title='voltage (V)',filename='voltage')
     v.varying_Cj()
     b1,Q1,s_minus1,N1 = solving(sim,ring_mod,v,t)

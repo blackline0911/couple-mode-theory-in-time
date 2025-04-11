@@ -105,7 +105,8 @@ class driver(simulation) :
                 assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
                 T_period_normalized = self.time.T_normalized
                 a=0
-                for i in range(self.time.N):
+                passed_T_num = int(t//T_period_normalized+1)
+                for i in range(passed_T_num):
                     a +=  (self.vpp*self.rcos(t,shift=(i+1)*T_period_normalized))
                 return a+self.v_bias-self.vpp/2  
         if self.time.mode == "scan_frequency":

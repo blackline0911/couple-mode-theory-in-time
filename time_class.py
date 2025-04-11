@@ -38,6 +38,7 @@ class time(simulation):
             self.dt = sim_time.set_dt(ring, driver,self.resolution)
             self.t_total, self.t_all_segment, self.t_max= sim_time.create_time_array(N,self.buffer)
             self.T_normalized = 1/(driver.f_drive*t0)
+            driver.create_voltage(time=self)
         elif self.mode == "scan_frequency":
             if buffer==0 or t_max==0:
                 assert False ,"please specify t_max and buffer"
@@ -47,6 +48,7 @@ class time(simulation):
             sim_time = ScanFrequencyTime(t_max,buffer)
             self.dt = sim_time.set_dt(ring,self.resolution)
             self.t_total = sim_time.create_time_array()
+            driver.create_voltage(time=self)
         else:
             raise ValueError("Unknown mode!")
 
