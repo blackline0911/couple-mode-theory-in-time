@@ -37,7 +37,7 @@ Simulation Parameter of time
 		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
 	Driver information : 
 	Driving Signal is raise_cosine signal
-		Driving frequency is 50.0 GHz
+		Driving frequency is 20.0 GHz
 		Bias voltage is -1 V
 		Peak to Peak voltage is 1 V
 

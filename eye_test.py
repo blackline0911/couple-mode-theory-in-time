@@ -12,7 +12,7 @@ Pin = 1 #mW
 FSR = 0.0195
 # mode = "scan_frequency"
 mode = "voltage_drive"
-bit_num = 20
+bit_num = 100
 v_bias = -1
 vpp = 1
 experiment_condition ={"mode":mode,
@@ -33,7 +33,7 @@ ring_mod = ring(2*np.pi*5,
 wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/2
 wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/2 
 
-v = driver(f_drive=50,
+v = driver(f_drive=20,
            v_bias=v_bias,
            vpp=vpp,
            R=53.9,
@@ -77,7 +77,6 @@ if sim.mode == "voltage_drive":
     v.create_voltage(time=t)
     b,Q,s_minus,N = solving(sim,ring_mod,v,t)
     ploting(t.t_total,v.v,x_label='time (ps)',title='voltage (V)',filename='voltage')
-    ploting(t.t_total,v.Cj,x_label='time (ps)',title='capacitance (C)',filename='capacitance')
     v.varying_Cj()
     b1,Q1,s_minus1,N1 = solving(sim,ring_mod,v,t)
     ploting(t.t_total,Q,Q1,x_label='time (ps)',title='Q',filename='Q',leg=['fixed Cj','varying Cj'])
