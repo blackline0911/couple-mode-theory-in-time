@@ -18,7 +18,7 @@ Parameter of ring modulator
 		mode cross section : 0.11 um^2
 		Linear absorption coefficient: 15.138904384722732 1/cm
 		Two Photon Absorption coefficient : 1088800603.44784 1/cm.mJ
-		Free Carrier Absorption coefficient : 1.933995056370126e+21 1/cm.mJ^2
+		Free Carrier Absorption coefficient : 2.900992584555188e+21 1/cm.mJ^2
 	Physical parameter : 
 		intrinsic photon life time : 8.77777910555755 ps
 		couple extrinsic photon life time (port 1 ) : 7.7537068586621 ps

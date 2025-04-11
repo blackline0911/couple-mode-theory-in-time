@@ -82,6 +82,16 @@ ploting(t.t_total,N,x_label='time (ps)',title='free_carrier_density (1/cm^3)',fi
 ploting(t.t_total,(ring_mod.TPA_coeff*t0*sim.Pin*abs(b/sim.b0)**2 + N*ring_mod.sigma_FCA*1e-17 ) ,x_label='time (ps)',title="NonLinear Loss (1/cm)",filename='NonLinear Loss')
 # ploting(t.t_total,(ring_mod.TPA_coeff*t0*sim.Pin*abs(b/sim.b0)**2 + ring_mod.FCA_coeff*abs(b)**4) ,x_label='time (ps)',title="NonLinear Loss (1/cm)",filename='NonLinear Loss')
 
+
+""" Estimating Self phase modulation"""
+n2 = 5.6e-9 # um^2/mW
+dn_SPM = n2*abs(b)**2/(ring_mod.round_trip_time*(1e-12)*ring_mod.cross_section)
+dw = -dn_SPM*2*np.pi*ring_mod.f_res_bar/(ring_mod.neff+dn_SPM)
+ploting(t.t_total, dw,x_label='time (ps)',title="w0 changed by Self Phase modulation (THz)",filename='Self_Phase_modulation')
+ploting(t.t_total, dw/(2*np.pi*ring_mod.f_res_bar),x_label='time (ps)',title="Self Phase modulation (compared to original w0)",filename='Self_Phase_modulation_compared')
+ploting(t.t_total, dw/(2*np.pi*c/(ring_mod.ng*ring_mod.L)*t0),x_label='time (ps)',title="Self Phase modulation (compared to FSR)",filename='Self_Phase_modulation_compared_FSR')
+
+
 Pin = 1
 experiment_condition["Pin"]=Pin
 sim1 = simulation() 
