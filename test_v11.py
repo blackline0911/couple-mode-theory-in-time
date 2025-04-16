@@ -1,3 +1,5 @@
+import os
+os.chdir("../")
 import cython_test
 import time as timer
 import numpy as np

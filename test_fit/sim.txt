@@ -18,7 +18,7 @@ Parameter of ring modulator
 		mode cross section : 0.11 um^2
 		Linear absorption coefficient: 15.138904384722732 1/cm
 		Two Photon Absorption coefficient : 1088800603.44784 1/cm.mJ
-		Free Carrier Absorption coefficient : 2.900992584555188e+21 1/cm.mJ^2
+		Free Carrier Absorption coefficient : 1.933995056370126e+21 1/cm.mJ^2
 	Physical parameter : 
 		intrinsic photon life time : 8.77777910555755 ps
 		couple extrinsic photon life time (port 1 ) : 7.7537068586621 ps
@@ -31,13 +31,13 @@ Parameter of ring modulator
 
 		Input Laser photon energy : 0.0001274983842559692 pJ
 
-	The start wavelength is 1.562 um
-	The end wavelength is 1.557 um
+	The start wavelength is 1.559139842049748 um
+	The end wavelength is 1.5597670219226234 um
 	scanning frequency range for better accuracy is 0.07731575384313624 THz
-	Current frequency range is 0.6163410092128743 THz
+	Current frequency range is 0.07731575696953996 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 
-	time resolution : 1e-15 sec
+	time resolution : 1e-14 sec
 	Max time range : 5000 ps
 		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 

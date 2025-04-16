@@ -1,2 +1,1 @@
-
-if sim.mode == "scan_frequency":
+5

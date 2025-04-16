@@ -50,7 +50,7 @@ class time(simulation):
             self.t_total = sim_time.create_time_array()
             driver.create_voltage(time=self)
         else:
-            raise ValueError("Unknown mode!")
+            raise ValueError("\nUnknown mode!\n")
 
     
 
@@ -89,8 +89,16 @@ class VoltageDriveTime():
         self.number_record = np.array([])
         for r in range(self.N):
             # num = math.ceil( ( (r+1)*self.T_normalized-self.dt/t0- (0+(r)*self.T_normalized ) ) / ( self.dt/t0 ))
-            # t_segment = np.linspace(0+(r)*self.T_normalized , (r+1)*self.T_normalized-self.dt/t0, num )
+            # t_segmenremovet = np.linspace(0+(r)*self.T_normalized , (r+1)*self.T_normalized-self.dt/t0, num )
             t_segment = np.arange( 0+r*self.T_normalized ,  (r+1)*self.T_normalized, self.dt/t0)
+            # print("start = ",0+r*self.T_normalized)
+            # print("stop = ",(r+1)*self.T_normalized)
+            # print("t_segment = ",t_segment)
+            # print("t_segment[-1] = ",t_segment[-1])
+            # print("Length of t_segment",len(t_segment))
+            if abs(t_segment[-1]-(r+1)*self.T_normalized)<self.dt/t0/1e-3:
+                t_segment = np.delete(t_segment,-1)
+                # print("bug")
             self.number_record= np.append(self.number_record,len(t_segment))
             t_total=np.append(t_total,t_segment)
             t_all_segment[r] = t_segment

@@ -25,15 +25,15 @@ ring_mod = ring(2*np.pi*5,
             (0.947582),
             FSR = FSR,
             neff=2.680503,
-            tau_eff=30,
+            tau_eff=20,
             sigma_FCA=1.04,
             beta_TPA=5,
             FSR_shift=0,)
 
-wl_min =  1.562
-wl_max =  1.557 
-# wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q*2
-# wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q*2 
+# wl_min =  1.562
+# wl_max =  1.557 
+wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/2
+wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/2
 
 v = driver(f_drive=50,
            v_bias=0,
@@ -58,7 +58,7 @@ os.chdir("./test_fit/")
 if sim.mode == "scan_frequency":
     t = time(mode = "scan_frequency")
     ring_mod.scan_frequency(wl_min ,wl_max,t)
-    t.main(ring_mod,t_max=5000,resolution=2,buffer=100)
+    t.main(ring_mod,t_max=5000,resolution=2,buffer=100,driver=v)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
     v.create_voltage(time=t)
     b,Q,s_minus,N = solving(sim,ring_mod,v,t)
@@ -86,7 +86,8 @@ ploting(t.t_total,(ring_mod.TPA_coeff*t0*sim.Pin*abs(b/sim.b0)**2 + N*ring_mod.s
 """ Estimating Self phase modulation"""
 n2 = 5.6e-9 # um^2/mW
 dn_SPM = n2*abs(b)**2/(ring_mod.round_trip_time*(1e-12)*ring_mod.cross_section)
-dw = -dn_SPM*2*np.pi*ring_mod.f_res_bar/(ring_mod.neff+dn_SPM)
+# dw = -dn_SPM*2*np.pi*ring_mod.f_res_bar/(ring_mod.neff+dn_SPM)
+dw = -dn_SPM*2*np.pi*ring_mod.f_res_bar/ring_mod.ng
 ploting(t.t_total, dw,x_label='time (ps)',title="w0 changed by Self Phase modulation (THz)",filename='Self_Phase_modulation')
 ploting(t.t_total, dw/(2*np.pi*ring_mod.f_res_bar),x_label='time (ps)',title="Self Phase modulation (compared to original w0)",filename='Self_Phase_modulation_compared')
 ploting(t.t_total, dw/(2*np.pi*c/(ring_mod.ng*ring_mod.L)*t0),x_label='time (ps)',title="Self Phase modulation (compared to FSR)",filename='Self_Phase_modulation_compared_FSR')

@@ -101,6 +101,9 @@ class ring(simulation):
         self.photon_energy = h*c/self.lambda_incident*1000/t0  #mJ
         self.FCA_fit_factor = FCA_fit_factor
         self.TPA_fit_factor = TPA_fit_factor
+        # normalized dw/dlambda
+        self.D_bar = -2*np.pi*c/self.lambda0**2 * t0
+        self.vg_in_cm = self.vg*1e-4
         # Note. photon energy is in unit. mJ, and normalized by t0
 
         
@@ -146,6 +149,11 @@ class ring(simulation):
         self.FCA_coeff = self.FCA_coeff*self.FCA_fit_factor
         self.FCA_ratio = self.FCA_coeff/self.alpha_linear
         # Note. The unit FCA_coeff here is  1/(cm*mJ^2), not 1/cm
+
+        # Self Phase Modulation
+        self.n2 = 5.6e-9
+        dn_SPM = self.n2/(self.round_trip_time*(1e-12)*self.cross_section)
+        self.dw_SPM_coeff = -dn_SPM*2*np.pi*self.f_res_bar/self.ng
         
 
     def w_res(self,t):

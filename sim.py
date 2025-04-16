@@ -8,6 +8,8 @@ class simulation():
     mode = None
     filename = 'sim.txt'
     discarding = 2
+    method = "small_signal"
+    mode_dict = {}
     def __init__(self):
         pass
     def main(self,experiment_condition):
@@ -30,43 +32,54 @@ class simulation():
                 self.scan_frequency = True
         self.mode = experiment_condition["mode"]
         self.lambda_incident = experiment_condition["lambda_incident"]
+        try:
+            self.method = experiment_condition["method"]
+        except:
+            pass
          # normalized input laser frequency
         self.f_pround_bar = c/(self.lambda_incident)*t0
         self.Pin = experiment_condition["Pin"]
-        self.b0 = np.real(sqrt(t0)*sqrt(self.Pin))
+        self.S0 = sqrt(self.Pin)
+        self.b0 = np.real(sqrt(t0)*self.S0)
+        
     def set_dt(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")
 
     def create_time_array(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")
     
-    def eye_diagram(self,time,driver,signal,filename):
+    def eye_diagram(self,time,driver,signal,filename,plot_bit_num=1):
         assert self.mode=="voltage_drive", "\neye diagram only available at voltage driving mode\n"
         N = time.N
         cum_t_index, sig= self.discard_func(time,signal)
-        
+        step = cum_t_index[1]-cum_t_index[0]
         plt.figure()
         # discarding the first two bits
-        
         if driver.PRBS:
-           step = cum_t_index[1]-cum_t_index[0]
-           for k in range(N-self.discarding-1):
-                sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+1]-step*self.discarding)]
-                last = time.t_all_segment[k+self.discarding-1][-1]
-                plt.plot( (np.array(time.t_all_segment[k+self.discarding][:])-last),sig_segment, color='crimson')
+            t_array = np.array(time.t_all_segment[0][:])
+            for j in range(1,plot_bit_num):
+                    t_array = np.append(t_array,np.array(time.t_all_segment[j][:]))
+            for k in range(0,N-self.discarding-plot_bit_num+1,plot_bit_num):
+                sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
+                # last = time.t_all_segment[k+self.discarding-1][-1]
+                # plt.plot( (np.array(time.t_all_segment[k+self.discarding][:])-last),sig_segment, color='crimson')
+                plt.plot( t_array,sig_segment, color='crimson')
 
         else:
-            step = cum_t_index[1]-cum_t_index[0]
-            for k in range(N-self.discarding-1):
-                sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+1]-step*self.discarding)]
-                last = time.t_all_segment[k+self.discarding-1][-1]
-                plt.plot( (np.array(time.t_all_segment[k+self.discarding][:])-last),sig_segment, color='crimson')
+            t_array = np.array(time.t_all_segment[0][:])
+            for j in range(1,plot_bit_num):
+                    t_array = np.append(t_array,np.array(time.t_all_segment[j][:]))
+            for k in range(N-self.discarding-plot_bit_num,plot_bit_num):
+                sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
+                # last = time.t_all_segment[k+self.discarding-1][-1]
+                # plt.plot( (np.array(time.t_all_segment[k+self.discarding][:]))-last,sig_segment, color='crimson')
+                plt.plot( t_array,sig_segment, color='crimson')
 
         plt.grid(color='w')
 
         ax = plt.gca()
         # ax.set_facecolor('k')
-        ax.set_xticks(np.linspace(0,time.T_normalized,15))
+        ax.set_xticks(np.linspace(0,time.T_normalized*plot_bit_num,15))
         # ax.set_yticks(np.linspace(v_bias+vpp/2,v_bias-vpp/2,15))
         ax.tick_params(axis='both', which='major', labelsize=7)
         plt.xlabel("time (second)")
@@ -224,4 +237,5 @@ class simulation():
         cum_t_index[0] = (len(time.t_all_segment[0]))
         for q in range(1,N):
             cum_t_index[q] = (len(time.t_all_segment[q]) + cum_t_index[q-1])
-        return cum_t_index[self.discarding::], sig[int(cum_t_index[self.discarding-1])::]
+        return cum_t_index[self.discarding-1::], sig[int(cum_t_index[self.discarding-1])::]
+
