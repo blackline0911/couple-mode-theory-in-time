@@ -90,9 +90,9 @@ class driver(simulation) :
                 else:
                     a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N)
                 self.v = a+self.v_bias-self.vpp/2  
-        if time.mode == "scan_frequency":
-            self.v = self.v_bias*np.ones(len(time.t_total))
-            self.Cj = self.Cj_V(self.v_bias)
+        # if time.mode == "scan_frequency":
+        #     self.v = self.v_bias*np.ones(len(time.t_total))
+        #     self.Cj = self.Cj_V(self.v_bias)
         if self.method == 'small_signal':
             self.Cj = self.Cj_V(self.v_bias)
             return

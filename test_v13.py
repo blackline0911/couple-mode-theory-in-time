@@ -4,6 +4,8 @@ from scipy.integrate import solve_ivp
 
 # 先定義好各種模式下的微分方程
 def mode1(t, y, alpha, beta):
+    print("alpha = ",alpha)
+    print("beta = ",beta)
     """
     dy/dt = alpha * y - beta * y^2
     """
@@ -37,14 +39,15 @@ def simulate_ode(mode, t_span, y0, **kwargs):
     kwargs: 給各個微分方程對應的參數
     """
     # 用 partial 把參數帶進對應的方程式
-    ode_func = partial(mode_dict[mode], **kwargs)
+    ode_func = partial(mode_dict[mode], 1)
 
     # 執行 solve_ivp
     sol = solve_ivp(
         ode_func,             # 微分方程函式
         t_span,               # 時間範圍
         y0,                   # 初始條件
-        t_eval=np.linspace(t_span[0], t_span[1], 100)  # 產生 100 個取樣點
+        t_eval=np.linspace(t_span[0], t_span[1], 100),  # 產生 100 個取樣點
+        args=(1,2)
     )
     return sol
 

@@ -15,7 +15,7 @@ atol = 1e-20
 # accuracy = atol + abs(y)*rtol
 
 # method of solving algorithm
-method = 'RK45'
+algorithm = 'RK45'
 
 
 def CMT_large_signal(t_bar,eqs,SPM=None,FCA=None,vg_in_cm=None,ring=None,sim=None,driver=None):
@@ -61,7 +61,23 @@ def CMT_small_signal(t_bar,eqs,SPM,FCA,ring,sim,driver):
 
     return [ f1,f2 ,f3]
 
-# def CMT_scan_frequency(t_bar,eqs,A,ring,sim,cj,driver):
+def CMT_scan_frequency(t_bar,eqs,SPM,FCA,ring,sim,driver):
+    f_res_bar = ring.w_res(t_bar)
+    b_bar , Q_pround, N_bar = eqs
+    voltage = driver.v_bias
+    cj = driver.Cj_V(voltage)
+    f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar)*b_bar \
+        - (ring.tu_e_bar_total_inv + \
+            ring.vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*(sim.b0)**2*abs(b_bar)**2\
+            + N_bar*1e-5/(ring.vg_in_cm*ring.alpha_linear) ) )*b_bar + \
+        ring.input_kappa *1 + \
+        1j*ring.D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar +\
+        SPM*abs(b_bar)**2
+    
+    f2 = (voltage/(driver.R * cj )*t0) - (1/( driver.R*cj ) )*Q_pround*t0
+
+    f3 = -N_bar/ring.tau_eff*(t0/1e-9) + FCA*abs(b_bar)**4
+    return [ f1,f2,f3]
 
 # DeFine Solving process My Different simulation modes
 def CMT_voltage_driving(sim,ring, 
@@ -86,7 +102,7 @@ def CMT_voltage_driving(sim,ring,
                        driver=driver)
     sol =  solve_ivp(ode_func ,[0 ,time.t_all_segment[0][-1]], 
                             [b_init, Q_init,N_init],
-                            method=method,
+                            method=sim.algorithm,
                             t_eval = time.t_all_segment[0] ,
                             atol = atol,rtol = rtol,)
     b = sol.y[0]
@@ -104,7 +120,7 @@ def CMT_voltage_driving(sim,ring,
                         [time.t_all_segment[i-1][-1] ,\
                         time.t_all_segment[i][-1]], 
                         [b_init, Q_init, N_init],
-                        method=method,
+                        method=algorithm,
                         t_eval = np.append(  np.array([time.t_all_segment[i-1][-1]]), \
                                             np.array(time.t_all_segment[i])  ),
                         atol = atol,
@@ -125,6 +141,26 @@ def CMT_voltage_driving(sim,ring,
 
     return b_bar*sim.b0, Q_bar*driver.cj_normalizing , s_minus_bar*sim.S0    ,N_bar/(ring.sigma_FCA*1e-17)*1e-5   
 
+def solve_scan_frequency(sim,ring, 
+                        driver,
+                        time):
+    SPM = ring.dw_SPM_coeff *(sim.b0)**2
+    FCA = ring.FCA_coeff/(ring.tau_eff*1e-9)*1e5*t0*(sim.b0)**4
+    b_init = 0+1j*0
+    Q_init = 0
+    N_init = 0
+    sol = solve_ivp(CMT_scan_frequency ,
+                    [0,time.t_max+time.buffer], 
+                    [b_init, Q_init,N_init],
+                    method=algorithm,
+                    t_eval = time.t_total,atol = atol,rtol = rtol,
+                    args=(SPM,FCA,ring,sim,driver))
+    b_bar = sol.y[0]
+    Q_bar = sol.y[1]
+    N_bar = sol.y[2]
+    s_minus_bar = (1-ring.input_kappa*b_bar)
+
+    return b_bar*sim.b0, Q_bar*driver.cj_normalizing , s_minus_bar*sim.S0    ,N_bar/(ring.sigma_FCA*1e-17)*1e-5
 
 def solving(sim,
             ring, 
@@ -142,55 +178,10 @@ def solving(sim,
 #     Hence, we divide the time according to the Baud Rate, and solve coupled differential equation by each time segments. 
 #     """
     mode_dict = {
-        "voltage_drive" : CMT_voltage_driving
+        "voltage_drive" : CMT_voltage_driving,
+        "scan_frequency" : solve_scan_frequency
     }
 
     solver = partial(mode_dict[sim.mode],sim,ring,driver)
     b, Q, s_minus, N = solver(time=time)
-    # Define ODE Functions
-    
-    # Define ODE Functions
-
-    # if time.mode == "scan_frequency":
-    #     A = ring.FCA_coeff/(ring.tau_eff*1e-9)*1e5*t0*t0**2*S0**4
-    #     # TPA = ring.TPA_coeff*t0*S0**2
-    #     # FCA = ring.FCA_coeff*t0**2*S0**4
-    #     def CMT(t_bar,eqs):
-    #         f_res_bar = ring.w_res(t_bar)
-    #         b_bar , Q_pround, N = eqs
-    #         voltage = driver.refering_v(t_bar)
-    #         if driver.varying_cj:
-    #             cj = driver.refering_Cj(voltage)
-    #         else:
-    #             cj = driver.Cj
-    #         f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar)*b_bar \
-    #             - (ring.tu_e_bar_total_inv + \
-    #                vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
-    #                 + N*1e-5/(vg_in_cm*ring.alpha_linear) ) )*b_bar + \
-    #             ring.input_kappa *1 + \
-    #             1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar 
-    #             # 1j*dw_SPM*abs(b_bar)**2
-    #         # f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar)*b_bar \
-    #         #     - (ring.tu_e_bar_total_inv + \
-    #         #        vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*t0*S0**2*abs(b_bar)**2\
-    #         #         + ring.FCA_ratio*t0**2*S0**4*abs(b_bar)**4) )*b_bar + \
-    #         #     ring.input_kappa *1 + \
-    #         #     1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar
-    #         # f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar)*b_bar \
-    #         #     - (ring.tu_e_bar_total_inv + \
-    #         #        vg_in_cm*( ring.alpha_linear + TPA*abs(b_bar)**2\
-    #         #         + FCA*abs(b_bar)**4) )*b_bar + \
-    #         #     ring.input_kappa *1 + \
-    #         #     1j*D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar
-
-    #         f2 = (voltage/(driver.R * cj )*t0) - (1/( driver.R*cj ) )*Q_pround*t0
-
-    #         f3 = -N/ring.tau_eff*(t0/1e-9) + A*abs(b_bar)**4
-    #         return [ f1,f2,f3]
-    #     sol = solve_ivp(CMT ,[0,time.t_max+time.buffer], [b_init, Q_init,N_init],method=method,t_eval = time.t_total,atol = atol,rtol = rtol)
-    #     b_bar = sol.y[0]
-    #     Q_bar = sol.y[1]
-    #     N_bar = sol.y[2]
-    # s_minus_bar = (1-ring.input_kappa*b_bar)
-
     return b, Q, s_minus   ,N

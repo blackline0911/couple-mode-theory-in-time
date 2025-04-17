@@ -33,7 +33,7 @@ Parameter of ring modulator
 
 Simulation Parameter of time 
 	time resolution : 1e-14 sec
-	Max time range : 600 ps
+	Max time range : 2000 ps
 		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
 	Driver information : 
 	Driving Signal is raise_cosine signal

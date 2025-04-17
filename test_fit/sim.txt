@@ -31,13 +31,13 @@ Parameter of ring modulator
 
 		Input Laser photon energy : 0.0001274983842559692 pJ
 
-	The start wavelength is 1.559139842049748 um
-	The end wavelength is 1.5597670219226234 um
+	The start wavelength is 1.562 um
+	The end wavelength is 1.557 um
 	scanning frequency range for better accuracy is 0.07731575384313624 THz
-	Current frequency range is 0.07731575696953996 THz
+	Current frequency range is 0.6163410092128743 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 
-	time resolution : 1e-14 sec
+	time resolution : 1e-15 sec
 	Max time range : 5000 ps
 		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 

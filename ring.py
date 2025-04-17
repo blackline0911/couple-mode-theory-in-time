@@ -151,10 +151,9 @@ class ring(simulation):
         # Note. The unit FCA_coeff here is  1/(cm*mJ^2), not 1/cm
 
         # Self Phase Modulation
-        self.n2 = 5.6e-9
+        self.n2 = 5.6e-9 #um^2/mW
         dn_SPM = self.n2/(self.round_trip_time*(1e-12)*self.cross_section)
-        self.dw_SPM_coeff = -dn_SPM*2*np.pi*self.f_res_bar/self.ng
-        
+        self.dw_SPM_coeff = -dn_SPM*2*np.pi*self.f_res_bar/self.ng  #rad/(ps*mJ)
 
     def w_res(self,t):
         """

@@ -13,7 +13,7 @@ Pin = 1 #mW
 FSR = 0.0195
 # mode = "scan_frequency"
 mode = "voltage_drive"
-bit_num = 30
+bit_num = 100
 v_bias = -1
 vpp = 1
 experiment_condition ={"mode":mode,
@@ -78,32 +78,32 @@ if sim.mode == "voltage_drive":
     t.main(ring_mod,N=bit_num,driver=v)
     sim.save_data(ring_mod,t,v)
     v.method = "large_signal"
+    sim.eye_diagram(t,v,v.v,filename="voltage_eye",plot_bit_num=2)
+    # t2 = timer.time()
+    # b,Q,s_minus,N = solving(sim,ring_mod,v,t)
+    # t3 = timer.time()
+    # print("Time for b,Q,s_minus,N = solving(sim,ring_mod,v,t) = ",t3-t2)
 
-    t2 = timer.time()
-    b,Q,s_minus,N = solving(sim,ring_mod,v,t)
-    t3 = timer.time()
-    print("Time for b,Q,s_minus,N = solving(sim,ring_mod,v,t) = ",t3-t2)
-
-    ploting(t.t_total,v.v,v.V_Q(Q/v.cj_normalizing),x_label='time (ps)',title='voltage (V)',filename='voltage')
-    ploting(t.t_total,v.v-v.V_Q(Q/v.cj_normalizing),x_label='time (ps)',title='Rv (V)',filename='Rv')
-    name = 'eye_'+str(bit_num)+'bits_without_TPA_FCA_f'+str(int(v.f_drive*1e-9))+'GHz'
-    sim.eye_diagram(t,v,abs(s_minus)**2,filename=name,plot_bit_num=2)
+    # ploting(t.t_total,v.v,v.V_Q(Q/v.cj_normalizing),x_label='time (ps)',title='voltage (V)',filename='voltage',leg=['External Voltage','junction voltage'])
+    # ploting(t.t_total,v.v-v.V_Q(Q/v.cj_normalizing),x_label='time (ps)',title='Resistor Voltage (V)',filename='Rv')
+    # name = 'eye_'+str(bit_num)+'bits_without_TPA_FCA_f'+str(int(v.f_drive*1e-9))+'GHz'
+    # sim.eye_diagram(t,v,abs(s_minus)**2,filename=name,plot_bit_num=2)
     
-    v.method = "small_signal"
-    b1,Q1,s_minus1,N1 = solving(sim,ring_mod,v,t)
-    ploting(t.t_total,Q,Q1,x_label='time (ps)',title='Q',filename='Q',leg=['fixed Cj','varying Cj'])
-    ploting(t.t_total,v.V_Q(Q/v.cj_normalizing),v.V_Q(Q1/v.cj_normalizing),x_label='time (ps)',title='junction voltage',filename='junction voltage',leg=['large signal','small signal'])
-    ploting(t.t_total,abs(s_minus)**2,abs(s_minus1)**2,x_label='time (ps)',title='output Power',filename='output Power')
+    # v.method = "small_signal"
+    # b1,Q1,s_minus1,N1 = solving(sim,ring_mod,v,t)
+    # ploting(t.t_total,Q,Q1,x_label='time (ps)',title='Q',filename='Q',leg=['Large Signal','Small Signal'])
+    # ploting(t.t_total,v.V_Q(Q/v.cj_normalizing),v.V_Q(Q1/v.cj_normalizing),x_label='time (ps)',title='junction voltage',filename='junction voltage',leg=['large signal','small signal'])
+    # ploting(t.t_total,abs(s_minus)**2,abs(s_minus1)**2,x_label='time (ps)',title='output Power',filename='output Power',leg=['large signal','small signal'])
     
-    name = 'eye_2_'+str(bit_num)+'bits_without_TPA_FCA_f'+str(int(v.f_drive*1e-9))+'GHz'
-    sim.eye_diagram(t,v,abs(s_minus1)**2,filename=name,plot_bit_num=2)
+    # name = 'eye_2_'+str(bit_num)+'bits_without_TPA_FCA_f'+str(int(v.f_drive*1e-9))+'GHz'
+    # sim.eye_diagram(t,v,abs(s_minus1)**2,filename=name,plot_bit_num=2)
 
-    dQ_dt = np.zeros(len(t.t_total))
-    dQ_dt[0] = (-3*Q[0]+4*Q[1]-Q[2])/(2*t.dt)
-    dQ_dt[-1] = (3*Q[-1]-4*Q[-2]+Q[-3])/(2*t.dt)
-    for i in range(1,len(dQ_dt)-1):
-        dQ_dt[i] = (Q[i+1]-Q[i-1])/(2*t.dt)
-    ploting(t.t_total,dQ_dt,x_label='time (ps)',title='Current',filename='Current')
-    ploting(t.t_total,dQ_dt*v.R,x_label='time (ps)',title='Resistance voltage',filename='Resistance voltage')
+    # dQ_dt = np.zeros(len(t.t_total))
+    # dQ_dt[0] = (-3*Q[0]+4*Q[1]-Q[2])/(2*t.dt)
+    # dQ_dt[-1] = (3*Q[-1]-4*Q[-2]+Q[-3])/(2*t.dt)
+    # for i in range(1,len(dQ_dt)-1):
+    #     dQ_dt[i] = (Q[i+1]-Q[i-1])/(2*t.dt)
+    # ploting(t.t_total,dQ_dt,x_label='time (ps)',title='Current',filename='Current')
+    # ploting(t.t_total,dQ_dt*v.R,x_label='time (ps)',title='Resistance voltage',filename='Resistance voltage')
     
 # ploting(t.t_total,(ring_mod.TPA_coeff*t0*sim.Pin*abs(b/sim.b0)**2 + N*ring_mod.sigma_FCA*1e-17 ) ,x_label='time (ps)',title="NonLinear Loss (1/cm)",filename='NonLinear Loss')

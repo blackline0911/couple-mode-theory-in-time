@@ -52,8 +52,8 @@ def ploting(x,*arg,x_label, title,filename='',figcolor='w',line_color='b',
        ax.set_facecolor(figcolor)
        if(filename!=''):
             plt.savefig(filename)
-            with open(filename, "wb") as f:
-                pickle.dump(fig, f)
+            # with open(filename, "wb") as f:
+            #     pickle.dump(fig, f)
        plt.show()
        return
 

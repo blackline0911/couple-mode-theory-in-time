@@ -61,8 +61,6 @@ class simulation():
                     t_array = np.append(t_array,np.array(time.t_all_segment[j][:]))
             for k in range(0,N-self.discarding-plot_bit_num+1,plot_bit_num):
                 sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
-                # last = time.t_all_segment[k+self.discarding-1][-1]
-                # plt.plot( (np.array(time.t_all_segment[k+self.discarding][:])-last),sig_segment, color='crimson')
                 plt.plot( t_array,sig_segment, color='crimson')
 
         else:
@@ -71,16 +69,11 @@ class simulation():
                     t_array = np.append(t_array,np.array(time.t_all_segment[j][:]))
             for k in range(N-self.discarding-plot_bit_num,plot_bit_num):
                 sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
-                # last = time.t_all_segment[k+self.discarding-1][-1]
-                # plt.plot( (np.array(time.t_all_segment[k+self.discarding][:]))-last,sig_segment, color='crimson')
                 plt.plot( t_array,sig_segment, color='crimson')
 
         plt.grid(color='w')
 
         ax = plt.gca()
-        # ax.set_facecolor('k')
-        ax.set_xticks(np.linspace(0,time.T_normalized*plot_bit_num,15))
-        # ax.set_yticks(np.linspace(v_bias+vpp/2,v_bias-vpp/2,15))
         ax.tick_params(axis='both', which='major', labelsize=7)
         plt.xlabel("time (second)")
         plt.ylabel("Output Power (mW)")
