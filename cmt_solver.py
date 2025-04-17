@@ -14,8 +14,7 @@ rtol = 1e-14
 atol = 1e-20
 # accuracy = atol + abs(y)*rtol
 
-# method of solving algorithm
-algorithm = 'RK45'
+
 
 
 def CMT_large_signal(t_bar,eqs,SPM=None,FCA=None,vg_in_cm=None,ring=None,sim=None,driver=None):
@@ -120,7 +119,7 @@ def CMT_voltage_driving(sim,ring,
                         [time.t_all_segment[i-1][-1] ,\
                         time.t_all_segment[i][-1]], 
                         [b_init, Q_init, N_init],
-                        method=algorithm,
+                        method=sim.algorithm,
                         t_eval = np.append(  np.array([time.t_all_segment[i-1][-1]]), \
                                             np.array(time.t_all_segment[i])  ),
                         atol = atol,
@@ -152,7 +151,7 @@ def solve_scan_frequency(sim,ring,
     sol = solve_ivp(CMT_scan_frequency ,
                     [0,time.t_max+time.buffer], 
                     [b_init, Q_init,N_init],
-                    method=algorithm,
+                    method=sim.algorithm,
                     t_eval = time.t_total,atol = atol,rtol = rtol,
                     args=(SPM,FCA,ring,sim,driver))
     b_bar = sol.y[0]

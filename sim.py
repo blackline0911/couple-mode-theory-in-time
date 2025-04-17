@@ -6,10 +6,13 @@ class simulation():
     voltage_drive = False
     scan_frequency = False
     mode = None
-    filename = 'sim.txt'
     discarding = 2
     method = "small_signal"
     mode_dict = {}
+
+    # method of solving algorithm
+    algorithm = 'RK45'
+    
     def __init__(self):
         pass
     def main(self,experiment_condition):
@@ -87,8 +90,8 @@ class simulation():
         with open(filename, "wb") as f:
             pickle.dump(fig, f)
         plt.show()
-    def save_data(self,*obj):
-        with open(self.filename, 'w') as f:
+    def save_data(self,*obj,file_name = 'sim.txt'):
+        with open(file_name, 'w') as f:
             f.write('This script is used to save the simulation variable that A simulation used. \nJust for Future checking or further research\n\n')
             f.write("Simulation Parameters and Settings\n")
             f.write("\ttime scaling : "+str(t0)+" sec\n")

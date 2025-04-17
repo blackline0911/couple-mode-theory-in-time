@@ -16,6 +16,11 @@ class driver(simulation) :
     id='driver'
     method = "small_signal"
     cj_normalizing = 0
+    def renew(self):
+        self.w_drive = 2*np.pi*self.f_drive
+        self.cj_normalizing = self.Cj_V(self.v_bias)
+        self.A = 3.7675e-14**2/(self.cj_normalizing**2)
+        self.B = self.cj_normalizing**2 / (2*3.7675e-14**2)
     def __init__(self,
                  f_drive,
                  v_bias,
@@ -83,16 +88,12 @@ class driver(simulation) :
                 self.v = self.vpp/2*np.exp(1j*self.w_drive*self.time.t_total*t0)+self.v_bias
                 assert not (self.square_wave or self.raise_cosine) , "Only one kind of signal should apply "
             if self.raise_cosine:
-                # assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
-                # T_period_normalized = self.time.T_normalized
+                assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
                 if self.PRBS:
-                    a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized,time.N)
+                    a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized,time.N,self)
                 else:
-                    a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N)
-                self.v = a+self.v_bias-self.vpp/2  
-        # if time.mode == "scan_frequency":
-        #     self.v = self.v_bias*np.ones(len(time.t_total))
-        #     self.Cj = self.Cj_V(self.v_bias)
+                    a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N,self)
+                self.v = a + self.v_bias - self.vpp/2
         if self.method == 'small_signal':
             self.Cj = self.Cj_V(self.v_bias)
             return
@@ -142,8 +143,6 @@ class driver(simulation) :
         return 3.7675e-14/( (2.5485-vol)**0.5 )*vol
     
     def V_Q(self,Q_bar):
-        # print(self.A)
-        # print(self.B)
         return  (-Q_bar**2*self.B + \
                 self.B*Q_bar*(Q_bar**2 + 4*2.5485*self.A)**0.5 )
     
