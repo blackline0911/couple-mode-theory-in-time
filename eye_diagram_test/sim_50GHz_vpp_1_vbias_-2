@@ -1,0 +1,43 @@
+This script is used to save the simulation variable that A simulation used. 
+Just for Future checking or further research
+
+Simulation Parameters and Settings
+	time scaling : 1e-12 sec
+	Simulation mode = voltage_drive
+	Input Laser Power : 1 mW
+
+	Input Laser wavelength : 1.5467 um
+
+Parameter of ring modulator
+	Structure parameter : 
+		cavity length : 31.41592653589793 um
+		Group index : 3.905736364286179
+		couple through coefficient : [0.95105]
+		Round trip loss : 0.95124
+		modulation efficiency : 39.5 pm/V (for reverse bias)
+		mode cross section : 0.11 um^2
+		Linear absorption coefficient: 15.91195544971486 1/cm
+		Two Photon Absorption coefficient : 0.0 1/cm.mJ
+		Free Carrier Absorption coefficient : 0.0 1/cm.mJ^2
+	Physical parameter : 
+		intrinsic photon life time : 8.187638662971404 ps
+		couple extrinsic photon life time (port 1 ) : 8.155050483445182 ps
+		resonant frequency : 193.81036447858233 THz
+		resonant wavelength : 1.5468339828292805 um
+		Q factor : 2487.646538182494
+		LineWidth : 0.6218061766762962 nm
+		Group velocity : 76756962077953.95 um/s
+		Round Trip time : 0.4092909058072424 ps
+
+		Input Laser photon energy : 0.00012842987177267732 pJ
+
+Simulation Parameter of time 
+	time resolution : 1e-14 sec
+	Max time range : 2000 ps
+		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
+	Driver information : 
+	Driving Signal is raise_cosine signal
+		Driving frequency is 50.0 GHz
+		Bias voltage is -2 V
+		Peak to Peak voltage is 1 V
+

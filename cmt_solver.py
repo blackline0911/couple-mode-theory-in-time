@@ -65,13 +65,12 @@ def CMT_scan_frequency(t_bar,eqs,SPM,FCA,ring,sim,driver):
     b_bar , Q_pround, N_bar = eqs
     voltage = driver.v_bias
     cj = driver.Cj_V(voltage)
-    f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar)*b_bar \
+    f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar + 1j*SPM*abs(b_bar)**2)*b_bar \
         - (ring.tu_e_bar_total_inv + \
             ring.vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*(sim.b0)**2*abs(b_bar)**2\
             + N_bar*1e-5/(ring.vg_in_cm*ring.alpha_linear) ) )*b_bar + \
         ring.input_kappa *1 + \
-        1j*ring.D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar +\
-        SPM*abs(b_bar)**2
+        1j*ring.D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar 
     
     f2 = (voltage/(driver.R * cj )*t0) - (1/( driver.R*cj ) )*Q_pround*t0
 

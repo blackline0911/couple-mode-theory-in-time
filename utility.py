@@ -6,8 +6,10 @@ import pickle
 
 c = 299792458*1e6
 t0 = 1e-12
-rtol = 1e-15
-atol = 1e-20
+rtol = 1e-13
+atol = 1e-13
+# rtol = 1e-15
+# atol = 1e-20
 h=6.626e-34
 
 def show(filename):

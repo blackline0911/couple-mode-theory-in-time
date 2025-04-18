@@ -9,6 +9,6 @@ def show(filename):
     return 
 
 if __name__=='__main__':
-    os.chdir("D:\Master_degree\paper\微分方程\couple-mode-theory-in-time\eye_diagram_test")
-    show('eye_300bits')
+    # os.chdir("D:\Master_degree\paper\微分方程\couple-mode-theory-in-time\eye_diagram_test")
+    show('voltage')
     

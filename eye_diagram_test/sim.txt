@@ -3,7 +3,7 @@ Just for Future checking or further research
 
 Simulation Parameters and Settings
 	time scaling : 1e-12 sec
-	Simulation mode = voltage_drive
+	Simulation mode = scan_frequency
 	Input Laser Power : 1 mW
 
 	Input Laser wavelength : 1.5467 um
@@ -17,8 +17,8 @@ Parameter of ring modulator
 		modulation efficiency : 39.5 pm/V (for reverse bias)
 		mode cross section : 0.11 um^2
 		Linear absorption coefficient: 15.91195544971486 1/cm
-		Two Photon Absorption coefficient : 0.0 1/cm.mJ
-		Free Carrier Absorption coefficient : 0.0 1/cm.mJ^2
+		Two Photon Absorption coefficient : 1110568175.5839574 1/cm.mJ
+		Free Carrier Absorption coefficient : 1.9975043528737064e+21 1/cm.mJ^2
 	Physical parameter : 
 		intrinsic photon life time : 8.187638662971404 ps
 		couple extrinsic photon life time (port 1 ) : 8.155050483445182 ps
@@ -31,13 +31,13 @@ Parameter of ring modulator
 
 		Input Laser photon energy : 0.00012842987177267732 pJ
 
-Simulation Parameter of time 
-	time resolution : 1e-14 sec
-	Max time range : 2000 ps
-		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
-	Driver information : 
-	Driving Signal is raise_cosine signal
-		Driving frequency is 50.0 GHz
-		Bias voltage is -1 V
-		Peak to Peak voltage is 1 V
+	The start wavelength is 1.5465230797409424 um
+	The end wavelength is 1.547144885917619 um
+	scanning frequency range for better accuracy is 0.07790912475056952 THz
+	Current frequency range is 0.07790912789798199 THz
+		Warning : This Transfer function result may not be accurate.
 
+Simulation Parameter of time 
+	time resolution : 1e-13 sec
+	Max time range : 5000 ps
+		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
