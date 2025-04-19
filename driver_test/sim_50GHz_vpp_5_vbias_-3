@@ -1,0 +1,20 @@
+This script is used to save the simulation variable that A simulation used. 
+Just for Future checking or further research
+
+Simulation Parameters and Settings
+	time scaling : 1e-12 sec
+	Simulation mode = voltage_drive
+	Input Laser Power : 1 mW
+
+	Input Laser wavelength : 1.5467 um
+
+Simulation Parameter of time 
+	time resolution : 1e-14 sec
+	Max time range : 2000 ps
+		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
+	Driver information : 
+	Driving Signal is raise_cosine signal
+		Driving frequency is 50.0 GHz
+		Bias voltage is -3 V
+		Peak to Peak voltage is 5 V
+

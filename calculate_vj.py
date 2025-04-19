@@ -1,20 +1,31 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from driver import driver
 
+v_bias = -3
+vpp = 5
+v = driver(f_drive=50,
+           v_bias=v_bias,
+           vpp=vpp,
+           R=53.9,
+           raise_cosine=1,
+           sine_wave=0,
+           PRBS=1)
+cj_normalizing = v.Cj_V(v_bias)
 def Cj_V(vol):
         return 3.7675e-14/( (2.5485-vol)**0.5 )
 
 def Q_V(vol):
         return 3.7675e-14/( (2.5485-vol)**0.5 )*vol
 
-cj_normalizing = 20e-15
+
 A = 3.7675e-14**2/(cj_normalizing**2)
 B = cj_normalizing**2 / (2*3.7675e-14**2)
 def V_Q(Q_bar):
         return  (-Q_bar**2*B + \
                 B*Q_bar*(Q_bar**2 + 4*2.5485*A)**0.5 )
 
-v = np.linspace(-7,0,1000)
+v = np.linspace(-20,0,10000)
 # Q = np.linspace(-100e-15,180e-15,1000)
 Q = np.linspace(-200e-15,-1e-15,10000)
 plt.plot(v,Cj_V(v),label='Cj')
@@ -40,9 +51,10 @@ plt.show()
 plt.plot(Q,V_Q(Q/cj_normalizing),label="Large Signal")
 plt.plot(Q,(Q/cj_normalizing),label="Small Signal")
 plt.grid(color='g',linestyle='--', alpha=0.5)
+name = "Vj at Vbias = "+str((v_bias))
+plt.title(name)
 plt.legend()
 plt.xlabel('Q')
-plt.title('Vj')
 plt.show()
 
 dQ = Q[1]-Q[0]
