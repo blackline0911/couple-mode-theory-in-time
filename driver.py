@@ -16,16 +16,35 @@ class driver(simulation) :
     id='driver'
     method = "small_signal"
     cj_normalizing = 0
+    
+    # Notes : a, b are variables in Junction capacitance formula
+    __a = 0
+    __b = 0
     def renew(self):
+        # Renew driver data earned by calculation, such as w_drive, Cj
+
         self.w_drive = 2*np.pi*self.f_drive
+        
+
+        assert len(self.cj_array)>=2, "\n\ncj must have at least two elements\n\n"
+        assert np.any( [ self.cj_array[i]<self.cj_array[i-1] for i in range(1,len(self.cj_array)) ] ) , "\n\nYou must input cj as a decreasing array ,since Junction capacitance decrease with voltage\n\n"
+        # self.__b = ( self.cj_array[1]**2*(-2) - self.cj_array[0]**2*(-1) ) / (self.cj_array[1]**2 - self.cj_array[0]**2)
+        # self.__a = self.cj_array[0]*(self.__b-(-1))**0.5
+        self.__b = ( self.cj_array[1]**2*(-1)  ) / (self.cj_array[1]**2 - self.cj_array[0]**2)
+        self.__a = self.cj_array[0]*(self.__b)**0.5
+
         self.cj_normalizing = self.Cj_V(self.v_bias)
-        self.A = 3.7675e-14**2/(self.cj_normalizing**2)
-        self.B = self.cj_normalizing**2 / (2*3.7675e-14**2)
+        print(self.__a)
+        print(self.__b)
+        assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
+        self.A = self.__a**2/(self.cj_normalizing**2)
+        self.B = self.cj_normalizing**2 / (2*self.__a**2)
     def __init__(self,
                  f_drive,
                  v_bias,
                  vpp,
                  R:float,
+                 cj:np.ndarray,
                  square_wave = 0,
                  sine_wave =1,
                  raise_cosine =0,
@@ -38,6 +57,8 @@ class driver(simulation) :
         v_bias: bias voltage
         vpp: peak to peak voltage
         R:series resistance of PN junction 
+        cj : a decreasing array depicting Cj varying with voltage. Note first element is 0V, -1V ,and so on.
+        cj must have at least two elements
         """
         self.f_drive = f_drive*1e9
         self.w_drive = 2*np.pi*self.f_drive
@@ -50,9 +71,11 @@ class driver(simulation) :
         self.raise_cosine = raise_cosine
         self.PRBS = PRBS
         self.method = method
+
+        self.cj_array = cj
+        
+        self.renew()
         self.cj_normalizing = self.Cj_V(self.v_bias)
-        self.A = 3.7675e-14**2/(self.cj_normalizing**2)
-        self.B = self.cj_normalizing**2 / (2*3.7675e-14**2)
         return 
     def create_voltage(self, 
                        time,
@@ -137,14 +160,19 @@ class driver(simulation) :
             return float(self.Cj)
         
     def Cj_V(self,vol):
-        return 3.7675e-14/( (2.5485-vol)**0.5 )
+        assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
+        # return 3.7675e-14/( (2.5485-vol)**0.5 )
+        return self.__a/( (self.__b-vol)**0.5 )
     
     def Q_V(self,vol):
-        return 3.7675e-14/( (2.5485-vol)**0.5 )*vol
+        assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
+        # return 3.7675e-14/( (2.5485-vol)**0.5 )*vol
+        return self.__a/( (self.__b-vol)**0.5 )*vol
     
     def V_Q(self,Q_bar):
+        assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
         return  (-Q_bar**2*self.B + \
-                self.B*Q_bar*(Q_bar**2 + 4*2.5485*self.A)**0.5 )
+                self.B*Q_bar*(Q_bar**2 + 4*self.__b*self.A)**0.5 )
     
     def varying_Cj(self):
         """

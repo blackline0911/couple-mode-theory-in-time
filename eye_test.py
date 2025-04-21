@@ -43,6 +43,7 @@ v = driver(f_drive=50,
            R=53.9,
            raise_cosine=1,
            sine_wave=0,
+           cj = [23.6e-15, 20e-15],
            PRBS=1)
 
 os.chdir("./eye_diagram_test/")

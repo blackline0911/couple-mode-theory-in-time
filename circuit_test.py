@@ -12,30 +12,61 @@ Csi = 7e-15
 Rs = 53.9
 Cj = 20e-15
 
-Vext_amp = 1.0
-Vext_w = 2*np.pi*1e3
+t0 = 1e-12
+
+Vpp = 1.0
+Vext_w = 2*np.pi*50e9*t0
+
+# Normalization
+cj_normalize = Cj
+Lint_bar = Lint/t0
+Ccc_bar = Ccc/t0
+Csi_bar = Csi/t0
+Cj_bar = Cj/t0
+cj_normalize_bar = cj_normalize/t0
+
 
 def circuit_Ceqs(t, paras):
-    Q, i2, i4, Vpn = paras
+    Vj, i2, Vb,  Vpn = paras
+    # Q_pround = paras
 
-    dQ_dt = (Vpn - Q/Cj)/Rs
+    dVj_dt = (Vpn  - Vj)/Rs/Cj_bar
 
-    di2_dt = 1/Lint * (-Vext_amp*np.cos(Vext_w*t) + i2*Rint + Vpn)
+    di2_dt = 1/Lint_bar * ( (Vpp/2*np.cos(Vext_w*t)-1) - i2*Rint - Vpn)
 
-    dvpn_dt = 1/Ccc* (i2 - dQ_dt - i4)
+    dvpn_dt = 1/Ccc_bar* (i2 - (Vpn  - Vj)/Rs \
+                        - (Vpn  - Vb)/Rsi )
     
-    di4_dt = -i4 + Csi/Rsi*dvpn_dt
+    dVb_dt = (Vpn - Vb) /Rsi/Csi_bar
 
-    return [dQ_dt, di2_dt, di4_dt, dvpn_dt]
+    return [dVj_dt, di2_dt, dVb_dt, dvpn_dt]
+    # return [dQ_dt]
     
-t = np.arange(0,0.01,0.000001)
-sol = solve_ivp(circuit_Ceqs, t_span=[0,0.01], y0=[0, 0, 0, 0], t_eval=t, atol=1e-20,rtol = 1e-15)
+t = np.arange(0,3000,0.01)
+sol = solve_ivp(circuit_Ceqs, t_span=[0,max(t)], 
+                y0=[0,0,0,0], t_eval=t, 
+                atol=1e-15,rtol = 1e-15)
+
 import matplotlib.pyplot as plt
-print(sol.y[1])
-plt.plot(t,sol.y[0],label="Q")
+
+plt.plot(t,sol.y[0],label="Vj")
+plt.legend()
+plt.grid(color='g',linestyle='--', alpha=0.5)
+plt.show()
+
+
 plt.plot(t,sol.y[1],label="i2")
-plt.plot(t,sol.y[2],label="i4")
+plt.legend()
+plt.grid(color='g',linestyle='--', alpha=0.5)
+plt.show()
+
+plt.plot(t,sol.y[2],label="Vb")
+plt.legend()
+plt.grid(color='g',linestyle='--', alpha=0.5)
+plt.show()
+
 plt.plot(t,sol.y[3],label="Vpn")
 plt.legend()
+plt.grid(color='g',linestyle='--', alpha=0.5)
 plt.show()
     
