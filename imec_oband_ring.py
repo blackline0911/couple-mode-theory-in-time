@@ -63,7 +63,8 @@ if sim.mode == "scan_frequency":
     t.main(ring_mod,t_max=5000,resolution=1,buffer=100,driver=v)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
     sim.save_data(ring_mod,t,v)
-    TP = np.zeros( int(len(t.t_total)-t.buffer*t0/t.dt))
+    TP = np.zeros( int(len(t.t_total)-t.buffer*t0/t.dt-1))
+    ER = np.zeros( int(len(t.t_total)-t.buffer*t0/t.dt-1))
     data_record = np.zeros((len(vbias),int (len(t.t_total)-t.buffer*t0/t.dt-1)))
     plt.figure()
     i = 0
@@ -73,11 +74,17 @@ if sim.mode == "scan_frequency":
         T = Transfer_function(ring_mod,t)
         wl,data = T.mapping((abs(s_minus)**2/sim.Pin))
         wl,data_phase = T.mapping(180/np.pi*np.angle(s_minus))
-        plt.plot(wl,data,
+        plt.plot(wl,10*np.log10(data),
                  label=str((vb)))
         data_record[i,:] = data
         i+=1
     TP = -10*np.log10( abs( data_record[2] - data_record[0] )/2 )
+    for i in range(len(data)):
+        if data_record[2,i]>data_record[0,i]:
+            ER[i] = -10*np.log10(data_record[0,i]/data_record[2,i])
+        else:
+            ER[i] = -10*np.log10(data_record[2,i]/data_record[0,i])
+
     plt.grid(color='g',linestyle='--', alpha=0.5)
     plt.xlabel('wavelength(um)')
     plt.title('Transfer function')
@@ -86,7 +93,8 @@ if sim.mode == "scan_frequency":
     plt.show()
 
     ploting(wl, data_record[0,:], data_record[2,:] ,x_label="wavelength (um)", title="Tranfer_functio")
-    ploting(wl, TP, x_label="wavelength (um)", title="TP", filename="TP")
+    ploting(wl, TP,ER, x_label="wavelength (um)", title="TP and ER", filename="TP_and_ER",leg=['TP','ER'])
+
     # v.v_bias=-1.5
     # b,Q,s_minus,N = solving(sim,ring_mod,v,t)
     # T = Transfer_function(ring_mod,t)
