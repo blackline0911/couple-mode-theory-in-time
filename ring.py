@@ -21,6 +21,8 @@ class ring(simulation):
                  beta_TPA = 5,  #1e-13 (cm/mW)
                  tau_eff = 20,  # ns
                  sigma_FCA = 1.04,  #1e-17 cm^2
+                 eta_h = 2.99,
+                 HE = 254.3,
                  FCA_fit_factor = 1,
                  TPA_fit_factor = 1,
                  input_port = 1,
@@ -45,6 +47,8 @@ class ring(simulation):
         \tbeta_TPA : Two Photon Absorption coefficient (cm/mW, normalized by 1e-13)\n
         \ttau_eff : effective carrier life time (ns)\n
         \tsigma_FCA :Free carrier absorption area (cm^2, normalized by 1e-17)\n
+        \teta_h : Normalized heater temperture (oC/mW) (Temperture in waveguide when applying 1mW electric power on Heater)\n
+        \tHE : Heater efficiency of ring (pm/mW)
         """
         self.L=L
         self.ng=ng
@@ -54,6 +58,16 @@ class ring(simulation):
         self.me = me
         self.band = band
         self.support_band = {"C","O"}
+
+        # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        self.eta_h = eta_h
+        self.HE = HE 
+        self.dlambda_dT = self.eta_h / (self.HE*1e-6)
+        
+        # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         assert self.band in self.support_band, f"The simulation only support {self.support_band} bands \n"
         if (lambda0==None):
             self.neff=neff
@@ -98,11 +112,11 @@ class ring(simulation):
         self.sigma_FCA = sigma_FCA  #1e-17 cm^2
         super().__init__()
         self.lambda_incident = lambda_incident
-        self.photon_energy = h*c/self.lambda_incident*1000/t0  #mJ
+        
         self.FCA_fit_factor = FCA_fit_factor
         self.TPA_fit_factor = TPA_fit_factor
         # normalized dw/dlambda
-        self.D_bar = -2*np.pi*c/self.lambda0**2 * t0
+        self.D_bar = -2*np.pi*c/self.lambda_incident**2 * t0
         self.vg_in_cm = self.vg*1e-4
         # Note. photon energy is in unit. mJ, and normalized by t0
 
@@ -110,7 +124,11 @@ class ring(simulation):
         self.Q = np.real( ( (self.tu_e_bar_total_inv + 1/self.tu_o_bar  )/(self.f_res_bar*np.pi) )**(-1) )
         # self.Q = np.real( ( (1/self.tu_e_bar + 1/self.tu_o_bar  )/(self.f_res_bar*np.pi) )**(-1) )
         
+        self.renew()
+        
 
+    def renew(self):
+        self.photon_energy = h*c/self.lambda_incident*1000/t0  #mJ
         self.handle_nonlinear()
 
     def scan_frequency(self,wl_start:float,wl_end:float,time):

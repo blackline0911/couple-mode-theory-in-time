@@ -70,3 +70,19 @@ def sinc(t):
 
 def dB(x):
      return 10*np.log10(x)
+
+def dB_inv(x):
+    return 10**(-x/10)
+
+def TP(low_level,high_level):
+    return -10*np.log10( abs( high_level - low_level )/2 )
+
+def ER(time,low_level,high_level):
+    ER = np.zeros( int(len(time.t_total)-time.buffer*t0/time.dt-1))
+    N = len(ER)
+    for i in range(N):
+        if high_level>low_level:
+                ER[i] = -10*np.log10(low_level/high_level)
+        else:
+            ER[i] = -10*np.log10(high_level/low_level)
+    return ER

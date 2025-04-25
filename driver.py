@@ -34,8 +34,8 @@ class driver(simulation) :
         self.__a = self.cj_array[0]*(self.__b)**0.5
 
         self.cj_normalizing = self.Cj_V(self.v_bias)
-        print(self.__a)
-        print(self.__b)
+        # print(self.__a)
+        # print(self.__b)
         assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
         self.A = self.__a**2/(self.cj_normalizing**2)
         self.B = self.cj_normalizing**2 / (2*self.__a**2)

@@ -1,0 +1,43 @@
+This script is used to save the simulation variable that A simulation used. 
+Just for Future checking or further research
+
+Simulation Parameters and Settings
+	time scaling : 1e-12 sec
+	Simulation mode = scan_frequency
+	Input Laser Power : 1 mW
+
+	Input Laser wavelength : 1.5595 um
+
+Parameter of ring modulator
+	Structure parameter : 
+		cavity length : 31.41592653589793 um
+		Group index : 3.983820815915829
+		couple through coefficient : [0.947582]
+		Round trip loss : 0.953553
+		modulation efficiency : 39.3 pm/V (for reverse bias)
+		mode cross section : 0.11 um^2
+		Linear Amplitude absorption coefficient: 15.138904384722732 1/cm
+		Two Photon Absorption coefficient : 1088800603.44784 1/cm.mJ
+		Free Carrier Absorption coefficient : 1.9358570541779284e+21 1/cm.mJ^2
+	Physical parameter : 
+		intrinsic photon life time : 8.77777910555755 ps
+		couple extrinsic photon life time (port 1 ) : 7.7537068586621 ps
+		resonant frequency : 192.24200726415518 THz
+		resonant wavelength : 1.5594534319861857 um
+		Q factor : 2486.4532479912123
+		LineWidth : 0.6271798728755736 nm
+		Group velocity : 75252495494349.08 um/s
+		Round Trip time : 0.41747355126923386 ps
+
+		Input Laser photon energy : 0.00012737575034998394 pJ
+
+	The start wavelength is 1.5590999999999997 um
+	The end wavelength is 1.5650000000000002 um
+	scanning frequency range for better accuracy is 0.07731575384313624 THz
+	Current frequency range is 0.724910518007988 THz
+		Warning : This Transfer function result may not be accurate.
+
+Simulation Parameter of time 
+	time resolution : 1e-14 sec
+	Max time range : 5000 ps
+		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 

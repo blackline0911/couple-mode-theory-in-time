@@ -9,6 +9,7 @@ class simulation():
     discarding = 2
     method = "small_signal"
     mode_dict = {}
+    id = "simulation"
 
     # method of solving algorithm
     algorithm = 'RK45'
@@ -50,6 +51,8 @@ class simulation():
 
     def create_time_array(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")
+    
+    
     
     def eye_diagram(self,time,driver,signal,filename,plot_bit_num=1):
         assert self.mode=="voltage_drive", "\neye diagram only available at voltage driving mode\n"
@@ -156,7 +159,7 @@ class simulation():
                         f.write(str(ob.cross_section) + ' um^2')
                         f.write('\n')
 
-                        f.write("\t\tLinear absorption coefficient: ")
+                        f.write("\t\tLinear Amplitude absorption coefficient: ")
                         f.write(str(ob.alpha_linear)+" 1/cm")
                         f.write('\n')
 
