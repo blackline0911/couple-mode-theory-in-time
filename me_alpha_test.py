@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 cj = [23.6e-15, 20e-15, 18.5e-15]
 a = [0.95124, 0.95248, 0.95273, 0.95292, 0.95305]
 L = 2*np.pi*5
+LA = L
 alpha_pdk = -1/(2*L*1e-4)*np.log(a)
 delta_alpha_pdk = alpha_pdk - alpha_pdk[0]
 # print(alpha_pdk)
