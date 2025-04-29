@@ -54,7 +54,7 @@ Cj = C_parallel+Cf+C_top+C_bottom;
 # Cj = t*La*(q*a*epsilon**2/ (12*(V0-V)))**(1/3)
 
 plt.plot(V,Cj,label="deduced Cj")
-# plt.plot(V,Cj_per_mm,label="Cj per mm")
+plt.plot(V,C_parallel,label="C parallel")
 # plt.plot(V,cj_pdk,label="PDK data")
 plt.scatter([0,-1,-2],[23.6*1e-15,20*1e-15,18.5*1e-15],label="PDK discrete data",marker='o',c='r')
 plt.legend()

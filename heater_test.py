@@ -119,7 +119,7 @@ if sim.mode == "scan_frequency":
         wl,data = T.mapping((abs(s_minus)**2/sim.Pin))
         wl,data_phase = T.mapping(180/np.pi*np.angle(s_minus))
         plt.plot(wl*1000,dB(data),
-                    label=str((v_bias)))
+                    label=str((V)))
     i+=1
     
     plt.grid(color='g',linestyle='--', alpha=0.5)
