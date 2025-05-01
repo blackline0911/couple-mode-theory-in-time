@@ -24,8 +24,10 @@ cpdef raise_cos(driver,cnp.ndarray[float_data_type, ndim=1] BS,t,shift,beta,T):
     cdef cnp.ndarray[float_data_type, ndim=1] ans = np.zeros(len(t),dtype=DTYPE)
     if isinstance(t,cnp.ndarray):
         ans = np.where( ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ),
-                        driver.vpp*BS[int(shift/T)]*np.pi/4*sinc((1/2/beta)),
-                        driver.vpp*BS[int(shift/T)] * sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
+                        #driver.vpp*BS[int(shift/T)]*np.pi/4*sinc((1/2/ beta)),
+                        driver.vpp*int(BS[int(shift/T)])/(driver.level_num-1)*np.pi/4*sinc((1/2/ beta)),
+                        #driver.vpp*BS[int(shift/T)] * sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
+                        driver.vpp*int(BS[int(shift/T)])/(driver.level_num-1) * sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
         return ans
     #else:
         if ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ):

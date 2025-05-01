@@ -22,7 +22,10 @@ class driver(simulation) :
     __b = 0
     def renew(self):
         # Renew driver data earned by calculation, such as w_drive, Cj
-
+        if self.level == "NRZ":
+            self.level_num = 2
+        if self.level == "PAM4":
+            self.level_num = 4
         self.w_drive = 2*np.pi*self.f_drive
         
 
@@ -46,10 +49,11 @@ class driver(simulation) :
                  R:float,
                  cj:np.ndarray,
                  square_wave = 0,
-                 sine_wave =1,
+                 sine_wave =0,
                  raise_cosine =0,
                  PRBS = 0,
-                 method = "small_signal"
+                 method = "small_signal",
+                 level = "NRZ"
                  ):
         """
         input argments:
@@ -73,14 +77,17 @@ class driver(simulation) :
         self.method = method
 
         self.cj_array = cj
-        
+        self.level = level
         self.renew()
         self.cj_normalizing = self.Cj_V(self.v_bias)
+        
         return 
     def create_voltage(self, 
                        time,
                        ):
         """
+        Do not call this function Externally\n
+
         This function creates a voltage array according to the time array refered to the time object.
         Hence the voltage value only exists in the specified time.
         Since I have no idea what time will solve_ivp solver need , so this function is only working for analysis and plotting
@@ -91,10 +98,14 @@ class driver(simulation) :
             # Generating PRBS 
             if self.PRBS:
                 # self.prbs = np.array([0,0,0,1,0,0],dtype=float)
-                self.prbs =np.zeros(self.time.N)
-                for i in range(self.time.N):
-                    self.prbs[i] = randint(0,1)
-                self.prbs[int(randint(0,time.N-1))] = 1
+                self.prbs =(np.zeros(self.time.N))
+                if self.level == 'NRZ':
+                    for i in range(self.time.N):
+                        self.prbs[i] = (randint(0,1))
+                if self.level == "PAM4":
+                    for i in range(self.time.N):
+                        self.prbs[i] = (randint(0,3))
+                self.prbs[int(randint(0,time.N-1))] = (1)
             else:
                 # Periodic Bit Sequence (this part only used when raise cosine is true while PRBS is false)
                 # create a dummy bit sequence : 0,1,0,1,0,1...
@@ -200,8 +211,8 @@ class driver(simulation) :
             """When input is a numpy array"""
             if self.PRBS:
                 ans  = np.where( ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ),
-                                 self.prbs[int(shift/T)]*np.pi/4*sinc((1/2/beta)),
-                                 self.prbs[int(shift/T)] * sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
+                                 int(self.prbs[int(shift/T)])/(self.level_num-1)*np.pi/4*sinc((1/2/beta)),
+                                 int(self.prbs[int(shift/T)])/(self.level_num-1) * sinc((t-shift)/T) * np.cos(np.pi*beta*(t-shift)/T) / (1-(2*beta*(t-shift)/T)**2) )
                 return ans
             else:
                 ans  = np.where( ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ),
