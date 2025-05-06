@@ -1,23 +1,119 @@
+import time as timer
 from scipy.integrate import *
 import numpy as np
 from utility import *
-from driver import driver
+from driver import *
 
 
 v_bias = -1
 vpp = 1
-f_drive = 50
-R = 53.9
-
-v = driver()
-Cj = 20e-15
-Rs = 59.3
+f_drive = 100
+Cjs = [23.6*1e-15,20*1e-15]
+Rs = 53.9
 Rsi = 1439.8
 Cox = 34.7e-15
 Cp = 6.6e-15
 f0 = 1e12
+level='NRZ'
 
-Cp_bar = Cp*f0
-Cox_bar = Cox*f0
-Cj_bar = Cj*f0
+# Some Dummy components
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////
+experiment_condition ={"mode":"voltage_drive",
+                        "lambda_incident":1.55,
+                        "Pin":1} 
+sim = simulation()
+sim.main(experiment_condition=experiment_condition)
 
+ring_mod = ring(2*np.pi*5,
+                0.99,
+                29.5,
+                0.5*0.22,
+                1.5501,
+                0.99,
+                lambda0=1.55,
+                FSR = 0.019
+                )
+# ///////////////////////////////////////////////////////////////////////////////////////////////
+
+v = driver(v_bias=v_bias,
+           vpp=vpp,
+           f_drive=f_drive,
+           Rs = Rs,
+           cj = Cjs,
+           raise_cosine=1,
+        #    sine_wave=1,
+           PRBS=1,
+           level=level)
+
+t_class = time(mode = sim.mode)
+t_class.main(ring_mod,v,N=50,resolution=2)
+sim.eye_diagram(t_class,v,signal=v.v,plot_bit_num=3,filename="sine_tml_test")
+
+Z0 = 50
+Cp_bar = Cp/t0
+Cox_bar = Cox/t0
+# Simple RC circuit test
+def TML(t,vj,driver):
+    voltage = driver.refering_v(t)
+    v_neg = ( 1/driver.Rs*vj - (1/driver.Rs-1/Z0)*voltage ) /(1/driver.Rs+1/Z0)
+    
+    f1 = t0/driver.Cj_V(driver.v_bias)/Z0*(voltage - v_neg)
+
+    return f1
+
+def TML_2(t,para,driver):
+    v_neg , vj, i2 = para
+    voltage = driver.refering_v(t)
+    # voltage = driver.refering_v(driver,t)
+    dvpos_dt = driver.refering_dv_dt(voltage,t_class,t)
+    Rs = driver.Rs
+    Cj_bar = driver.Cj_V(driver.v_bias)/t0
+
+    dvneg_dt = ( 1/Cp_bar*1/Z0*(voltage - v_neg) \
+                -dvpos_dt\
+                -1/Cp_bar/Rs*(voltage + v_neg - vj)\
+                -1/Cp_bar*i2)
+    
+    dvj_dt = 1/(Rs*Cj_bar)*(voltage + v_neg - vj)
+
+    di2_dt = (1/Rsi*dvpos_dt + \
+              1/Rsi*dvneg_dt\
+               - 1/Rsi/Cox_bar*i2)
+
+
+    return [dvneg_dt, dvj_dt, di2_dt]
+
+
+# sol = solve_ivp(TML,t_span=[0,t_class.t_total[-1]], y0=[0+1j*0], t_eval=t_class.t_total,args= (v,),atol=1e-20,rtol=1e-15)
+t1 = timer.time()
+sol = solve_ivp(TML_2,t_span=[0,t_class.t_total[-1]], y0=[0+1j*0,0+1j*0,0+1j*0], t_eval=t_class.t_total,args= (v,),atol=1e-20,rtol=1e-15)
+t2 = timer.time()
+print("spent time = ",t2-t1," second")
+print(v.prbs)
+v_neg = sol.y[0]
+# vj = sol.y[0]
+# v_neg = ( 1/v.Rs*vj - (1/v.Rs-1/Z0)*v.v ) /(1/v.Rs+1/Z0)
+i1 = Cp*FDM(t_class.dt/t0,v.v+v_neg)
+vj = sol.y[1]
+i2 = sol.y[2]
+i3 = 1/v.Rs*(v.v+v_neg-vj)
+dis = 0
+voltage = v.v[dis::]
+v_neg = v_neg[dis::]
+vj = vj[dis::]
+i2 = i2[dis::]
+i3 = i3[dis::]
+t_array = t_class.t_total[dis::]
+import os
+os.chdir("TML")
+ploting(t_array,voltage ,x_label="time (ps)",title="v pos",filename="v_pos")
+ploting(t_array,vj,x_label="time (ps)",title="vj",filename='vj')
+ploting(t_array,v_neg,x_label="time (ps)",title="v neg",filename='v_neg')
+ploting(t_array,i1,x_label="time (ps)",title="i1",filename='i1')
+ploting(t_array,i2,x_label="time (ps)",title="i2",filename='i2')
+ploting(t_array,i3,x_label="time (ps)",title="i3",filename='i3')
+ploting(t_array,voltage+v_neg,x_label="time (ps)",title="v_on_modulator",filename='v_on_modulator')
+ploting(t_array,abs(v_neg/voltage),x_label="time (ps)",title="s11",filename='s11')
+
+sim.eye_diagram(t_class,v,signal=vj,plot_bit_num=3,filename="vj_test")
+# ploting(t_array,(1/Z0*(v.v-v_neg))/(i1+i2+i3),x_label='time(ps)',title="total current",filename="total_current")

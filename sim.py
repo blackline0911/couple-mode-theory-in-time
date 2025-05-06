@@ -54,7 +54,7 @@ class simulation():
     
     
     
-    def eye_diagram(self,time,driver,signal,filename,plot_bit_num=1):
+    def eye_diagram(self,time,driver,signal,filename='',plot_bit_num=1):
         assert self.mode=="voltage_drive", "\neye diagram only available at voltage driving mode\n"
         N = time.N
         cum_t_index, sig= self.discard_func(time,signal)
@@ -89,7 +89,8 @@ class simulation():
         # plt.colorbar()
         plt.grid(color='g',linestyle='--', alpha=0.5)
         fig = plt.gcf()
-        plt.savefig(filename)
+        if (not filename==''):
+            plt.savefig(filename)
         with open(filename, "wb") as f:
             pickle.dump(fig, f)
         plt.show()

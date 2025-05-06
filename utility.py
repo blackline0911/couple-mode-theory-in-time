@@ -86,3 +86,12 @@ def ER(time,low_level,high_level):
         else:
             ER[i] = -10*np.log10(high_level/low_level)
     return ER
+
+def FDM(dt,signal):
+    N = len(signal)
+    FDM = np.zeros(N)
+    FDM[0] = (-3*signal[0] + 4*signal[1] - signal[2])/2/dt
+    FDM[-1] = (3*signal[-1] - 4*signal[-2] + signal[-3])/2/dt
+    for i in range(1,N-1):
+        FDM[i] = (signal[i+1]-signal[i-1])/2/dt
+    return FDM

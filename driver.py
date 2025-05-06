@@ -7,6 +7,8 @@ from utility import *
 from sim import simulation
 from time_class import *
 import raise_cosine
+from scipy.interpolate import CubicSpline
+
 
 class driver(simulation) :
     Cj = 0
@@ -16,7 +18,10 @@ class driver(simulation) :
     id='driver'
     method = "small_signal"
     cj_normalizing = 0
-    
+
+    # This voltage_record is used for calculating differetial of voltage
+    voltage_record = []
+
     # Notes : a, b are variables in Junction capacitance formula
     __a = 0
     __b = 0
@@ -46,7 +51,7 @@ class driver(simulation) :
                  f_drive,
                  v_bias,
                  vpp,
-                 R:float,
+                 Rs:float,
                  cj:np.ndarray,
                  square_wave = 0,
                  sine_wave =0,
@@ -68,7 +73,7 @@ class driver(simulation) :
         self.w_drive = 2*np.pi*self.f_drive
         self.v_bias = v_bias
         self.vpp=vpp
-        self.R = R
+        self.Rs = Rs
 
         self.square_wave = square_wave
         self.sine_wave = sine_wave
@@ -130,9 +135,12 @@ class driver(simulation) :
                 self.v = a + self.v_bias - self.vpp/2
         if self.method == 'small_signal':
             self.Cj = self.Cj_V(self.v_bias)
-            return
-
-    def refering_v(self,t):
+        self.cubic_interp_voltage = CubicSpline(self.time.t_total,self.v)
+        return
+    step =0 
+    passed = False
+    counter = 0
+    def refering_v(self,t,for_differential=False):
         if self.time.mode == "voltage_drive":
             """
             input
@@ -142,21 +150,63 @@ class driver(simulation) :
                 """Do not use square wave is better, 
                 since the discontinuous in the transition can result in artifitial peak in large signal analysis"""
                 assert not (self.sine_wave or self.raise_cosine) , "Only one kind of signal should apply "
-                return self.vpp/2*signal.square(self.w_drive*t*t0,duty=0.5)+self.v_bias
+                v = self.vpp/2*signal.square(self.w_drive*t*t0,duty=0.5)+self.v_bias
             if self.sine_wave:
                 assert not (self.square_wave or self.raise_cosine) , "Only one kind of signal should apply "
-                return self.vpp/2*np.exp(1j*self.w_drive*t*t0)+self.v_bias
+                v = self.vpp/2*np.exp(1j*self.w_drive*t*t0)+self.v_bias
             if self.raise_cosine:
                 assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
                 T_period_normalized = self.time.T_normalized
-                a=0
-                passed_T_num = int(t//T_period_normalized+1)
-                for i in range(self.time.N):
-                    a +=  (self.vpp*self.rcos(t,shift=(i)*T_period_normalized))
-                return a+self.v_bias-self.vpp/2  
+                v=0
+                # for i in range(self.time.N):
+                #     v +=  (self.vpp*self.rcos(t,shift=(i)*T_period_normalized))
+                v = raise_cosine.refering_rcos_signal(self.prbs,t,self.time.T_normalized,self.time.N,self)
+                v = v+self.v_bias-self.vpp/2
+            # 當solve_ivp用的t足夠接近dt/t0點時，將該點t當作離散t點的電壓，並記錄下來
+            # 為了避免相同dt/t0區間的電壓隨時間增加而改變，增加判斷該時間的step是否與前一個t相同
+            # 因此如此做可以確保紀錄下來的voltage是最接近dt/t0時間點的電壓
+            # if (not for_differential):
+            #     if len(self.voltage_record)==2:
+            #         # Clean Up Record
+            #         self.voltage_record = []
+            #         self.counter = 0
+            #     if (not t//(self.time.dt/t0)==self.step):
+            #         print("renew passed")
+            #         self.passed = False
+            #     if ( ( t%(self.time.dt/t0) ) < (self.time.dt/t0)) \
+            #         and ((not self.passed)):
+            #         print("In appending voltage_record")
+            #         self.passed = True
+            #         self.voltage_record.append([v])
+            #         print("voltage to append = ",v)
+            #         print("voltage record after appending = ",self.voltage_record)
+            #     if self.passed==True:
+            #         self.voltage_record[self.counter].append(v)
+            #         print(self.voltage_record)
+            #     self.step = t//(self.time.dt/t0)
+            #     print("t%(self.time.dt/t0) = ",t%(self.time.dt/t0))
+            #     print("(not t//(self.time.dt/t0)==self.step) = ",(not t//(self.time.dt/t0)==self.step))
+            #     print("step = ",self.step)
+            #     print("t//(self.time.dt/t0) = ",t//(self.time.dt/t0))
+            #     print((self.time.dt/t0)**3)
+            #     print(self.voltage_record)
+            return v
         if self.time.mode == "scan_frequency":
             return self.v_bias
-            
+
+    def refering_dv_dt(self,v0,time_class,t):
+        # v0：voltage point at time t
+        if (t<2*time_class.dt/t0):
+            v1 = self.cubic_interp_voltage(t+time_class.dt/t0)
+            v2 = self.cubic_interp_voltage(t+2*time_class.dt/t0)
+            dv_dt = (-3*v0 + 4*v1 - v2)/2/(time_class.dt/t0)
+        if (t>=2*time_class.dt/t0):
+            v1 = self.cubic_interp_voltage(t-time_class.dt/t0)
+            v2 = self.cubic_interp_voltage(t-2*time_class.dt/t0)
+            dv_dt = (3*v0 - 4*v1 + v2)/2/(time_class.dt/t0)
+        return dv_dt
+
+        
 
     def refering_Cj(self,voltage):
         """
