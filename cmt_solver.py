@@ -14,27 +14,26 @@ rtol = 1e-14
 atol = 1e-20
 # accuracy = atol + abs(y)*rtol
 
-
-
-
 def CMT_large_signal(t_bar,eqs,SPM=None,FCA=None,vg_in_cm=None,ring=None,sim=None,driver=None,Heater=None):
     b_bar , Q_pround ,N_bar= eqs
     voltage = np.real(driver.refering_v(t_bar))
+    alpha_linear = ring.alpha(voltage)
+    me = ring.me(voltage)
     f1 = 1j*2*np.pi*(ring.f_res_bar-sim.f_pround_bar + \
                      SPM*abs(b_bar)**2)*b_bar- \
     \
         (ring.tu_e_bar_total_inv + \
-            ring.vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*(sim.b0)**2*abs(b_bar)**2\
+            ring.vg_in_cm*alpha_linear*(1 + ring.TPA_ratio*(sim.b0)**2*abs(b_bar)**2\
     \
-            + N_bar*1e-5/(ring.vg_in_cm*ring.alpha_linear) ) )*b_bar + \
+            + N_bar*1e-5/(ring.vg_in_cm*alpha_linear) ) )*b_bar + \
                 ring.input_kappa *1 + \
     \
-        1j*ring.D_bar*(-ring.me*1e-12/1e-6)*driver.V_Q(Q_pround)*b_bar + \
+        1j*ring.D_bar*(-me*1e-12/1e-6)*driver.V_Q(Q_pround)*b_bar + \
     \
         1j*ring.D_bar*( ring.dlambda_dT*(Heater.T_surround-300) + (ring.HE*1e-6)*Heater.P)
         
-    f2 = (voltage/(driver.R * driver.cj_normalizing )*t0) \
-        - (1/( driver.R ) )*driver.V_Q(Q_pround)*t0/driver.cj_normalizing
+    f2 = (voltage/(driver.Rs * driver.cj_normalizing )*t0) \
+        - (1/( driver.Rs ) )*driver.V_Q(Q_pround)*t0/driver.cj_normalizing
 
     f3 = -N_bar/ring.tau_eff*(t0/1e-9) + FCA*abs(b_bar)**4
 
@@ -44,21 +43,23 @@ def CMT_small_signal(t_bar,eqs,SPM=None,FCA=None,ring=None,sim=None,driver=None,
     b_bar , Q_pround ,N_bar= eqs
     voltage = np.real(driver.refering_v(t_bar))
     cj = driver.Cj
+    alpha_linear = ring.alpha(voltage)
+    me = ring.me(voltage)
     f1 = 1j*2*np.pi*(ring.f_res_bar - sim.f_pround_bar + \
                       SPM*abs(b_bar)**2)*b_bar- \
     \
         (ring.tu_e_bar_total_inv + \
-            ring.vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*(sim.b0)**2*abs(b_bar)**2\
+            ring.vg_in_cm*alpha_linear*(1 + ring.TPA_ratio*(sim.b0)**2*abs(b_bar)**2\
     \
-            + N_bar*1e-5/(ring.vg_in_cm*ring.alpha_linear) ) )*b_bar + \
+            + N_bar*1e-5/(ring.vg_in_cm*alpha_linear) ) )*b_bar + \
                 ring.input_kappa *1 + \
     \
-        1j*ring.D_bar*(-ring.me*1e-12/1e-6)*driver.cj_normalizing* (Q_pround/cj)*b_bar + \
+        1j*ring.D_bar*(-me*1e-12/1e-6)*driver.cj_normalizing* (Q_pround/cj)*b_bar + \
     \
         1j*ring.D_bar*( ring.dlambda_dT*(Heater.T_surround-300) + (ring.HE*1e-6)*Heater.P)
 
-    f2 = (voltage/(driver.R * driver.cj_normalizing )*t0) \
-        - (1/( driver.R*cj)*t0 )*Q_pround
+    f2 = (voltage/(driver.Rs * driver.cj_normalizing )*t0) \
+        - (1/( driver.Rs*cj)*t0 )*Q_pround
 
     f3 = -N_bar/ring.tau_eff*(t0/1e-9) + FCA*abs(b_bar)**4
 
@@ -69,19 +70,21 @@ def CMT_scan_frequency(t_bar,eqs,SPM,FCA,ring,sim,driver,Heater=None):
     b_bar , Q_pround, N_bar = eqs
     voltage = driver.v_bias
     cj = driver.Cj_V(voltage)
+    alpha_linear = ring.alpha(voltage)
+    me = ring.me(voltage)
     f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar + 1j*SPM*abs(b_bar)**2)*b_bar \
         - (ring.tu_e_bar_total_inv + \
         \
-        ring.vg_in_cm*ring.alpha_linear*(1 + ring.TPA_ratio*(sim.b0)**2*abs(b_bar)**2\
-        + N_bar*1e-5/(ring.vg_in_cm*ring.alpha_linear) ) )*b_bar + \
+        ring.vg_in_cm*alpha_linear*(1 + ring.TPA_ratio*(sim.b0)**2*abs(b_bar)**2\
+        + N_bar*1e-5/(ring.vg_in_cm*alpha_linear) ) )*b_bar + \
         \
         ring.input_kappa *1 + \
         \
-        1j*ring.D_bar*(-ring.me*1e-12/1e-6)*Q_pround*b_bar +\
+        1j*ring.D_bar*(-me*1e-12/1e-6)*Q_pround*b_bar +\
         \
         1j*ring.D_bar*( ring.dlambda_dT*(Heater.T_surround-300) + (ring.HE*1e-6)*Heater.P)*b_bar
     
-    f2 = (voltage/(driver.R * cj )*t0) - (1/( driver.R*cj ) )*Q_pround*t0
+    f2 = (voltage/(driver.Rs * cj )*t0) - (1/( driver.Rs*cj ) )*Q_pround*t0
 
     f3 = -N_bar/ring.tau_eff*(t0/1e-9) + FCA*abs(b_bar)**4
     return [ f1,f2,f3]

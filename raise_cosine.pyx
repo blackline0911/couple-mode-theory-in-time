@@ -37,8 +37,9 @@ cpdef create_rcos_signal(cnp.ndarray[float_data_type, ndim=1] BS,
                         cnp.ndarray[float_data_type, ndim=1] t,
                         T_normalized,
                         N,
-                        driver):
-    cdef float_data_type beta = 1.0
+                        driver,
+                        bet):
+    cdef float_data_type beta = bet
     cdef cnp.ndarray[float_data_type, ndim=1] rcos_signal = np.zeros(len(t))
     for i in range(N):
         #passed_T_num = int(t[i]//T_normalized)
@@ -50,8 +51,9 @@ cpdef refering_rcos_signal(cnp.ndarray[float_data_type, ndim=1] BS,
                         t,
                         T_normalized,
                         N,
-                        driver):
-    cdef float_data_type beta = 1.0
+                        driver,
+                        bet):
+    cdef float_data_type beta = bet
     voltage = 0
     for i in range(N):
         voltage += raise_cos(driver,BS,t,(i)*T_normalized,beta,T_normalized)

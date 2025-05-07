@@ -57,6 +57,7 @@ class driver(simulation) :
                  sine_wave =0,
                  raise_cosine =0,
                  PRBS = 0,
+                 beta = 0.6,
                  method = "small_signal",
                  level = "NRZ"
                  ):
@@ -80,6 +81,7 @@ class driver(simulation) :
         self.raise_cosine = raise_cosine
         self.PRBS = PRBS
         self.method = method
+        self.beta = beta
 
         self.cj_array = cj
         self.level = level
@@ -129,13 +131,14 @@ class driver(simulation) :
             if self.raise_cosine:
                 assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
                 if self.PRBS:
-                    a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized,time.N,self)
+                    a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized,time.N,self,self.beta)
                 else:
-                    a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N,self)
+                    a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N,self,self.beta)
                 self.v = a + self.v_bias - self.vpp/2
+            self.cubic_interp_voltage = CubicSpline(self.time.t_total,self.v)
         if self.method == 'small_signal':
             self.Cj = self.Cj_V(self.v_bias)
-        self.cubic_interp_voltage = CubicSpline(self.time.t_total,self.v)
+        
         return
     step =0 
     passed = False
@@ -160,7 +163,7 @@ class driver(simulation) :
                 v=0
                 # for i in range(self.time.N):
                 #     v +=  (self.vpp*self.rcos(t,shift=(i)*T_period_normalized))
-                v = raise_cosine.refering_rcos_signal(self.prbs,t,self.time.T_normalized,self.time.N,self)
+                v = raise_cosine.refering_rcos_signal(self.prbs,t,self.time.T_normalized,self.time.N,self,self.beta)
                 v = v+self.v_bias-self.vpp/2
             # 當solve_ivp用的t足夠接近dt/t0點時，將該點t當作離散t點的電壓，並記錄下來
             # 為了避免相同dt/t0區間的電壓隨時間增加而改變，增加判斷該時間的step是否與前一個t相同

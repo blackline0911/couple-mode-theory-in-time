@@ -7,50 +7,71 @@ from driver import driver
 from time_class import time
 from cmt_solver import *
 import time as timer
+from Heater import Heater
 
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+mode = "scan_frequency"
+# mode = "voltage_drive"
 wl_in = 1.5467
 Pin = 1 #mW
 FSR = 0.0195
-# mode = "scan_frequency"
-mode = "voltage_drive"
+radius = 5
+RoundTripLoss_pdk = [0.95124, 0.95248, 0.95273, 0.95292, 0.95305]
+me_data = [39.5, 37.9]
+
 bit_num = 300
 v_bias = -1
 vpp = 1
+Rs = 53.9
+Cjs = [23.6e-15, 20e-15]
+f_drive=50
+
+L = 2*np.pi*radius*1e-4
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 experiment_condition ={"mode":mode,
                         "lambda_incident":wl_in,
                         "Pin":Pin} 
 sim = simulation()
 sim.main(experiment_condition=experiment_condition)
-ring_mod = ring(2*np.pi*5, 
-            (0.95124),
-            39.5,
-            0.5*0.22,
-            wl_in,
-            (0.95105),
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+a_fit = alpha_fit(RoundTripLoss=RoundTripLoss_pdk,L = 2*np.pi*radius)
+m_fit = me_fit(me_data=me_data)
+ring_mod = ring(L=2*np.pi*radius, 
+            alpha=a_fit.alpha_V,
+            me=m_fit.me_V,
+            cross_section=0.5*0.22,
+            lambda_incident=wl_in,
+            gamma=[0.95105],
             FSR = FSR,
             neff=2.5111,
-            FSR_shift=0,
-            FCA_fit_factor=1,
-            TPA_fit_factor=1,
             )
 
-wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/2
-wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/2 
+wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/8
+wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/8 
 
-v = driver(f_drive=50,
+v = driver(f_drive=f_drive,
            v_bias=v_bias,
            vpp=vpp,
-           R=53.9,
+           Rs=Rs,
            raise_cosine=1,
-           sine_wave=0,
-           cj = [23.6e-15, 20e-15],
+           cj = Cjs,
            PRBS=1)
-
+H = Heater(300,0,0.5*150/0.6)
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 os.chdir("./eye_diagram_test/")
 t = time(mode = sim.mode)
 
 if sim.mode == "scan_frequency":
-    vbias = np.array([0,-1,-2,-3,-4,-5,-6])
+    vbias = np.array([0,-1,-2,-3])
     ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=5000,resolution=1,buffer=100,driver=v)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
@@ -58,17 +79,18 @@ if sim.mode == "scan_frequency":
     plt.figure()
     for vb in vbias:
         v.v_bias = vb
-        b,Q,s_minus,N = solving(sim,ring_mod,v,t)
+        b,Q,s_minus,N = solving(sim,ring_mod,v,t,H)
         T = Transfer_function(ring_mod,t)
         wl,data = T.mapping(10*np.log10(abs(s_minus)**2/sim.Pin))
         wl,data_phase = T.mapping(180/np.pi*np.angle(s_minus))
         plt.plot(wl,data,
-                 label=str(vb))
+                 label="V = "+str(vb))
     plt.grid(color='g',linestyle='--', alpha=0.5)
     plt.xlabel('wavelength(um)')
     plt.title('Transfer function')
-    plt.show()
     plt.legend()
+    plt.savefig("Transmission_vs_voltage")
+    plt.show()
     # v.v_bias=-1.5
     # b,Q,s_minus,N = solving(sim,ring_mod,v,t)
     # T = Transfer_function(ring_mod,t)
@@ -84,7 +106,8 @@ if sim.mode == "scan_frequency":
     # T = Transfer_function(ring_mod,t)
     # wl,data_v3 = T.mapping(10*np.log10(abs(s_minus)**2/sim.Pin))
     # wl,data_phase_v3 = T.mapping(180/np.pi*np.angle(s_minus))
-    
+V = np.linspace(-2,0,1000)
+ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="absorption coefficient (1/cm)",filename="alpha_V")
 if sim.mode == "voltage_drive":
     
     # F = np.arange(50,51)

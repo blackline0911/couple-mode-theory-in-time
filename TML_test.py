@@ -14,7 +14,7 @@ Rsi = 1439.8
 Cox = 34.7e-15
 Cp = 6.6e-15
 f0 = 1e12
-level='NRZ'
+level='PAM4'
 
 # Some Dummy components
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,8 +46,8 @@ v = driver(v_bias=v_bias,
            level=level)
 
 t_class = time(mode = sim.mode)
-t_class.main(ring_mod,v,N=50,resolution=2)
-sim.eye_diagram(t_class,v,signal=v.v,plot_bit_num=3,filename="sine_tml_test")
+t_class.main(ring_mod,v,N=200,resolution=2)
+sim.eye_diagram(t_class,v,signal=v.v,plot_bit_num=2,filename="sine_tml_test")
 
 Z0 = 50
 Cp_bar = Cp/t0
@@ -64,7 +64,6 @@ def TML(t,vj,driver):
 def TML_2(t,para,driver):
     v_neg , vj, i2 = para
     voltage = driver.refering_v(t)
-    # voltage = driver.refering_v(driver,t)
     dvpos_dt = driver.refering_dv_dt(voltage,t_class,t)
     Rs = driver.Rs
     Cj_bar = driver.Cj_V(driver.v_bias)/t0
@@ -79,8 +78,7 @@ def TML_2(t,para,driver):
     di2_dt = (1/Rsi*dvpos_dt + \
               1/Rsi*dvneg_dt\
                - 1/Rsi/Cox_bar*i2)
-
-
+    
     return [dvneg_dt, dvj_dt, di2_dt]
 
 
@@ -115,5 +113,6 @@ ploting(t_array,i3,x_label="time (ps)",title="i3",filename='i3')
 ploting(t_array,voltage+v_neg,x_label="time (ps)",title="v_on_modulator",filename='v_on_modulator')
 ploting(t_array,abs(v_neg/voltage),x_label="time (ps)",title="s11",filename='s11')
 
-sim.eye_diagram(t_class,v,signal=vj,plot_bit_num=3,filename="vj_test")
+sim.eye_diagram(t_class,v,signal=vj,plot_bit_num=2,filename="vj_test")
+sim.eye_diagram(t_class,v,signal=v_neg,plot_bit_num=2,filename="vneg_test")
 # ploting(t_array,(1/Z0*(v.v-v_neg))/(i1+i2+i3),x_label='time(ps)',title="total current",filename="total_current")

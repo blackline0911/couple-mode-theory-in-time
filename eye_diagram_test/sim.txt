@@ -13,31 +13,29 @@ Parameter of ring modulator
 		cavity length : 31.41592653589793 um
 		Group index : 3.905736364286179
 		couple through coefficient : [0.95105]
-		Round trip loss : 0.95124
-		modulation efficiency : 39.5 pm/V (for reverse bias)
+		Round trip loss : <bound method alpha_fit.alpha_V of <ring.alpha_fit object at 0x000002247D7802F0>>
+		modulation efficiency : <bound method me_fit.me_V of <ring.me_fit object at 0x000002247D7812B0>> pm/V (for reverse bias)
 		mode cross section : 0.11 um^2
-		Linear absorption coefficient: 15.91195544971486 1/cm
+		Linear Amplitude absorption coefficient: -877.8823763008189 1/cm
 		Two Photon Absorption coefficient : 1110568175.5839574 1/cm.mJ
 		Free Carrier Absorption coefficient : 1.9975043528737064e+21 1/cm.mJ^2
 	Physical parameter : 
-		intrinsic photon life time : 8.187638662971404 ps
+		intrinsic photon life time : -0.14840409736044313 ps
 		couple extrinsic photon life time (port 1 ) : 8.155050483445182 ps
 		resonant frequency : 193.81036447858233 THz
 		resonant wavelength : 1.5468339828292805 um
-		Q factor : 2487.646538182494
-		LineWidth : 0.6218061766762962 nm
+		Q factor : -92.03409970088791
+		LineWidth : -16.807183292459126 nm
 		Group velocity : 76756962077953.95 um/s
 		Round Trip time : 0.4092909058072424 ps
 
 		Input Laser photon energy : 0.00012842987177267732 pJ
 
-	The start wavelength is 1.5465230797409424 um
-	The end wavelength is 1.547144885917619 um
-	scanning frequency range for better accuracy is 0.07790912475056952 THz
-	Current frequency range is 0.07790912789798199 THz
-		Warning : This Transfer function result may not be accurate.
-
+	The start wavelength is 1.5489348807408378 um
+	The end wavelength is 1.5447330849177234 um
+	scanning frequency range for better accuracy is -2.1058538640402706 THz
+	Current frequency range is 0.5264644371717111 THz
 Simulation Parameter of time 
-	time resolution : 1e-13 sec
+	time resolution : 1e-14 sec
 	Max time range : 5000 ps
 		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 

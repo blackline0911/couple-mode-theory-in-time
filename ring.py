@@ -9,9 +9,9 @@ class ring(simulation):
     def __init__(self,L:float, 
                  alpha:float,
                  me:float,
+                 gamma:np.ndarray,
                  cross_section:float,
                  lambda_incident:float,
-                 *gamma,
                  neff=None,
                  band = "C",
                  lambda0=None,
@@ -96,7 +96,7 @@ class ring(simulation):
         self.cross_section =  cross_section #um^2
         self.kappa = (1-self.gamma**2)**0.5
         self.tu_e_bar = -self.L*self.ng/(c*t0*np.log((1-self.kappa**2)**0.5))
-        self.tu_o_bar = -self.L*self.ng/(c*t0*np.log(alpha))
+        self.tu_o_bar = -self.L*self.ng/(c*t0*np.log(alpha(0)))
         self.kappa_total = 0
         self.tu_e_bar_total_inv = 0
         for tu_e_bar in self.tu_e_bar:
@@ -231,3 +231,32 @@ class Transfer_function():
         wl = wl[i:L-1]
         data = data[i:L-1]
         return wl, data
+    
+class alpha_fit():
+    m = 0
+    b = 0
+    def renew(self):
+        alpha_pdk = -1/(self.L*1e-4)*np.log(self.RoundTripLoss)
+        self.m, self.b = np.polyfit(np.array([0,-0.5,-1,-1.5,-2]), alpha_pdk, 1)
+    def __init__(self,RoundTripLoss:np.ndarray,L):
+        self.L = L
+        self.RoundTripLoss = RoundTripLoss
+        self.renew()
+    def alpha_V(self,V):
+        return self.m*V+self.b
+    
+class me_fit(ring):
+    m = 0
+    b = 0
+    def renew(self):
+        self.m, self.b = np.polyfit(np.array([0,-0.25]), self.me_data, 1)
+    def __init__(self,me_data:np.ndarray,FSR,L):
+        self.me_data =me_data
+        self.FSR = FSR
+        self.L = L
+        self.renew()
+    def me_V(self,V):
+        return self.m*V+self.b
+    
+            self.ng = self.lambda0_reference**2/(self.FSR*self.L)
+            self.vg = c/self.ng*t0
