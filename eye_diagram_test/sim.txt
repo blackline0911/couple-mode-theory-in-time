@@ -13,27 +13,27 @@ Parameter of ring modulator
 		cavity length : 31.41592653589793 um
 		Group index : 3.905721477009281
 		couple through coefficient : [0.95105]
-		Round trip loss : 15.767467906026438
+		Round trip loss : 31.752807998554875
 		mode cross section : 0.11 um^2
-		Linear Amplitude absorption coefficient: 15.767467906026434 1/cm
+		Linear Amplitude absorption coefficient: 15.876403999277434 1/cm
 		Two Photon Absorption coefficient : 1110572408.6907063 1/cm.mJ
 		Free Carrier Absorption coefficient : 1.9975195805120602e+21 1/cm.mJ^2
 	Physical parameter : 
-		intrinsic photon life time : 8.26263581660216 ps
+		intrinsic photon life time : 8.205941664333334 ps
 		couple extrinsic photon life time (port 1 ) : 8.155019399295272 ps
 		resonant frequency : 193.8107338477027 THz
 		resonant wavelength : 1.5468310348361727 um
-		Q factor : 2498.9650228974365
-		LineWidth : 0.6189886695743715 nm
+		Q factor : 2490.418370924833
+		LineWidth : 0.621112923392766 nm
 		Group velocity : 76757254649289.38 um/s
 		Round Trip time : 0.4092893457359836 ps
 
 		Input Laser photon energy : 0.00012842987177267732 pJ
 
-	The start wavelength is 1.5465215405013852 um
-	The end wavelength is 1.54714052917096 um
-	scanning frequency range for better accuracy is 0.077556401178832 THz
-	Current frequency range is 0.07755640428368338 THz
+	The start wavelength is 1.5465204783744764 um
+	The end wavelength is 1.5471415912978688 um
+	scanning frequency range for better accuracy is 0.07782256030167727 THz
+	Current frequency range is 0.0778225634385592 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 
