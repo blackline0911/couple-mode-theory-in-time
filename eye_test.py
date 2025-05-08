@@ -17,8 +17,9 @@ wl_in = 1.5467
 Pin = 1 #mW
 FSR = 0.0195
 radius = 5
-RoundTripLoss_pdk = [0.95124, 0.95248, 0.95273, 0.95292, 0.95305]
-me_data = [39.5, 37.9]
+Amp_RoundTripLoss_pdk = [0.95124, 0.95248, 0.95273, 0.95292, 0.95305]
+neff_pdk = [2.51105, 2.5111, 2.51113, 2.51116, 2.51118, 2.5112]
+mode_area = 0.22*0.5
 
 bit_num = 300
 v_bias = -1
@@ -42,20 +43,20 @@ sim.main(experiment_condition=experiment_condition)
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-a_fit = alpha_fit(RoundTripLoss=RoundTripLoss_pdk,L = 2*np.pi*radius)
-m_fit = me_fit(me_data=me_data)
+a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_pdk,L = 2*np.pi*radius)
+n_fit = neff_fit(neff_data=neff_pdk)
 ring_mod = ring(L=2*np.pi*radius, 
             alpha=a_fit.alpha_V,
-            me=m_fit.me_V,
-            cross_section=0.5*0.22,
+            neff=n_fit.neff_V,
+            cross_section=mode_area,
             lambda_incident=wl_in,
             gamma=[0.95105],
             FSR = FSR,
-            neff=2.5111,
+            FCA_fit_factor=1
             )
 
-wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/8
-wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/8 
+wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/2
+wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/2 
 
 v = driver(f_drive=f_drive,
            v_bias=v_bias,
@@ -71,7 +72,7 @@ os.chdir("./eye_diagram_test/")
 t = time(mode = sim.mode)
 
 if sim.mode == "scan_frequency":
-    vbias = np.array([0,-1,-2,-3])
+    vbias = np.array([0,-0.5,-1,-1.5,-2])
     ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=5000,resolution=1,buffer=100,driver=v)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
@@ -79,7 +80,7 @@ if sim.mode == "scan_frequency":
     plt.figure()
     for vb in vbias:
         v.v_bias = vb
-        b,Q,s_minus,N = solving(sim,ring_mod,v,t,H)
+        b,s_minus,N = solving(sim,ring_mod,v,t,H)
         T = Transfer_function(ring_mod,t)
         wl,data = T.mapping(10*np.log10(abs(s_minus)**2/sim.Pin))
         wl,data_phase = T.mapping(180/np.pi*np.angle(s_minus))
@@ -87,9 +88,9 @@ if sim.mode == "scan_frequency":
                  label="V = "+str(vb))
     plt.grid(color='g',linestyle='--', alpha=0.5)
     plt.xlabel('wavelength(um)')
-    plt.title('Transfer function')
+    plt.title('Transfer function (2-order fit alpha)')
     plt.legend()
-    plt.savefig("Transmission_vs_voltage")
+    plt.savefig("Transmission_vs_voltage (with NL) (2-order fit alpha)")
     plt.show()
     # v.v_bias=-1.5
     # b,Q,s_minus,N = solving(sim,ring_mod,v,t)

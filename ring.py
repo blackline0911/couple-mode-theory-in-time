@@ -8,11 +8,11 @@ class ring(simulation):
     id='ring'
     def __init__(self,L:float, 
                  alpha:float,
-                 me:float,
+                #  me:float,
                  gamma:np.ndarray,
                  cross_section:float,
                  lambda_incident:float,
-                 neff=None,
+                 neff:float,
                  band = "C",
                  lambda0=None,
                  FSR = None,
@@ -35,7 +35,7 @@ class ring(simulation):
         \tgamma:amplitude couple through coefficient of the bus waveguide of ring\n
         \t(gamma can input multiple values for multi-port ring (or add-drop ring), \n
         \tthe first gamma is port of input Laser by default (can specified by input port ))\n
-        \talpha:round trip amplitude attenuation coefficient (one for no loss)\n
+        \talpha:round trip AMPLITUDE attenuation coefficient (one for no loss)\n
         \tme : modulation efficiency (pm/reverse voltage)\n
         \tband : specify operating wavelength, "C" for 1550nm, "O" for 1310nm\n
         \tcross_section : mode area in waveguide (um^2)\n
@@ -55,7 +55,7 @@ class ring(simulation):
         self.gamma=np.real(gamma)
         assert (not np.imag(g)==0.0 for g in gamma) , "\nCoupling coefficient shall not over one\n"
         self.alpha = alpha
-        self.me = me
+        # self.me = me
         self.band = band
         self.support_band = {"C","O"}
 
@@ -96,7 +96,8 @@ class ring(simulation):
         self.cross_section =  cross_section #um^2
         self.kappa = (1-self.gamma**2)**0.5
         self.tu_e_bar = -self.L*self.ng/(c*t0*np.log((1-self.kappa**2)**0.5))
-        self.tu_o_bar = -self.L*self.ng/(c*t0*np.log(alpha(0)))
+        # self.tu_o_bar = -self.L*self.ng/(c*t0*np.log(alpha(0)))
+        self.tu_o_bar = self.ng/((c*1e-4)*t0*alpha(0))
         self.kappa_total = 0
         self.tu_e_bar_total_inv = 0
         for tu_e_bar in self.tu_e_bar:
@@ -104,6 +105,7 @@ class ring(simulation):
             self.tu_e_bar_total_inv += 1/tu_e_bar
         assert input_port>0 , "\nInput port should start from one\n"
         
+        # 為了保持微分方程不動，alpha_linear和gamma皆為Amplitude的loss(coupling through ratio)
         self.input_kappa = (2/self.tu_e_bar[input_port-1])**0.5 
         self.alpha_linear = np.real(1/(self.vg*1e-4*self.tu_o_bar))
         self.tu_t_bar = (self.tu_e_bar_total_inv+1/self.tu_o_bar)**(-1)
@@ -189,17 +191,17 @@ class ring(simulation):
     def find_reference_res_wavelength(self):
         if self.band=="C":
             f_band = c/1.55*t0
-            m = self.neff*self.L/1.55
+            m = self.neff(0)*self.L/1.55
         if self.band=="O":
             f_band = c/1.31*t0
-            m = self.neff*self.L/1.31
-        a = np.ceil(m)*c/self.neff/self.L*t0 - f_band
-        b = f_band - np.floor(m)*c/self.neff/self.L*t0
+            m = self.neff(0)*self.L/1.31
+        a = np.ceil(m)*c/self.neff(0)/self.L*t0 - f_band
+        b = f_band - np.floor(m)*c/self.neff(0)/self.L*t0
         if a<b:
             m= np.ceil(m)
         if a>b:
             m=np.floor(m)
-        self.lambda0_reference = (self.neff*self.L)/m
+        self.lambda0_reference = (self.neff(0)*self.L)/m
         
         return m
     
@@ -209,8 +211,8 @@ class ring(simulation):
         # Assume the specified neff (self.neff) is index of resonant wavelength near 1550 or 1310 nm 
         # solving index at shifted resonance frequency
         A = 1
-        B = -(2*self.neff-self.ng)
-        C = -(self.ng-self.neff)/(f0_v0*self.L)*m_pround*c*t0
+        B = -(2*self.neff(0)-self.ng)
+        C = -(self.ng-self.neff(0))/(f0_v0*self.L)*m_pround*c*t0
         n = np.real((-B+sqrt(B**2-4*A*C))/(2*A))
         assert np.imag((-B+sqrt(B**2-4*A*C))/(2*A))==0.0 , "\nimaginary part of index is supposed to be zero\n"
         
@@ -233,30 +235,46 @@ class Transfer_function():
         return wl, data
     
 class alpha_fit():
-    m = 0
+    a = 0
     b = 0
+    c = 0
+    """
+    alpha is AMPLITUDE absorption coefficient in 1/cm
+    """
     def renew(self):
-        alpha_pdk = -1/(self.L*1e-4)*np.log(self.RoundTripLoss)
-        self.m, self.b = np.polyfit(np.array([0,-0.5,-1,-1.5,-2]), alpha_pdk, 1)
-    def __init__(self,RoundTripLoss:np.ndarray,L):
+        if self.input_mode=="amp":
+            alpha_pdk = -1/(self.L*1e-4)*np.log(self.RoundTripLoss)
+        if self.input_mode=="energy":
+            alpha_pdk = -1/(2*self.L*1e-4)*np.log(self.RoundTripLoss)
+        self.a,self.b,self.c = np.polyfit(np.array([0,-0.5,-1,-1.5,-2]), alpha_pdk, 2)
+    def __init__(self,RoundTripLoss:np.ndarray,L,input = "amp"):
         self.L = L
         self.RoundTripLoss = RoundTripLoss
+        self.input_mode = input 
         self.renew()
     def alpha_V(self,V):
-        return self.m*V+self.b
+        return self.a*V**2+self.b*V + self.c
+        # if V==0:
+        #     return -1/self.L/1e-4*np.log(0.95124)
+        # if V==-0.5:
+        #     return -1/self.L/1e-4*np.log(0.95248)
+        # if V==-1:
+        #     return -1/self.L/1e-4*np.log(0.95273)
+        # if V==-1.5:
+        #     return -1/self.L/1e-4*np.log(0.95292)
+        if V==-2:
+            return -1/self.L/1e-4*np.log(0.95305)
     
-class me_fit(ring):
-    m = 0
+class neff_fit(ring):
+    c = 0
     b = 0
+    a = 0
     def renew(self):
-        self.m, self.b = np.polyfit(np.array([0,-0.25]), self.me_data, 1)
-    def __init__(self,me_data:np.ndarray,FSR,L):
-        self.me_data =me_data
-        self.FSR = FSR
-        self.L = L
+        V = np.array([0.5,0,-0.5,-1,-1.5,-2])
+        self.a, self.b, self.c = np.polyfit(V, self.neff_data, 2)
+        # self.a = np.polyfit(V, self.neff_data, 2)
+    def __init__(self,neff_data:np.ndarray):
+        self.neff_data =neff_data
         self.renew()
-    def me_V(self,V):
-        return self.m*V+self.b
-    
-            self.ng = self.lambda0_reference**2/(self.FSR*self.L)
-            self.vg = c/self.ng*t0
+    def neff_V(self,V):
+        return self.a*V**2+self.b*V+self.c

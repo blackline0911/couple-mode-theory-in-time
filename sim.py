@@ -137,7 +137,7 @@ class simulation():
 
                         if ( ob.lambda0==None):
                             f.write("\t\tneff : ")
-                            f.write(str(ob.neff))
+                            f.write(str(ob.neff(0)))
                             f.write('\n')
 
                         f.write("\t\tGroup index : ")
@@ -149,12 +149,12 @@ class simulation():
                         f.write('\n')
 
                         f.write("\t\tRound trip loss : ")
-                        f.write(str(np.real(ob.alpha)))
+                        f.write(str(np.real(2*ob.alpha(0))))
                         f.write('\n')
 
-                        f.write("\t\tmodulation efficiency : ")
-                        f.write(str(ob.me) + ' pm/V (for reverse bias)')
-                        f.write('\n')
+                        # f.write("\t\tmodulation efficiency : ")
+                        # f.write(str(ob.me) + ' pm/V (for reverse bias)')
+                        # f.write('\n')
 
                         f.write("\t\tmode cross section : ")
                         f.write(str(ob.cross_section) + ' um^2')
