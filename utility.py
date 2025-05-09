@@ -72,20 +72,30 @@ def dB(x):
      return 10*np.log10(x)
 
 def dB_inv(x):
-    return 10**(-x/10)
+    return 10**(x/10)
 
-def TP(low_level,high_level):
-    return -10*np.log10( abs( high_level - low_level )/2 )
+def TP(low_level,high_level,Pin):
+    return -10*np.log10( abs( high_level - low_level )/2/Pin )
 
 def ER(time,low_level,high_level):
     ER = np.zeros( int(len(time.t_total)-time.buffer*t0/time.dt-1))
     N = len(ER)
     for i in range(N):
-        if high_level>low_level:
-                ER[i] = -10*np.log10(low_level/high_level)
+        if high_level[i]>low_level[i]:
+                ER[i] = -10*np.log10(low_level[i]/high_level[i])
         else:
-            ER[i] = -10*np.log10(high_level/low_level)
+            ER[i] = -10*np.log10(high_level[i]/low_level[i])
     return ER
+
+def IL(time,low_level,high_level):
+    IL = np.zeros( int(len(time.t_total)-time.buffer*t0/time.dt-1))
+    N = len(IL)
+    for i in range(N):
+        if high_level[i]>low_level[i]:
+            IL[i] = -10*np.log10(high_level[i])
+        else:
+            IL[i] = -10*np.log10(low_level[i])
+    return IL
 
 def FDM(dt,signal):
     N = len(signal)

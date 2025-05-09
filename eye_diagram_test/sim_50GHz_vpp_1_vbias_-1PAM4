@@ -6,7 +6,7 @@ Simulation Parameters and Settings
 	Simulation mode = voltage_drive
 	Input Laser Power : 1 mW
 
-	Input Laser wavelength : 1.5467 um
+	Input Laser wavelength : 1.546832 um
 
 Parameter of ring modulator
 	Structure parameter : 
@@ -17,7 +17,7 @@ Parameter of ring modulator
 		mode cross section : 0.11 um^2
 		Linear Amplitude absorption coefficient: 15.851599943752241 1/cm
 		Two Photon Absorption coefficient : 1110572408.6907063 1/cm.mJ
-		Free Carrier Absorption coefficient : 1.9975195805120602e+21 1/cm.mJ^2
+		Free Carrier Absorption coefficient : 1.9976900548022446e+21 1/cm.mJ^2
 	Physical parameter : 
 		intrinsic photon life time : 8.218782048483884 ps
 		couple extrinsic photon life time (port 1 ) : 8.155019399295272 ps
@@ -28,11 +28,11 @@ Parameter of ring modulator
 		Group velocity : 76757254649289.38 um/s
 		Round Trip time : 0.4092893457359836 ps
 
-		Input Laser photon energy : 0.00012842987177267732 pJ
+		Input Laser photon energy : 0.0001284189121189631 pJ
 
 Simulation Parameter of time 
 	time resolution : 1e-14 sec
-	Max time range : 6000 ps
+	Max time range : 20000 ps
 		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
 	Driver information : 
 	Driving Signal is raise_cosine signal
