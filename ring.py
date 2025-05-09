@@ -3,6 +3,7 @@ import numpy as np
 from cmath import *
 from time_class import *
 from sim import simulation
+from scipy.optimize import curve_fit
 
 class ring(simulation):
     id='ring'
@@ -241,29 +242,23 @@ class alpha_fit():
     """
     alpha is AMPLITUDE absorption coefficient in 1/cm
     """
+    @staticmethod
+    def func(v, a, b,c):
+            return a*v/(abs(v)+b)**0.5 +c
     def renew(self):
         if self.input_mode=="amp":
-            alpha_pdk = -1/(self.L*1e-4)*np.log(self.RoundTripLoss)
+            self.alpha_pdk = -1/(self.L*1e-4)*np.log(self.RoundTripLoss)
         if self.input_mode=="energy":
-            alpha_pdk = -1/(2*self.L*1e-4)*np.log(self.RoundTripLoss)
-        self.a,self.b,self.c = np.polyfit(np.array([0,-0.5,-1,-1.5,-2]), alpha_pdk, 2)
+            self.alpha_pdk = -1/(2*self.L*1e-4)*np.log(self.RoundTripLoss)
+        V = np.array([0,-0.5,-1,-1.5,-2])
+        self.popt, pcov = curve_fit(self.func, V, self.alpha_pdk)
     def __init__(self,RoundTripLoss:np.ndarray,L,input = "amp"):
         self.L = L
         self.RoundTripLoss = RoundTripLoss
         self.input_mode = input 
         self.renew()
     def alpha_V(self,V):
-        return self.a*V**2+self.b*V + self.c
-        # if V==0:
-        #     return -1/self.L/1e-4*np.log(0.95124)
-        # if V==-0.5:
-        #     return -1/self.L/1e-4*np.log(0.95248)
-        # if V==-1:
-        #     return -1/self.L/1e-4*np.log(0.95273)
-        # if V==-1.5:
-        #     return -1/self.L/1e-4*np.log(0.95292)
-        if V==-2:
-            return -1/self.L/1e-4*np.log(0.95305)
+        return self.func(V,self.popt[0],self.popt[1],self.popt[2])
     
 class neff_fit(ring):
     c = 0
@@ -272,7 +267,6 @@ class neff_fit(ring):
     def renew(self):
         V = np.array([0.5,0,-0.5,-1,-1.5,-2])
         self.a, self.b, self.c = np.polyfit(V, self.neff_data, 2)
-        # self.a = np.polyfit(V, self.neff_data, 2)
     def __init__(self,neff_data:np.ndarray):
         self.neff_data =neff_data
         self.renew()

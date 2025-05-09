@@ -5978,7 +5978,7 @@ static PyObject *__pyx_f_12raise_cosine_raise_cos(PyObject *__pyx_v_driver, PyAr
  *         return ans
  *     else:
  *         if ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ):             # <<<<<<<<<<<<<<
- *             s = driver.vpp*BS[int(shift/T)]*np.pi/4*sinc((1/2/beta))
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*np.pi/4*sinc((1/2/beta))
  *         else:
  */
   /*else*/ {
@@ -6016,9 +6016,9 @@ static PyObject *__pyx_f_12raise_cosine_raise_cos(PyObject *__pyx_v_driver, PyAr
       /* "raise_cosine.pyx":32
  *     else:
  *         if ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ):
- *             s = driver.vpp*BS[int(shift/T)]*np.pi/4*sinc((1/2/beta))             # <<<<<<<<<<<<<<
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*np.pi/4*sinc((1/2/beta))             # <<<<<<<<<<<<<<
  *         else:
- *             s = driver.vpp*BS[int(shift/T)]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
  */
       __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_driver, __pyx_n_s_vpp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
@@ -6034,62 +6034,80 @@ static PyObject *__pyx_f_12raise_cosine_raise_cos(PyObject *__pyx_v_driver, PyAr
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_driver, __pyx_n_s_level_num); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_pi); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyInt_SubtractObjC(__pyx_t_6, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_pi); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = PyNumber_Multiply(__pyx_t_6, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __pyx_t_4 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_2, __pyx_int_4, 4, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = PyFloat_FromDouble((1.0 / 2.0)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_v_beta); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __pyx_f_12raise_cosine_sinc(__pyx_t_6, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __pyx_t_6 = PyNumber_Multiply(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = __Pyx_PyInt_TrueDivideObjC(__pyx_t_6, __pyx_int_4, 4, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_2);
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_6 = PyFloat_FromDouble((1.0 / 2.0)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_4 = __Pyx_PyNumber_Divide(__pyx_t_6, __pyx_v_beta); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 32, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_6 = __pyx_f_12raise_cosine_sinc(__pyx_t_4, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = PyNumber_Multiply(__pyx_t_2, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 32, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_v_s = __pyx_t_4;
-      __pyx_t_4 = 0;
+      __pyx_v_s = __pyx_t_6;
+      __pyx_t_6 = 0;
 
       /* "raise_cosine.pyx":31
  *         return ans
  *     else:
  *         if ( (t-shift)==T/2/beta) | ( (t-shift)==( -T/2/beta) ):             # <<<<<<<<<<<<<<
- *             s = driver.vpp*BS[int(shift/T)]*np.pi/4*sinc((1/2/beta))
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*np.pi/4*sinc((1/2/beta))
  *         else:
  */
       goto __pyx_L4;
     }
 
     /* "raise_cosine.pyx":34
- *             s = driver.vpp*BS[int(shift/T)]*np.pi/4*sinc((1/2/beta))
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*np.pi/4*sinc((1/2/beta))
  *         else:
- *             s = driver.vpp*BS[int(shift/T)]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)             # <<<<<<<<<<<<<<
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)             # <<<<<<<<<<<<<<
  *         return s
  * cpdef create_rcos_signal(cnp.ndarray[float_data_type, ndim=1] BS,
  */
     /*else*/ {
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_driver, __pyx_n_s_vpp); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 34, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_6 = __Pyx_PyNumber_Divide(__pyx_v_shift, __pyx_v_T); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 34, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_driver, __pyx_n_s_vpp); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 34, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_2 = __Pyx_PyNumber_Int(__pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_v_shift, __pyx_v_T); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_4 = __Pyx_PyNumber_Int(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 34, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_BS), __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __pyx_t_4 = PyNumber_Multiply(__pyx_t_6, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 34, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_6 = __Pyx_PyObject_GetItem(((PyObject *)__pyx_v_BS), __pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 34, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_driver, __pyx_n_s_level_num); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __pyx_t_6 = __Pyx_PyInt_SubtractObjC(__pyx_t_2, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 34, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = PyNumber_Multiply(__pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 34, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -6182,7 +6200,7 @@ static PyObject *__pyx_f_12raise_cosine_raise_cos(PyObject *__pyx_v_driver, PyAr
 
     /* "raise_cosine.pyx":35
  *         else:
- *             s = driver.vpp*BS[int(shift/T)]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
  *         return s             # <<<<<<<<<<<<<<
  * cpdef create_rcos_signal(cnp.ndarray[float_data_type, ndim=1] BS,
  *                         cnp.ndarray[float_data_type, ndim=1] t,
@@ -6455,7 +6473,7 @@ static PyObject *__pyx_pf_12raise_cosine_2raise_cos(CYTHON_UNUSED PyObject *__py
 }
 
 /* "raise_cosine.pyx":36
- *             s = driver.vpp*BS[int(shift/T)]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
  *         return s
  * cpdef create_rcos_signal(cnp.ndarray[float_data_type, ndim=1] BS,             # <<<<<<<<<<<<<<
  *                         cnp.ndarray[float_data_type, ndim=1] t,
@@ -6712,7 +6730,7 @@ static PyObject *__pyx_f_12raise_cosine_create_rcos_signal(PyArrayObject *__pyx_
   goto __pyx_L0;
 
   /* "raise_cosine.pyx":36
- *             s = driver.vpp*BS[int(shift/T)]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
  *         return s
  * cpdef create_rcos_signal(cnp.ndarray[float_data_type, ndim=1] BS,             # <<<<<<<<<<<<<<
  *                         cnp.ndarray[float_data_type, ndim=1] t,
@@ -7669,7 +7687,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_codeobj__7 = (PyObject*)__Pyx_PyCode_New(6, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__6, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_raise_cosine_pyx, __pyx_n_s_raise_cos, 23, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__7)) __PYX_ERR(0, 23, __pyx_L1_error)
 
   /* "raise_cosine.pyx":36
- *             s = driver.vpp*BS[int(shift/T)]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
  *         return s
  * cpdef create_rcos_signal(cnp.ndarray[float_data_type, ndim=1] BS,             # <<<<<<<<<<<<<<
  *                         cnp.ndarray[float_data_type, ndim=1] t,
@@ -8176,7 +8194,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "raise_cosine.pyx":36
- *             s = driver.vpp*BS[int(shift/T)]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+ *             s = driver.vpp*BS[int(shift/T)]/(driver.level_num-1)*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
  *         return s
  * cpdef create_rcos_signal(cnp.ndarray[float_data_type, ndim=1] BS,             # <<<<<<<<<<<<<<
  *                         cnp.ndarray[float_data_type, ndim=1] t,

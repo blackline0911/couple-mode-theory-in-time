@@ -54,7 +54,7 @@ class simulation():
     
     
     
-    def eye_diagram(self,time,driver,signal,filename='',plot_bit_num=1):
+    def eye_diagram(self,time,driver,signal,title = "Output Power",filename='',plot_bit_num=1):
         assert self.mode=="voltage_drive", "\neye diagram only available at voltage driving mode\n"
         N = time.N
         cum_t_index, sig= self.discard_func(time,signal)
@@ -68,7 +68,6 @@ class simulation():
             for k in range(0,N-self.discarding-plot_bit_num+1,plot_bit_num):
                 sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
                 plt.plot( t_array,sig_segment, color='crimson')
-
         else:
             t_array = np.array(time.t_all_segment[0][:])
             for j in range(1,plot_bit_num):
@@ -78,12 +77,10 @@ class simulation():
                 plt.plot( t_array,sig_segment, color='crimson')
 
         plt.grid(color='w')
-
         ax = plt.gca()
         ax.tick_params(axis='both', which='major', labelsize=7)
         plt.xlabel("time (second)")
-        plt.ylabel("Output Power (mW)")
-        plt.title("Eye")
+        plt.title("Eye diagram of "+title)
         # ax.set_xticklabels([])
         # ax.set_yticklabels([])
         # plt.colorbar()

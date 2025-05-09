@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 
 cj = [23.6e-15, 20e-15, 18.5e-15]
 a = [0.95124, 0.95248, 0.95273, 0.95292, 0.95305]
@@ -55,44 +56,32 @@ V = np.array([0,-0.5,-1,-1.5,-2])
 alpha0 = -1/(L)*np.log(a0)
 # m,b = np.polyfit(V,alpha_pdk-alpha0, 1)
 # a,b,c = np.polyfit(V,alpha_pdk, 2)
-para = np.polyfit(V,alpha_pdk, 1)
+def func(v, a, b,c):
+    return a*v/(abs(v)+b)**0.5 + c
+# para = np.polyfit(V,alpha_pdk, 1)
+popt, pcov = curve_fit(func, V, alpha_pdk)
+# print("popt = ",popt)
+print("alpha_pdk = ",alpha_pdk)
 plt.scatter(np.array([0,-0.5,-1,-1.5,-2]),alpha_pdk,c='r',marker='o',label='pdk data')
 plt.grid(color='g',linestyle='--', alpha=0.5)
-# plt.plot(np.linspace(-2,0,1000),a*(np.linspace(-2,0,1000))**2+b*np.linspace(-2,0,1000)+c)
-v = np.linspace(-3,0,1000)
+v = np.linspace(-3,1,1000)
 # plt.plot(v,m*v+b+alpha0)
 # plt.plot(v,a*v**2+b*v+c)
-A = 0
-for i in range(len(para)):
-    A+=para[i]*v**(len(para)-1-i)
-plt.plot(v,A,label='fitting curve')
+plt.xlabel("voltage (V)")
+plt.title("absorption coefficient (1/cm)")
+plt.plot(v,func(v,popt[0],popt[1],popt[2]),label='fitting curve')
 plt.legend()
 plt.show()
-
-# me_pdk = [39.5, 37.9]
-# V = np.array([0,-0.25])
-# m,b = np.polyfit(V,me_pdk, 1)
-# plt.scatter(V,me_pdk,c='r',marker='o',label='pdk data')
-# V = np.array([0,-0.5,-1,-1.5,-2])
-# plt.plot(V,m*V+b)
-# plt.show()
 
 neff_pdk = [2.51105, 2.5111, 2.51113, 2.51116, 2.51118, 2.5112]
 V = np.array([0.5,0,-0.5,-1,-1.5,-2])
 a,b,c = np.polyfit(V,neff_pdk, 2)
 plt.scatter(V,neff_pdk,c='r',marker='o',label='pdk data')
-V = np.linspace(-2,0.5,1000)
+V = np.linspace(-3,0.5,1000)
 # plt.plot(V,m*V+b,label="Linea fitting") 
 plt.plot(V,a*V**2+b*V+c,label="Quadra fitting") 
 plt.xlabel("voltage")
 plt.title("Neff vs Voltage")
-plt.grid(color='g',linestyle='--', alpha=0.5)
-plt.legend()
-plt.show()
-
-plt.plot(V,1.5486e6/3.905*(m*V+b-b),label="me")  
-plt.xlabel("voltage")
-plt.title("ME vs Voltage (pm/V)")
 plt.grid(color='g',linestyle='--', alpha=0.5)
 plt.legend()
 plt.show()

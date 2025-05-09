@@ -62,11 +62,12 @@ class VoltageDriveTime():
     def set_dt(self, ring, driver,resolution):
         self.ring = ring
         self.driver = driver
+        # 從調變過程中最大的detuning frequency計算需要的dt
         if  (not driver.vpp==0) and (not driver.v_bias==0):
-            df_max =  (c/ring.lambda0**2)*abs( ring.me*1e-12/1e-6 )*( driver.vpp/2 + abs(driver.v_bias))
+            df_max =  (ring.f_res_bar/t0/ring.ng)*abs( ring.neff( driver.vpp/2 + abs(driver.v_bias) ) -ring.neff(driver.v_bias) )
         else:
             df_max = abs(c/ring.lambda_incident-c/ring.lambda0)
-        # print("df_max = ",df_max)
+        print("df_max = ",df_max)
         self.dt = (1/df_max/10)
         # print("dt_v1 = ",self.dt)
         if df_max < driver.f_drive:

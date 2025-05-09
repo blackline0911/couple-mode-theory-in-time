@@ -59,7 +59,11 @@ class driver(simulation) :
                  PRBS = 0,
                  beta = 0.6,
                  method = "small_signal",
-                 level = "NRZ"
+                 level = "NRZ",
+                 Z0 = 50,
+                 Cox = 34.7e-15,
+                 Rsi = 1439.8,
+                 Cp = 6.6e-15
                  ):
         """
         input argments:
@@ -75,6 +79,10 @@ class driver(simulation) :
         self.v_bias = v_bias
         self.vpp=vpp
         self.Rs = Rs
+        self.Cox = Cox
+        self.Rsi = Rsi
+        self.Cp = Cp
+        self.Z0 = Z0
 
         self.square_wave = square_wave
         self.sine_wave = sine_wave
@@ -143,7 +151,7 @@ class driver(simulation) :
     step =0 
     passed = False
     counter = 0
-    def refering_v(self,t,for_differential=False):
+    def refering_v(self,t):
         if self.time.mode == "voltage_drive":
             """
             input
@@ -159,54 +167,25 @@ class driver(simulation) :
                 v = self.vpp/2*np.exp(1j*self.w_drive*t*t0)+self.v_bias
             if self.raise_cosine:
                 assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
-                T_period_normalized = self.time.T_normalized
-                v=0
-                # for i in range(self.time.N):
-                #     v +=  (self.vpp*self.rcos(t,shift=(i)*T_period_normalized))
-                v = raise_cosine.refering_rcos_signal(self.prbs,t,self.time.T_normalized,self.time.N,self,self.beta)
-                v = v+self.v_bias-self.vpp/2
-            # 當solve_ivp用的t足夠接近dt/t0點時，將該點t當作離散t點的電壓，並記錄下來
-            # 為了避免相同dt/t0區間的電壓隨時間增加而改變，增加判斷該時間的step是否與前一個t相同
-            # 因此如此做可以確保紀錄下來的voltage是最接近dt/t0時間點的電壓
-            # if (not for_differential):
-            #     if len(self.voltage_record)==2:
-            #         # Clean Up Record
-            #         self.voltage_record = []
-            #         self.counter = 0
-            #     if (not t//(self.time.dt/t0)==self.step):
-            #         print("renew passed")
-            #         self.passed = False
-            #     if ( ( t%(self.time.dt/t0) ) < (self.time.dt/t0)) \
-            #         and ((not self.passed)):
-            #         print("In appending voltage_record")
-            #         self.passed = True
-            #         self.voltage_record.append([v])
-            #         print("voltage to append = ",v)
-            #         print("voltage record after appending = ",self.voltage_record)
-            #     if self.passed==True:
-            #         self.voltage_record[self.counter].append(v)
-            #         print(self.voltage_record)
-            #     self.step = t//(self.time.dt/t0)
-            #     print("t%(self.time.dt/t0) = ",t%(self.time.dt/t0))
-            #     print("(not t//(self.time.dt/t0)==self.step) = ",(not t//(self.time.dt/t0)==self.step))
-            #     print("step = ",self.step)
-            #     print("t//(self.time.dt/t0) = ",t//(self.time.dt/t0))
-            #     print((self.time.dt/t0)**3)
-            #     print(self.voltage_record)
+                v = self.cubic_interp_voltage(t)
+                # T_period_normalized = self.time.T_normalized
+                # v=0
+                # v = raise_cosine.refering_rcos_signal(self.prbs,t,self.time.T_normalized,self.time.N,self,self.beta)
+                # v = v+self.v_bias-self.vpp/2
             return v
         if self.time.mode == "scan_frequency":
             return self.v_bias
 
-    def refering_dv_dt(self,v0,time_class,t):
+    def refering_dv_dt(self,v0,t):
         # v0：voltage point at time t
-        if (t<2*time_class.dt/t0):
-            v1 = self.cubic_interp_voltage(t+time_class.dt/t0)
-            v2 = self.cubic_interp_voltage(t+2*time_class.dt/t0)
-            dv_dt = (-3*v0 + 4*v1 - v2)/2/(time_class.dt/t0)
-        if (t>=2*time_class.dt/t0):
-            v1 = self.cubic_interp_voltage(t-time_class.dt/t0)
-            v2 = self.cubic_interp_voltage(t-2*time_class.dt/t0)
-            dv_dt = (3*v0 - 4*v1 + v2)/2/(time_class.dt/t0)
+        if (t<2*self.time.dt/t0):
+            v1 = self.cubic_interp_voltage(t+self.time.dt/t0)
+            v2 = self.cubic_interp_voltage(t+2*self.time.dt/t0)
+            dv_dt = (-3*v0 + 4*v1 - v2)/2/(self.time.dt/t0)
+        if (t>=2*self.time.dt/t0):
+            v1 = self.cubic_interp_voltage(t-self.time.dt/t0)
+            v2 = self.cubic_interp_voltage(t-2*self.time.dt/t0)
+            dv_dt = (3*v0 - 4*v1 + v2)/2/(self.time.dt/t0)
         return dv_dt
 
         
@@ -284,6 +263,20 @@ class driver(simulation) :
                     return self.prbs[int(shift/T)]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
                 else:
                     return self. bit_sequence[int(shift/T)]*sinc((t-shift)/T)*np.cos(np.pi*beta*(t-shift)/T)/(1-(2*beta*(t-shift)/T)**2)
+
+    def TML(self,v_neg, vj, voltage, dvpos_dt, i2, Z0,Rs,Cj_bar,Cox_bar,Rsi,Cp_bar):
+        dvneg_dt = ( 1/Cp_bar*1/Z0*(voltage - v_neg) \
+                -dvpos_dt\
+                -1/Cp_bar/Rs*(voltage + v_neg - vj)\
+                -1/Cp_bar*i2)
+    
+        dvj_dt = 1/(Rs*Cj_bar)*(voltage + v_neg - vj)
+
+        di2_dt = (1/Rsi*dvpos_dt + \
+                1/Rsi*dvneg_dt\
+                - 1/Rsi/Cox_bar*i2)
+    
+        return dvneg_dt, dvj_dt, di2_dt
 
 
 
