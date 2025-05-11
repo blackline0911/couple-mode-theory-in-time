@@ -11,8 +11,8 @@ from Heater import Heater
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# mode = "scan_frequency"
-mode = "voltage_drive"
+mode = "scan_frequency"
+# mode = "voltage_drive"
 wl_in = 1.54685
 Pin = 1 #mW
 FSR = 0.0195
@@ -22,12 +22,12 @@ neff_pdk = [2.51105, 2.5111, 2.51113, 2.51116, 2.51118, 2.5112]
 mode_area = 0.22*0.5
 
 bit_num = 1000
-v_bias = -0.25
-vpp = 0.5
+v_bias = -0.4
+vpp = 2
 Rs = 53.9
 Cjs = [23.6e-15, 20e-15]
 f_drive=50
-level = "PAM4"
+level = "NRZ"
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,6 +72,8 @@ t = time(mode = sim.mode)
 
 if sim.mode == "scan_frequency":
     vbias = np.array([v_bias+vpp/2,v_bias,v_bias-vpp/2])
+    # vbias = np.array([1,0.5,0.25,0,-0.5,-1,-1.5,-2])
+    vbias = np.arange(0,-4,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=5000,resolution=1,buffer=100,driver=v)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
@@ -80,7 +82,7 @@ if sim.mode == "scan_frequency":
     plt.figure()
     for vb in vbias:
         v.v_bias = vb
-        b,s_minus,N = solving(sim,ring_mod,v,t,H)
+        b,s_minus = solving(sim,ring_mod,v,t,H)
         T = Transfer_function(ring_mod,t)
         wl,data = T.mapping(10*np.log10(abs(s_minus)**2/sim.Pin))
         wl,data_phase = T.mapping(180/np.pi*np.angle(s_minus))
@@ -98,13 +100,13 @@ if sim.mode == "scan_frequency":
         plt.title('Transfer function (no NL absorb) (func fit alpha)')
         plt.savefig("Transmission_vs_voltage (no NL) (func fit alpha)")
     plt.show()
-    highlevel_arg = int(np.argwhere(vbias==v_bias+vpp/2))
-    lowlevel_arg = int(np.argwhere(vbias==v_bias-vpp/2))
-    Extinction_ratio = ER(t,dB_inv(T_record[:,lowlevel_arg]),dB_inv(T_record[:,highlevel_arg]))
-    Tranmission_penalty = TP(dB_inv(T_record[:,highlevel_arg]),dB_inv(T_record[:,lowlevel_arg]),1)
-    Insertion_Loss = IL(t,dB_inv(T_record[:,highlevel_arg]),dB_inv(T_record[:,lowlevel_arg]))
-    ploting(wl*1000,Extinction_ratio,Tranmission_penalty,Insertion_Loss,x_label="wavelength(nm)",\
-            title="vswing = "+str(vbias[highlevel_arg])+"~"+str(vbias[lowlevel_arg]),filename="Transmission ER TP",leg=["ER","TP","IL"])
+    # highlevel_arg = int(np.argwhere(vbias==v_bias+vpp/2))
+    # lowlevel_arg = int(np.argwhere(vbias==v_bias-vpp/2))
+    # Extinction_ratio = ER(t,dB_inv(T_record[:,lowlevel_arg]),dB_inv(T_record[:,highlevel_arg]))
+    # Tranmission_penalty = TP(dB_inv(T_record[:,highlevel_arg]),dB_inv(T_record[:,lowlevel_arg]),1)
+    # Insertion_Loss = IL(t,dB_inv(T_record[:,highlevel_arg]),dB_inv(T_record[:,lowlevel_arg]))
+    # ploting(wl*1000,Extinction_ratio,Tranmission_penalty,Insertion_Loss,x_label="wavelength(nm)",\
+    #         title="vswing = "+str(vbias[highlevel_arg])+"~"+str(vbias[lowlevel_arg]),filename="Transmission ER TP",leg=["ER","TP","IL"])
     
 
     # v.v_bias=-1.5
@@ -123,9 +125,9 @@ if sim.mode == "scan_frequency":
     # wl,data_v3 = T.mapping(10*np.log10(abs(s_minus)**2/sim.Pin))
     # wl,data_phase_v3 = T.mapping(180/np.pi*np.angle(s_minus))
 
-    # V = np.linspace(-2,0,1000)
-    # ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Amplitude absorption coefficient (1/cm)",filename="alpha_V")
-    # ploting(V,ring_mod.neff(V),x_label="voltage (V)",title="neff vs Voltage (1/cm)",filename="neff_V")
+    V = np.linspace(-5,0,1000)
+    ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Amplitude absorption coefficient (1/cm)",filename="alpha_V")
+    ploting(V,ring_mod.neff(V),x_label="voltage (V)",title="neff vs Voltage (1/cm)",filename="neff_V")
 if sim.mode == "voltage_drive":
     
     # F = np.arange(50,51)

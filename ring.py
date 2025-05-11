@@ -264,11 +264,15 @@ class neff_fit(ring):
     c = 0
     b = 0
     a = 0
+    @staticmethod
+    def func(v, a, b,c):
+            return a*v/(abs(v)+b)**0.5 +c
     def renew(self):
         V = np.array([0.5,0,-0.5,-1,-1.5,-2])
-        self.a, self.b, self.c = np.polyfit(V, self.neff_data, 2)
+        # self.a, self.b, self.c = np.polyfit(V, self.neff_data, 2)
+        self.popt, pcov = curve_fit(self.func, V, self.neff_data)
     def __init__(self,neff_data:np.ndarray):
         self.neff_data =neff_data
         self.renew()
     def neff_V(self,V):
-        return self.a*V**2+self.b*V+self.c
+        return self.func(V,self.popt[0],self.popt[1],self.popt[2])

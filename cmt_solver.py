@@ -106,7 +106,7 @@ def CMT_scan_frequency(t_bar,eqs,SPM,FCA,ring,sim,driver,Heater=None):
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     f_res_bar = ring.w_res(t_bar)
-    b_bar , N_bar = eqs
+    b_bar  = eqs
     voltage = driver.v_bias
     alpha_linear = ring.alpha(voltage)
     dlambda = ring.lambda0/ring.ng*( ring.neff(voltage) - ring.neff(0))
@@ -119,7 +119,7 @@ def CMT_scan_frequency(t_bar,eqs,SPM,FCA,ring,sim,driver,Heater=None):
         - (ring.tu_e_bar_total_inv + \
         \
         ring.vg_in_cm*alpha_linear*(1 + ring.TPA_ratio/2*(sim.b0)**2*abs(b_bar)**2\
-        + N_bar*1e-5/2/(ring.vg_in_cm*alpha_linear) ) )*b_bar + \
+        + FCA/2/(ring.vg_in_cm*alpha_linear) ) )*b_bar + \
         \
         ring.input_kappa *1 + \
         \
@@ -129,8 +129,8 @@ def CMT_scan_frequency(t_bar,eqs,SPM,FCA,ring,sim,driver,Heater=None):
 
     # 這裡不加Q的方程式並不會影響結果
 
-    f3 = -N_bar/ring.tau_eff*(t0/1e-9) + FCA*abs(b_bar)**4
-    return [ f1,f3]
+    # f3 = -N_bar/ring.tau_eff*(t0/1e-9) + FCA*abs(b_bar)**4
+    return [ f1]
 
 # DeFine Solving process My Different simulation modes
 def CMT_voltage_driving(sim,ring, 
@@ -226,20 +226,22 @@ def solve_scan_frequency(sim,ring,
                         time,
                         Heater):
     SPM = ring.dw_SPM_coeff *(sim.b0)**2
-    FCA = ring.FCA_coeff/(ring.tau_eff*1e-9)*1e5*t0*(sim.b0)**4
+    # FCA = ring.FCA_coeff/(ring.tau_eff*1e-9)*1e5*t0*(sim.b0)**4
+    FCA = ring.FCA_coeff*t0*(sim.b0)**4
     b_init = 0+1j*0
-    N_init = 0
+    # N_init = 0
     sol = solve_ivp(CMT_scan_frequency ,
                     [0,time.t_max+time.buffer], 
-                    [b_init,N_init],
+                    [b_init],
                     method=sim.algorithm,
                     t_eval = time.t_total,atol = atol,rtol = rtol,
                     args=(SPM,FCA,ring,sim,driver,Heater))
     b_bar = sol.y[0]
-    N_bar = sol.y[1]
+    # N_bar = sol.y[1]
     s_minus_bar = (1-ring.input_kappa*b_bar)
 
-    return b_bar*sim.b0, s_minus_bar*sim.S0    ,N_bar/(ring.sigma_FCA*1e-17)*1e-5
+    # return b_bar*sim.b0, s_minus_bar*sim.S0    ,N_bar/(ring.sigma_FCA*1e-17)*1e-5
+    return b_bar*sim.b0, s_minus_bar*sim.S0
 
 def solving(sim,
             ring, 
@@ -265,8 +267,8 @@ def solving(sim,
     solver = partial(mode_dict[sim.mode],sim,ring,driver,time,Heater)
     
     if sim.mode == "scan_frequency":
-        b,  s_minus, N= solver()
-        return b,  s_minus   ,N
+        b,  s_minus = solver()
+        return b,  s_minus
     else:
         b, Q, s_minus, N, vneg, vj, i2 = solver()
         return b, Q, s_minus   ,N, vneg, vj, i2
