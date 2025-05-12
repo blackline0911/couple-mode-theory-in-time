@@ -87,7 +87,7 @@ def CMT_small_signal(t_bar,eqs,SPM=None,FCA=None,ring=None,sim=None,driver=None,
         (ring.tu_e_bar_total_inv + \
             ring.vg_in_cm*alpha_linear*(1 + ring.TPA_ratio/2*(sim.b0)**2*abs(b_bar)**2\
     \
-            + N_bar*1e-5/2/(ring.vg_in_cm*alpha_linear) ) )*b_bar + \
+            + N_bar*1e-5/2/(alpha_linear) ) )*b_bar + \
                 ring.input_kappa *1 + \
     \
         1j*ring.D_bar*(dlambda)*b_bar + \
@@ -101,36 +101,64 @@ def CMT_small_signal(t_bar,eqs,SPM=None,FCA=None,ring=None,sim=None,driver=None,
 
     return [ f1,f2 ,f3, dvneg_dt, dvj_dt, di2_dt]
 
-def CMT_scan_frequency(t_bar,eqs,SPM,FCA,ring,sim,driver,Heater=None):
+def CMT_scan_frequency(t_bar,eqs,SPM,TPA,FCA,T_args,ring,sim,driver,Heater=None):
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     f_res_bar = ring.w_res(t_bar)
-    b_bar  = eqs
+    # b_bar  = eqs
+    # b_bar, N_bar ,delta_T = eqs
+    b_bar, N_bar  = eqs
     voltage = driver.v_bias
     alpha_linear = ring.alpha(voltage)
+    tu_o_bar = 1/(ring.vg_in_cm*alpha_linear)
     dlambda = ring.lambda0/ring.ng*( ring.neff(voltage) - ring.neff(0))
     
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+    #         + tu_o_bar*FCA/2 * abs(b_bar)**4 ) )*b_bar + \
     # 不要忘記這裡的tau_o吸收是amplitude的吸收，不是energy的
-    f1 = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar + SPM*abs(b_bar)**2)*b_bar \
+
+    delta_T = (sim.b0*abs(b_bar))**2 / (T_args[1]*T_args[2]*T_args[3]) * (\
+        \
+        +ring.vg_in_cm*alpha_linear \
+        \
+        + TPA*abs(b_bar)**2 \
+        \
+        + ring.vg_in_cm * N_bar*1e-5 \
+        ) * Heater.tau_th
+    da_dt = 1j*2*np.pi*(f_res_bar-sim.f_pround_bar + SPM*abs(b_bar)**2 + \
+        \
+        (-ring.f_res_bar/ring.ng)*T_args[0]*delta_T )*b_bar \
+        \
         - (ring.tu_e_bar_total_inv + \
         \
-        ring.vg_in_cm*alpha_linear*(1 + ring.TPA_ratio/2*(sim.b0)**2*abs(b_bar)**2\
-        + FCA/2/(ring.vg_in_cm*alpha_linear) ) )*b_bar + \
+        1/tu_o_bar*( 1 + tu_o_bar*TPA/2*abs(b_bar)**2 \
+        + tu_o_bar*ring.vg_in_cm*N_bar*1e-5/2 * abs(b_bar)**4 ) )*b_bar + \
         \
         ring.input_kappa *1 + \
         \
-        1j*ring.D_bar*dlambda*b_bar +\
+        1j*ring.D_bar*dlambda*b_bar + \
         \
         1j*ring.D_bar*( ring.dlambda_dT*(Heater.T_surround-300) + (ring.HE*1e-6)*Heater.P)*b_bar
 
     # 這裡不加Q的方程式並不會影響結果
+    # N_bar = sigma_FCA*N*1e5
 
-    # f3 = -N_bar/ring.tau_eff*(t0/1e-9) + FCA*abs(b_bar)**4
-    return [ f1]
+    dN_dt = -N_bar/ring.tau_eff*(t0/1e-9) + FCA*abs(b_bar)**4
+
+    # dT_dt = (sim.b0*abs(b_bar))**2 / (T_args[1]*T_args[2]*T_args[3]) * (\
+    #     \
+    #     +ring.vg_in_cm*alpha_linear \
+    #     \
+    #     + TPA*abs(b_bar)**2 \
+    #     \
+    #     + ring.vg_in_cm * N_bar*1e-5 \
+    #     ) \
+    #     \
+    #     - t0/Heater.tau_th*delta_T
+    # return [ da_dt,dN_dt,dT_dt ]
+    return [ da_dt,dN_dt]
 
 # DeFine Solving process My Different simulation modes
 def CMT_voltage_driving(sim,ring, 
@@ -225,23 +253,34 @@ def solve_scan_frequency(sim,ring,
                         driver,
                         time,
                         Heater):
-    SPM = ring.dw_SPM_coeff *(sim.b0)**2
-    # FCA = ring.FCA_coeff/(ring.tau_eff*1e-9)*1e5*t0*(sim.b0)**4
-    FCA = ring.FCA_coeff*t0*(sim.b0)**4
+    
+    # 非線性吸收項記得乘以vg
+    SPM = ring.df_SPM_coeff *(sim.b0)**2
+    # FCA項因為還要算dN_dt，所以先不用乘以vg
+    FCA = ring.FCA_coeff/(ring.tau_eff*1e-9)*1e5*t0*(sim.b0)**4
+    # FCA = ring.FCA_coeff*t0*(sim.b0)**4
+    TPA = ring.TPA_coeff*t0*(sim.b0)**2 * ring.vg_in_cm
+    Aeff = 0.204 #um^2
+    Veff = Aeff*ring.L #um^3
+    ro_si = 2.329e-12 # g/um^3
+    cSi = 0.713*1000 # mJ/(g*K)
+    kappa_theta = 1.86e-4 # 1/K
+    T_args = [kappa_theta, ro_si, cSi, Veff]
     b_init = 0+1j*0
-    # N_init = 0
+    N_init = 0
+    delta_T_init = 0
     sol = solve_ivp(CMT_scan_frequency ,
                     [0,time.t_max+time.buffer], 
-                    [b_init],
+                    [b_init, N_init],
                     method=sim.algorithm,
                     t_eval = time.t_total,atol = atol,rtol = rtol,
-                    args=(SPM,FCA,ring,sim,driver,Heater))
+                    args=(SPM,TPA,FCA,T_args,ring,sim,driver,Heater))
     b_bar = sol.y[0]
-    # N_bar = sol.y[1]
+    N_bar = sol.y[1]
     s_minus_bar = (1-ring.input_kappa*b_bar)
 
-    # return b_bar*sim.b0, s_minus_bar*sim.S0    ,N_bar/(ring.sigma_FCA*1e-17)*1e-5
-    return b_bar*sim.b0, s_minus_bar*sim.S0
+    return b_bar*sim.b0, s_minus_bar*sim.S0    ,N_bar/(ring.sigma_FCA*1e-17)*1e-5
+    # return b_bar*sim.b0, s_minus_bar*sim.S0
 
 def solving(sim,
             ring, 
@@ -267,8 +306,8 @@ def solving(sim,
     solver = partial(mode_dict[sim.mode],sim,ring,driver,time,Heater)
     
     if sim.mode == "scan_frequency":
-        b,  s_minus = solver()
-        return b,  s_minus
+        b,  s_minus ,N = solver()
+        return b,  s_minus,N
     else:
         b, Q, s_minus, N, vneg, vj, i2 = solver()
         return b, Q, s_minus   ,N, vneg, vj, i2

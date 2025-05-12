@@ -17,7 +17,7 @@ Parameter of ring modulator
 		mode cross section : 0.11 um^2
 		Linear Amplitude absorption coefficient: 15.851599943752248 1/cm
 		Two Photon Absorption coefficient : 1110574187.2127972 1/cm.mJ
-		Free Carrier Absorption coefficient : 1.9977196997626917e+21 1/cm.mJ^2
+		Free Carrier Absorption coefficient : 2.9965795496440376e+18 1/cm.mJ^2
 	Physical parameter : 
 		intrinsic photon life time : 8.218768886566739 ps
 		couple extrinsic photon life time (port 1 ) : 8.155006339490422 ps
@@ -38,5 +38,5 @@ Parameter of ring modulator
 
 Simulation Parameter of time 
 	time resolution : 1e-13 sec
-	Max time range : 5000 ps
+	Max time range : 10000 ps
 		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 

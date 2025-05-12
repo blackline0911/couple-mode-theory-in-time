@@ -20,7 +20,7 @@ class ring(simulation):
                  ng = None,
                  FSR_shift = 0,
                  beta_TPA = 5,  #1e-13 (cm/mW)
-                 tau_eff = 20,  # ns
+                 tau_eff = 0.03,  # ns
                  sigma_FCA = 1.04,  #1e-17 cm^2
                  eta_h = 2.99,
                  HE = 254.3,
@@ -78,14 +78,13 @@ class ring(simulation):
             self.lambda0_reference = lambda0
         if FSR==None:
             self.ng = ng
-            self.vg = c/self.ng*t0
+            self.vg = c/self.ng*t0  #um/ps
         elif ng==None:
             self.FSR = FSR
             self.ng = self.lambda0_reference**2/(self.FSR*self.L)
-            self.vg = c/self.ng*t0
+            self.vg = c/self.ng*t0  #um/ps
         else:
             assert False, "\nDo not specify FSR and ng at the same time \nYou have to specify one of them.\n"
-        
         if (lambda0==None):
             self.FSR_shift = FSR_shift
             self.f_res_bar = self.find_accurate_res_frequency(m)
@@ -159,7 +158,7 @@ class ring(simulation):
         self.TPA_coeff = self.TPA_coeff / ( 10**(np.log10(self.TPA_coeff)//1) )
         self.TPA_coeff = self.TPA_coeff*10**( self.TPA_coeff_order)
         self.TPA_coeff = self.TPA_coeff*self.TPA_fit_factor
-        self.TPA_ratio = self.TPA_coeff/self.alpha_linear
+        # self.TPA_ratio = self.TPA_coeff*self.tu_o_bar
         # Note. The unit TPA_coeff here is  1/(cm*mJ), not 1/cm
      
         self.FCA_coeff = self.beta_TPA*self.tau_eff*self.sigma_FCA/ \
@@ -168,13 +167,13 @@ class ring(simulation):
         self.FCA_coeff = self.FCA_coeff / ( 10**(np.log10(self.FCA_coeff)//1) )
         self.FCA_coeff = self.FCA_coeff * 10**(self.FCA_coeff_order)
         self.FCA_coeff = self.FCA_coeff*self.FCA_fit_factor
-        self.FCA_ratio = self.FCA_coeff/self.alpha_linear
+        # self.FCA_ratio = self.FCA_coeff*self.tu_o_bar
         # Note. The unit FCA_coeff here is  1/(cm*mJ^2), not 1/cm
 
         # Self Phase Modulation
         self.n2 = 5.6e-9 #um^2/mW
-        dn_SPM = self.n2/(self.round_trip_time*(1e-12)*self.cross_section)
-        self.dw_SPM_coeff = -dn_SPM*2*np.pi*self.f_res_bar/self.ng  #rad/(ps*mJ)
+        dn_SPM = self.n2/(self.round_trip_time*(t0)*self.cross_section)
+        self.df_SPM_coeff = -dn_SPM*self.f_res_bar/self.ng  # 1/(ps*mJ)
 
     def w_res(self,t):
         """
