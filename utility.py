@@ -10,7 +10,7 @@ rtol = 1e-13
 atol = 1e-13
 # rtol = 1e-15
 # atol = 1e-20
-h=6.626e-34
+h=6.626e-34 #J*s
 
 def show(filename):
     """

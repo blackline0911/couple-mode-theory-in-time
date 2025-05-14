@@ -45,6 +45,10 @@ class simulation():
         self.Pin = experiment_condition["Pin"]
         self.S0 = sqrt(self.Pin)
         self.b0 = np.real(sqrt(t0)*self.S0)
+    def renew(self):
+        self.f_pround_bar = c/(self.lambda_incident)*t0
+        self.S0 = sqrt(self.Pin)
+        self.b0 = np.real(sqrt(t0)*self.S0)
         
     def set_dt(self, *args, **kwargs):
         raise NotImplementedError("Subclasses must implement this method")
@@ -211,7 +215,7 @@ class simulation():
                         f.write('\n\n')
 
                         f.write("\t\tInput Laser photon energy : ")
-                        f.write(str(ob.photon_energy)+" pJ")
+                        f.write(str(ob.photon_energy)+" fJ")
                         f.write('\n\n')
 
                         if self.mode == "scan_frequency":

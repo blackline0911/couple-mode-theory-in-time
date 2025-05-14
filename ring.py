@@ -36,7 +36,7 @@ class ring(simulation):
         \tgamma:amplitude couple through coefficient of the bus waveguide of ring\n
         \t(gamma can input multiple values for multi-port ring (or add-drop ring), \n
         \tthe first gamma is port of input Laser by default (can specified by input port ))\n
-        \talpha:round trip AMPLITUDE attenuation coefficient (one for no loss)\n
+        \talpha:round trip ENERGY attenuation coefficient (one for no loss)\n
         \tme : modulation efficiency (pm/reverse voltage)\n
         \tband : specify operating wavelength, "C" for 1550nm, "O" for 1310nm\n
         \tcross_section : mode area in waveguide (um^2)\n
@@ -96,17 +96,19 @@ class ring(simulation):
         self.cross_section =  cross_section #um^2
         self.kappa = (1-self.gamma**2)**0.5
         self.tu_e_bar = -self.L*self.ng/(c*t0*np.log((1-self.kappa**2)**0.5))
-        # self.tu_o_bar = -self.L*self.ng/(c*t0*np.log(alpha(0)))
+        # print("self.tu_e_bar = ",self.tu_e_bar)
+        # self.tu_o_bar = -self.L*self.ng/(c*t0*np.log(0.95124))
         self.tu_o_bar = self.ng/((c*1e-4)*t0*alpha(0))
+        # print("self.tu_o_bar = ",self.tu_o_bar)
         self.kappa_total = 0
         self.tu_e_bar_total_inv = 0
         for tu_e_bar in self.tu_e_bar:
-            self.kappa_total += (2/tu_e_bar)**0.5 
+            self.kappa_total += (1/tu_e_bar)**0.5 
             self.tu_e_bar_total_inv += 1/tu_e_bar
         assert input_port>0 , "\nInput port should start from one\n"
         
         # 為了保持微分方程不動，alpha_linear和gamma皆為Amplitude的loss(coupling through ratio)
-        self.input_kappa = (2/self.tu_e_bar[input_port-1])**0.5 
+        self.input_kappa = (1/self.tu_e_bar[input_port-1])**0.5 
         self.alpha_linear = np.real(1/(self.vg*1e-4*self.tu_o_bar))
         self.tu_t_bar = (self.tu_e_bar_total_inv+1/self.tu_o_bar)**(-1)
         self.beta_TPA = beta_TPA  #1e-13 (cm/mW)
@@ -153,26 +155,26 @@ class ring(simulation):
     def handle_nonlinear(self):
         #unit of TPA coeff : 1/(cm* mJ) 
         #  beta_TPA in 1e-9 order
-        self.TPA_coeff = self.beta_TPA/(self.round_trip_time*self.cross_section)
+        A_TPA = 0.1289
+        self.TPA_coeff = self.beta_TPA/(self.round_trip_time*A_TPA)
         self.TPA_coeff_order = np.log10(1e-13/(1e-12*1e-8)) + np.log10(self.TPA_coeff)//1
         self.TPA_coeff = self.TPA_coeff / ( 10**(np.log10(self.TPA_coeff)//1) )
         self.TPA_coeff = self.TPA_coeff*10**( self.TPA_coeff_order)
         self.TPA_coeff = self.TPA_coeff*self.TPA_fit_factor
-        # self.TPA_ratio = self.TPA_coeff*self.tu_o_bar
         # Note. The unit TPA_coeff here is  1/(cm*mJ), not 1/cm
-     
+
+        A_FCA = 0.116
         self.FCA_coeff = self.beta_TPA*self.tau_eff*self.sigma_FCA/ \
-            (2*self.photon_energy*self.round_trip_time**2*self.cross_section**2) 
+            (2*self.photon_energy*self.round_trip_time**2*A_FCA**2) 
         self.FCA_coeff_order = np.log10(1e-13*1e-9*1e-17/( 1e-12*(1e-12)**2*(1e-4)**4 ) ) + np.log10(self.FCA_coeff)//1
         self.FCA_coeff = self.FCA_coeff / ( 10**(np.log10(self.FCA_coeff)//1) )
         self.FCA_coeff = self.FCA_coeff * 10**(self.FCA_coeff_order)
         self.FCA_coeff = self.FCA_coeff*self.FCA_fit_factor
-        # self.FCA_ratio = self.FCA_coeff*self.tu_o_bar
         # Note. The unit FCA_coeff here is  1/(cm*mJ^2), not 1/cm
 
         # Self Phase Modulation
-        self.n2 = 5.6e-9 #um^2/mW
-        dn_SPM = self.n2/(self.round_trip_time*(t0)*self.cross_section)
+        self.n2 = 11e-9 #um^2/mW
+        dn_SPM = self.n2/(self.round_trip_time*1e-12*self.cross_section)
         self.df_SPM_coeff = -dn_SPM*self.f_res_bar/self.ng  # 1/(ps*mJ)
 
     def w_res(self,t):
@@ -217,7 +219,30 @@ class ring(simulation):
         assert np.imag((-B+sqrt(B**2-4*A*C))/(2*A))==0.0 , "\nimaginary part of index is supposed to be zero\n"
         
         return m_pround*c/n/self.L*t0
+    
+    def CMT(self,f_pround_bar,b_bar,N_bar,delta_T,f_res_bar,alpha_linear,TPA,SPM,T_args,dlambda,Heater):
+        da_dt = 1j*2*np.pi*(f_res_bar-f_pround_bar + SPM*abs(b_bar)**2 + \
+        \
+        (-self.f_res_bar/self.ng)*T_args[0]*delta_T )*b_bar \
+        \
+        - (self.tu_e_bar_total_inv/2 + \
+        \
+        self.vg_in_cm*alpha_linear/2 +\
+        self.vg_in_cm*TPA/2*abs(b_bar)**2 \
+        + self.vg_in_cm*N_bar*1e-5/2 * abs(b_bar)**4 ) *b_bar + \
+        \
+        self.input_kappa *1 + \
+        \
+        1j*self.D_bar*dlambda*b_bar + \
+        \
+        1j*self.D_bar*( self.dlambda_dT*(Heater.T_surround-300) + (self.HE*1e-6)*Heater.P)*b_bar
+        return da_dt
 
+    def FC_rate_equation(self,b_bar,N_bar,FCA,tau_eff):
+
+        dN_dt = -t0*N_bar/(tau_eff*1e-9) + FCA*abs(b_bar)**4
+        
+        return dN_dt
 class Transfer_function():
     def __init__(self,ring, time):
         self.ring = ring
@@ -246,12 +271,14 @@ class alpha_fit():
             return a*v/(abs(v)+b)**0.5 +c
     def renew(self):
         if self.input_mode=="amp":
-            self.alpha_pdk = -1/(self.L*1e-4)*np.log(self.RoundTripLoss)
+            self.alpha_pdk = -2/(self.L*1e-4)*np.log(self.RoundTripLoss)
         if self.input_mode=="energy":
-            self.alpha_pdk = -1/(2*self.L*1e-4)*np.log(self.RoundTripLoss)
+            self.alpha_pdk = -1/(self.L*1e-4)*np.log(self.RoundTripLoss)
         V = np.array([0,-0.5,-1,-1.5,-2])
         self.popt, pcov = curve_fit(self.func, V, self.alpha_pdk)
-    def __init__(self,RoundTripLoss:np.ndarray,L,input = "amp"):
+    def __init__(self,RoundTripLoss:np.ndarray,L,input = "energy"):
+        """input: specify which physic parameter of RoundTripLoss is using, energy or amplitude."""
+        """Now, alpha_pdk is Loss of Energy"""
         self.L = L
         self.RoundTripLoss = RoundTripLoss
         self.input_mode = input 
