@@ -4,9 +4,9 @@ Just for Future checking or further research
 Simulation Parameters and Settings
 	time scaling : 1e-12 sec
 	Simulation mode = scan_frequency
-	Input Laser Power : 10 mW
+	Input Laser Power : 1 mW
 
-	Input Laser wavelength : 1.54685 um
+	Input Laser wavelength : 1.5467 um
 
 Parameter of ring modulator
 	Structure parameter : 
@@ -17,7 +17,7 @@ Parameter of ring modulator
 		mode cross section : 0.11 um^2
 		Linear Amplitude absorption coefficient: 15.851599943752248 1/cm
 		Two Photon Absorption coefficient : 947735923.9209288 1/cm.mJ
-		Free Carrier Absorption coefficient : 2.694605570057436e+19 1/cm.mJ^2
+		Free Carrier Absorption coefficient : 2.694344270748835e+18 1/cm.mJ^2
 	Physical parameter : 
 		intrinsic photon life time : 8.218768886566739 ps
 		couple extrinsic photon life time (port 1 ) : 8.155006339490422 ps
@@ -28,7 +28,7 @@ Parameter of ring modulator
 		Group velocity : 76757377571911.95 um/s
 		Round Trip time : 0.4092886902821189 ps
 
-		Input Laser photon energy : 0.00012841741776565277 fJ
+		Input Laser photon energy : 0.00012842987177267732 fJ
 
 	The start wavelength is 1.546519481632075 um
 	The end wavelength is 1.5471401108763851 um

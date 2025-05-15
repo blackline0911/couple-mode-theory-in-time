@@ -229,7 +229,7 @@ class ring(simulation):
         \
         self.vg_in_cm*alpha_linear/2 +\
         self.vg_in_cm*TPA/2*abs(b_bar)**2 \
-        + self.vg_in_cm*N_bar*1e-5/2 * abs(b_bar)**4 ) *b_bar + \
+        + self.vg_in_cm*N_bar*1e-5/2  ) *b_bar + \
         \
         self.input_kappa *1 + \
         \

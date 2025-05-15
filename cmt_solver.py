@@ -34,8 +34,7 @@ def CMT_large_signal(t_bar,eqs,driver:driver,ring:ring,Heater:Heater,SPM=None,TP
 
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    print("FCA   = ",FCA )
-    # print("delta_T   = ",delta_T )
+    print("N_bar   = ",N_bar )
     # Coupled Transmission Line Equations
     dvneg_dt, dvj_dt, di2_dt = driver.TML(v_neg, vj, voltage, dvpos_dt, i2, \
                                           driver.Z0, Rs, cj_bar, Cox_bar, Rsi, Cp_bar)
@@ -110,7 +109,7 @@ def CMT_scan_frequency(t_bar,eqs,SPM,TPA,FCA,T_args,ring:ring,sim:simulation,dri
     #         + tu_o_bar*FCA/2 * abs(b_bar)**4 ) )*b_bar + \
     # 不要忘記這裡的tau_o吸收是energy的吸收，不是amplitude的
 
-    N_bar = FCA
+    N_bar = FCA* abs(b_bar)**4
 
     delta_T = (sim.b0*abs(b_bar))**2 / (T_args[1]*T_args[2]*T_args[3]) * (\
         \

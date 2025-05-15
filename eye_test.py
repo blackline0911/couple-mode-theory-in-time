@@ -13,7 +13,7 @@ from Heater import Heater
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # mode = "scan_frequency"
 mode = "voltage_drive"
-wl_in = 1.54685
+wl_in = 1.5467
 Pin = 1 #mW
 FSR = 0.0195
 radius = 5
@@ -53,10 +53,10 @@ ring_mod = ring(L=2*np.pi*radius,
             FCA_fit_factor=1
             )
 
-wl_min =  1.5464
-wl_max =  1.55
-# wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/2
-# wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/2
+# wl_min =  1.5464
+# wl_max =  1.55
+wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/2
+wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/2
 
 v = driver(f_drive=f_drive,
            v_bias=v_bias,
