@@ -34,29 +34,19 @@ def CMT_large_signal(t_bar,eqs,driver:driver,ring:ring,Heater:Heater,SPM=None,TP
 
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    print("N_bar   = ",N_bar )
+   
     # Coupled Transmission Line Equations
     dvneg_dt, dvj_dt, di2_dt = driver.TML(v_neg, vj, voltage, dvpos_dt, i2, \
                                           driver.Z0, Rs, cj_bar, Cox_bar, Rsi, Cp_bar)
     
     da_dt = ring.CMT(sim.f_pround_bar,b_bar,N_bar,delta_T,ring.f_res_bar,alpha_linear,TPA,SPM,T_args,dlambda,Heater)
-        
+    
     dQ_dt = (voltage/(driver.Rs * driver.cj_normalizing )*t0) \
         - (1/( driver.Rs ) )*driver.V_Q(Q_pround)*t0/driver.cj_normalizing
     
     dN_dt = ring.FC_rate_equation(b_bar,N_bar,FCA,ring.tau_eff)
 
-    # dT_dt = Heater.T_rate_equation(b_bar,N_bar,delta_T,T_args,alpha_linear,TPA,ring,sim)
-    dT_dt = (sim.b0*abs(b_bar))**2 / (T_args[1]*T_args[2]*T_args[3]) * (\
-        \
-        +ring.vg_in_cm*alpha_linear \
-        \
-        + ring.vg_in_cm *TPA*abs(b_bar)**2 \
-        \
-        + ring.vg_in_cm * N_bar*1e-5 \
-        ) \
-        \
-        - t0/Heater.tau_th*delta_T
+    dT_dt = Heater.T_rate_equation(b_bar,N_bar,delta_T,T_args,alpha_linear,TPA,ring,sim)
     return [ da_dt,dQ_dt ,dN_dt, dT_dt, dvneg_dt, dvj_dt, di2_dt]
 
 def CMT_small_signal(t_bar,eqs,driver:driver,SPM=None,TPA=None,FCA=None,ring=None,sim=None,Heater=None,T_args=None):
@@ -102,7 +92,7 @@ def CMT_scan_frequency(t_bar,eqs,SPM,TPA,FCA,T_args,ring:ring,sim:simulation,dri
     b_bar  = eqs
     voltage = driver.v_bias
     alpha_linear = ring.alpha(voltage)
-    dlambda = ring.lambda0/ring.ng*( ring.neff(voltage) - ring.neff(0))
+    df = -sim.f_pround_bar/ring.ng*( ring.neff(voltage) - ring.neff(0))*(ring.L_active/ring.L)
     
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,12 +111,16 @@ def CMT_scan_frequency(t_bar,eqs,SPM,TPA,FCA,T_args,ring:ring,sim:simulation,dri
         ) * Heater.tau_th
     
     # print("FCA absorption = ",N_bar*1e-5*abs(b_bar)**4,' 1/cm')
-    da_dt = ring.CMT(sim.f_pround_bar,b_bar,N_bar,delta_T,f_res_bar,alpha_linear,TPA,SPM,T_args,dlambda,Heater)
+    da_dt = ring.CMT(sim.f_pround_bar,b_bar,N_bar,delta_T,f_res_bar,alpha_linear,TPA,SPM,T_args,\
+                     (-c*1e-12/sim.f_pround_bar**2)*df , Heater)
+    # print((-c*1e-12/sim.f_pround_bar**2)*df)
 
     # N_bar = sigma_FCA*N*1e5
 
     # dN_dt = ring.FC_rate_equation(b_bar,N_bar,FCA,ring.tau_eff)
-    
+    # print("N =",N_bar*1/(ring.sigma_FCA*1e-17)*1e-5)
+    # print("FCA absorb =",N_bar*1e-5," 1/cm")
+    # print("FCA absorb 1 =",ring.FCA_coeff*abs(sim.b0*b_bar)**4," 1/cm")
     return [ da_dt ]
 
 # DeFine Solving process My Different simulation modes
@@ -147,6 +141,7 @@ def CMT_voltage_driving(sim,ring:ring,
     b_record = np.array([])
     Q_record = np.array([])
     N_record = np.array([])
+    T_record = np.array([])
     vneg_record = np.array([])
     vj_record = np.array([])
     i2_record = np.array([])
@@ -177,19 +172,22 @@ def CMT_voltage_driving(sim,ring:ring,
     Q_record = np.append(Q_record,sol.y[1])
     n = sol.y[2]
     N_record = np.append(N_record,sol.y[2])
-    vneg = sol.y[3]
+    T = sol.y[3]
+    T_record = np.append(T_record,sol.y[3])
+    vneg = sol.y[4]
     vneg_record = np.append(vneg_record,vneg)
-    vj = sol.y[4]
+    vj = sol.y[5]
     vj_record = np.append(vj_record,vj)
-    i2 = sol.y[5]
+    i2 = sol.y[6]
     i2_record = np.append(i2_record,i2)
 
     b_init = sol.y[0][-1]
     Q_init = sol.y[1][-1]
     N_init = sol.y[2][-1]
-    vneg_init = sol.y[3][-1]
-    vj_init = sol.y[4][-1]
-    i2_init = sol.y[5][-1]
+    delta_T_init = sol.y[3][-1]
+    vneg_init = sol.y[4][-1]
+    vj_init = sol.y[5][-1]
+    i2_init = sol.y[6][-1]
     
     for i in range(1,time.N):
         sol =  solve_ivp(ode_func ,
@@ -207,24 +205,27 @@ def CMT_voltage_driving(sim,ring:ring,
         Q_record = np.append(Q_record,q[1::])
         n = sol.y[2]
         N_record = np.append(N_record,n[1::])
-        vneg = sol.y[3]
+        T = sol.y[3]
+        T_record = np.append(T_record,T[1::])
+        vneg = sol.y[4]
         vneg_record = np.append(vneg_record,vneg[1::])
-        vj = sol.y[4]
+        vj = sol.y[5]
         vj_record = np.append(vj_record,vj[1::])
-        i2 = sol.y[5]
+        i2 = sol.y[6]
         i2_record = np.append(i2_record,i2[1::])
         b_init = sol.y[0][-1]
         Q_init = sol.y[1][-1]
         N_init = sol.y[2][-1]
-        vneg_init = sol.y[3][-1]
-        vj_init = sol.y[4][-1]
-        i2_init = sol.y[5][-1]
+        delta_T_init = sol.y[3][-1]
+        vneg_init = sol.y[4][-1]
+        vj_init = sol.y[5][-1]
+        i2_init = sol.y[6][-1]
     b_bar = b_record
     Q_bar = Q_record
     N_bar = N_record
     s_minus_bar = (1-ring.input_kappa*b_bar)
 
-    return b_bar*sim.b0, Q_bar*driver.cj_normalizing , s_minus_bar*sim.S0    ,N_bar/(ring.sigma_FCA*1e-17)*1e-5  ,\
+    return b_bar*sim.b0, Q_bar*driver.cj_normalizing , s_minus_bar*sim.S0    ,N_bar/(ring.sigma_FCA*1e-17)*1e-5  , T_record,\
             vneg_record, vj_record, i2_record
 
 def solve_scan_frequency(sim,ring:ring, 
@@ -286,5 +287,5 @@ def solving(sim,
         b,  s_minus  = solver()
         return b,  s_minus
     else:
-        b, Q, s_minus, N, vneg, vj, i2 = solver()
-        return b, Q, s_minus   ,N, vneg, vj, i2
+        b, Q, s_minus, N, T,vneg, vj, i2 = solver()
+        return b, Q, s_minus   ,N, T,vneg, vj, i2

@@ -8,6 +8,7 @@ from scipy.optimize import curve_fit
 class ring(simulation):
     id='ring'
     def __init__(self,L:float, 
+                 L_active:float,
                  alpha:float,
                 #  me:float,
                  gamma:np.ndarray,
@@ -20,12 +21,13 @@ class ring(simulation):
                  ng = None,
                  FSR_shift = 0,
                  beta_TPA = 5,  #1e-13 (cm/mW)
-                 tau_eff = 0.03,  # ns
+                 tau_eff = 20,  # ns
                  sigma_FCA = 1.04,  #1e-17 cm^2
                  eta_h = 2.99,
                  HE = 254.3,
                  FCA_fit_factor = 1,
                  TPA_fit_factor = 1,
+                 SPM_fit_factor = 1,
                  input_port = 1,
                 ):
         """
@@ -33,10 +35,10 @@ class ring(simulation):
         \tL : Length of cavity (micron)\n
         \tneff : effective phase index of waveguide in ring\n
         \tng: group index of waveguide in ring\n
-        \tgamma:amplitude couple through coefficient of the bus waveguide of ring\n
+        \tgamma:AMPLITUDE couple through coefficient of the bus waveguide of ring\n
         \t(gamma can input multiple values for multi-port ring (or add-drop ring), \n
         \tthe first gamma is port of input Laser by default (can specified by input port ))\n
-        \talpha:round trip ENERGY attenuation coefficient (one for no loss)\n
+        \talpha:round trip AMPLITUDE attenuation coefficient (one for no loss)\n
         \tme : modulation efficiency (pm/reverse voltage)\n
         \tband : specify operating wavelength, "C" for 1550nm, "O" for 1310nm\n
         \tcross_section : mode area in waveguide (um^2)\n
@@ -52,6 +54,7 @@ class ring(simulation):
         \tHE : Heater efficiency of ring (pm/mW)
         """
         self.L=L
+        self.L_active = L_active
         self.ng=ng
         self.gamma=np.real(gamma)
         assert (not np.imag(g)==0.0 for g in gamma) , "\nCoupling coefficient shall not over one\n"
@@ -94,12 +97,12 @@ class ring(simulation):
 
         self.round_trip_time = self.L*self.ng/(c*t0)
         self.cross_section =  cross_section #um^2
-        self.kappa = (1-self.gamma**2)**0.5
-        self.tu_e_bar = -self.L*self.ng/(c*t0*np.log((1-self.kappa**2)**0.5))
-        # print("self.tu_e_bar = ",self.tu_e_bar)
-        # self.tu_o_bar = -self.L*self.ng/(c*t0*np.log(0.95124))
-        self.tu_o_bar = self.ng/((c*1e-4)*t0*alpha(0))
-        # print("self.tu_o_bar = ",self.tu_o_bar)
+        self.kappa = (1-self.gamma**2)**0.5     #AMPLITUDE Coupling ratio
+
+        #AMPLITUDE photon life time
+        self.tu_e_bar = -self.L*self.ng/(c*t0*np.log(self.gamma))
+        self.tu_o_bar = self.ng/((c*1e-4)*t0*alpha(0)/2)
+
         self.kappa_total = 0
         self.tu_e_bar_total_inv = 0
         for tu_e_bar in self.tu_e_bar:
@@ -108,8 +111,8 @@ class ring(simulation):
         assert input_port>0 , "\nInput port should start from one\n"
         
         # 為了保持微分方程不動，alpha_linear和gamma皆為Amplitude的loss(coupling through ratio)
-        self.input_kappa = (1/self.tu_e_bar[input_port-1])**0.5 
-        self.alpha_linear = np.real(1/(self.vg*1e-4*self.tu_o_bar))
+        self.input_kappa = (2/self.tu_e_bar[input_port-1])**0.5 
+        self.alpha_linear = np.real(2/(self.vg*1e-4*self.tu_o_bar)) #Energy absorption (1/cm)
         self.tu_t_bar = (self.tu_e_bar_total_inv+1/self.tu_o_bar)**(-1)
         self.beta_TPA = beta_TPA  #1e-13 (cm/mW)
         self.tau_eff = tau_eff      #1e-9  s,
@@ -119,13 +122,14 @@ class ring(simulation):
         
         self.FCA_fit_factor = FCA_fit_factor
         self.TPA_fit_factor = TPA_fit_factor
+        self.SPM_fit_factor = SPM_fit_factor
         # normalized dw/dlambda
         self.D_bar = -2*np.pi*c/self.lambda_incident**2 * t0
         self.vg_in_cm = self.vg*1e-4
         # Note. photon energy is in unit. mJ, and normalized by t0
 
         
-        self.Q = np.real( ( (self.tu_e_bar_total_inv + 1/self.tu_o_bar  )/(self.f_res_bar*np.pi) )**(-1) )
+        self.Q = np.real( ( (2*self.tu_e_bar_total_inv + 2/self.tu_o_bar  )/(self.f_res_bar*2*np.pi) )**(-1) )
         # self.Q = np.real( ( (1/self.tu_e_bar + 1/self.tu_o_bar  )/(self.f_res_bar*np.pi) )**(-1) )
         
         self.renew()
@@ -175,7 +179,7 @@ class ring(simulation):
         # Self Phase Modulation
         self.n2 = 11e-9 #um^2/mW
         dn_SPM = self.n2/(self.round_trip_time*1e-12*self.cross_section)
-        self.df_SPM_coeff = -dn_SPM*self.f_res_bar/self.ng  # 1/(ps*mJ)
+        self.df_SPM_coeff = -dn_SPM*self.f_res_bar/self.ng *self.SPM_fit_factor  # 1/(ps*mJ)
 
     def w_res(self,t):
         """
@@ -217,7 +221,7 @@ class ring(simulation):
         C = -(self.ng-self.neff(0))/(f0_v0*self.L)*m_pround*c*t0
         n = np.real((-B+sqrt(B**2-4*A*C))/(2*A))
         assert np.imag((-B+sqrt(B**2-4*A*C))/(2*A))==0.0 , "\nimaginary part of index is supposed to be zero\n"
-        
+        print(m_pround)
         return m_pround*c/n/self.L*t0
     
     def CMT(self,f_pround_bar,b_bar,N_bar,delta_T,f_res_bar,alpha_linear,TPA,SPM,T_args,dlambda,Heater):
@@ -225,7 +229,7 @@ class ring(simulation):
         \
         (-self.f_res_bar/self.ng)*T_args[0]*delta_T )*b_bar \
         \
-        - (self.tu_e_bar_total_inv/2 + \
+        - (self.tu_e_bar_total_inv + \
         \
         self.vg_in_cm*alpha_linear/2 +\
         self.vg_in_cm*TPA/2*abs(b_bar)**2 \
@@ -271,20 +275,27 @@ class alpha_fit():
             return a*v/(abs(v)+b)**0.5 +c
     def renew(self):
         if self.input_mode=="amp":
-            self.alpha_pdk = -2/(self.L*1e-4)*np.log(self.RoundTripLoss)
+            self.alpha_data = -2/(self.L*1e-4)*np.log(self.RoundTripLoss)
         if self.input_mode=="energy":
-            self.alpha_pdk = -1/(self.L*1e-4)*np.log(self.RoundTripLoss)
+            self.alpha_data = -1/(self.L*1e-4)*np.log(self.RoundTripLoss)
         V = np.array([0,-0.5,-1,-1.5,-2])
-        self.popt, pcov = curve_fit(self.func, V, self.alpha_pdk)
-    def __init__(self,RoundTripLoss:np.ndarray,L,input = "energy"):
+        if self.fit_mode=="linear":
+            self.m, self.b = np.polyfit(V, self.alpha_data, 1)
+        if self.fit_mode == "func":
+            self.popt, pcov = curve_fit(self.func, V, self.alpha_data)
+    def __init__(self,RoundTripLoss:np.ndarray,L,input,fit_mode = "linear"):
         """input: specify which physic parameter of RoundTripLoss is using, energy or amplitude."""
         """Now, alpha_pdk is Loss of Energy"""
         self.L = L
+        self.fit_mode = fit_mode
         self.RoundTripLoss = RoundTripLoss
         self.input_mode = input 
         self.renew()
     def alpha_V(self,V):
-        return self.func(V,self.popt[0],self.popt[1],self.popt[2])
+        if self.fit_mode=="linear":
+            return self.m*(V)+self.b
+        if self.fit_mode=="func":
+            return self.func(V,self.popt[0],self.popt[1],self.popt[2])
     
 class neff_fit(ring):
     c = 0
@@ -295,10 +306,16 @@ class neff_fit(ring):
             return a*v/(abs(v)+b)**0.5 +c
     def renew(self):
         V = np.array([0.5,0,-0.5,-1,-1.5,-2])
-        # self.a, self.b, self.c = np.polyfit(V, self.neff_data, 2)
-        self.popt, pcov = curve_fit(self.func, V, self.neff_data)
-    def __init__(self,neff_data:np.ndarray):
+        if self.fit_mode=="linear":
+            self.m, self.b = np.polyfit(V, self.neff_data, 1)
+        if self.fit_mode == "func":
+            self.popt, pcov = curve_fit(self.func, V, self.neff_data)
+    def __init__(self,neff_data:np.ndarray,fit_mode = "linear"):
+        self.fit_mode = fit_mode
         self.neff_data =neff_data
         self.renew()
     def neff_V(self,V):
-        return self.func(V,self.popt[0],self.popt[1],self.popt[2])
+        if self.fit_mode=="linear":
+            return self.m*(V)+self.b
+        if self.fit_mode=="func":
+            return self.func(V,self.popt[0],self.popt[1],self.popt[2])

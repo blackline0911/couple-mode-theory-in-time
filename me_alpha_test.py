@@ -7,10 +7,10 @@ a = [0.95124, 0.95248, 0.95273, 0.95292, 0.95305]
 # a = [0.95248, 0.95273, 0.95292, 0.95305]
 L = 2*np.pi*5*1e-4
 LA = L
-alpha_pdk = -1/(L)*np.log(a)
+alpha_pdk = -2/(L)*np.log(a)
 print(alpha_pdk,"\n (1/cm)")
 a0 = 0.95124
-delta_alpha_pdk = alpha_pdk - (-1/(L)*np.log(a0))
+delta_alpha_pdk = alpha_pdk - (-2/(L)*np.log(a0))
 eps_si = 8.854e-14*3.46**2
 Nd = 3.309987243044366e+17
 Na = 6.441134216747775e+17
@@ -53,36 +53,54 @@ T=300
 # plt.show()
 
 V = np.array([0,-0.5,-1,-1.5,-2])
-alpha0 = -1/(L)*np.log(a0)
-# m,b = np.polyfit(V,alpha_pdk-alpha0, 1)
-# a,b,c = np.polyfit(V,alpha_pdk, 2)
+alpha0 = -2/(L)*np.log(a0)
 def func(v, a, b,c):
     return a*v/(abs(v)+b)**0.5 + c
 # para = np.polyfit(V,alpha_pdk, 1)
 popt, pcov = curve_fit(func, V, alpha_pdk)
-# print("popt = ",popt)
+print("popt = ",popt)
 print("alpha_pdk = ",alpha_pdk)
 plt.scatter(np.array([0,-0.5,-1,-1.5,-2]),alpha_pdk,c='r',marker='o',label='pdk data')
 plt.grid(color='g',linestyle='--', alpha=0.5)
 v = np.linspace(-3,1,1000)
-# plt.plot(v,m*v+b+alpha0)
-# plt.plot(v,a*v**2+b*v+c)
 plt.xlabel("voltage (V)")
 plt.title("absorption coefficient (1/cm)")
 plt.plot(v,func(v,popt[0],popt[1],popt[2]),label='fitting curve')
 plt.legend()
 plt.show()
 
-neff_pdk = [2.51105, 2.5111, 2.51113, 2.51116, 2.51118, 2.5112]
+
+dneff_dV = 7.2244e-05
+neff0 = 2.69021788
+neff_pdk = [neff0+dneff_dV*(-0.5),neff0, neff0+dneff_dV*0.5, neff0+dneff_dV*1, neff0+dneff_dV*1.5, neff0+dneff_dV*2]
+# neff_pdk = [2.51105, 2.5111, 2.51113, 2.51116, 2.51118, 2.5112]
 V = np.array([0.5,0,-0.5,-1,-1.5,-2])
 # a,b,c = np.polyfit(V,neff_pdk, 2)
-popt, pcov = curve_fit(func, V, neff_pdk)
+# popt, pcov = curve_fit(func, V, neff_pdk)
 plt.scatter(V,neff_pdk,c='r',marker='o',label='pdk data')
 V = np.linspace(-3,0.5,1000)
 # plt.plot(V,m*V+b,label="Linea fitting") 
-plt.plot(V,func(V,popt[0],popt[1],popt[2]),label="Quadra fitting") 
+# plt.plot(V,func(V,popt[0],popt[1],popt[2]),label="Quadra fitting") 
 plt.xlabel("voltage")
 plt.title("Neff vs Voltage")
+plt.grid(color='g',linestyle='--', alpha=0.5)
+plt.legend()
+plt.show()
+
+gamma_pdk = [0.947445, 0.947582, 0.947633, 0.947595, 0.947592, 0.947325]
+V = np.array([0.5,0,-0.5,-1,-1.5,-2])
+def gamma_func(v, a, b,c):
+    # return np.sin((a*v/(abs(v)+b)**0.5 + c)*L)
+    return c*np.sin((a*v)-b)
+# a,b,c = np.polyfit(V,neff_pdk, 2)
+popt, pcov = curve_fit(gamma_func, V, gamma_pdk)
+print(popt)
+plt.scatter(V,gamma_pdk,c='r',marker='o',label='pdk data')
+V = np.linspace(-3,0.5,1000)
+# plt.plot(V,m*V+b,label="Linea fitting") 
+plt.plot(V,gamma_func(V,popt[0],popt[1],popt[2]),label="func fitting") 
+plt.xlabel("voltage")
+plt.title("gamma vs Voltage")
 plt.grid(color='g',linestyle='--', alpha=0.5)
 plt.legend()
 plt.show()

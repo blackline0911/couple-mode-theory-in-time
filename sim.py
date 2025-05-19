@@ -10,6 +10,10 @@ class simulation():
     method = "small_signal"
     mode_dict = {}
     id = "simulation"
+    
+    # Result Variables
+    b = np.array([])
+    N = np.array([])
 
     # method of solving algorithm
     algorithm = 'RK45'
@@ -161,20 +165,20 @@ class simulation():
                         f.write(str(ob.cross_section) + ' um^2')
                         f.write('\n')
 
-                        f.write("\t\tLinear Amplitude absorption coefficient: ")
+                        f.write("\t\tLinear Energy absorption coefficient: ")
                         f.write(str(ob.alpha_linear)+" 1/cm")
                         f.write('\n')
 
-                        f.write("\t\tTwo Photon Absorption coefficient : ")
-                        f.write(str(ob.TPA_coeff)+" 1/cm.mJ")
+                        f.write("\t\tMax Two Photon Absorption coefficient : ")
+                        f.write(str(ob.TPA_coeff*(max(abs(self.b)**2)))+" 1/cm")
                         f.write('\n')
 
                         # f.write("\t\tTwo Photon Absorption coefficient ratio (compared to Linear absorption): ")
                         # f.write(str(np.real(ob.TPA_ratio*t0*self.Pin)))
                         # f.write('\n')
 
-                        f.write("\t\tFree Carrier Absorption coefficient : ")
-                        f.write(str(ob.FCA_coeff)+" 1/cm.mJ^2")
+                        f.write("\t\tMax Free Carrier Absorption coefficient : ")
+                        f.write(str(ob.FCA_coeff*(max(abs(self.b)**4)))+" 1/cm")
                         f.write('\n')
 
                         # f.write("\t\tFree Carrier Absorption coefficient ratio (compared to Linear absorption): ")
@@ -203,7 +207,7 @@ class simulation():
                         f.write('\n')
 
                         f.write("\t\tLineWidth : ")
-                        f.write(str(c*1e-9/ob.f_res_bar**2*ob.f_res_bar/ob.Q)+" nm")
+                        f.write(str(c*(1e-12/1e-3)/ob.f_res_bar**2*ob.f_res_bar/ob.Q)+" nm")
                         f.write('\n')
 
                         f.write("\t\tGroup velocity : ")

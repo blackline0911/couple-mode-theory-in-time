@@ -11,23 +11,25 @@ from Heater import Heater
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# mode = "scan_frequency"
-mode = "voltage_drive"
-wl_in = 1.5467
+mode = "scan_frequency"
+# mode = "voltage_drive"
+wl_in = 1.54
 Pin = 1 #mW
-FSR = 0.0195
+FSR = 0.019431
 radius = 5
-Amp_RoundTripLoss_pdk = [0.95124, 0.95248, 0.95273, 0.95292, 0.95305]
-neff_pdk = [2.51105, 2.5111, 2.51113, 2.51116, 2.51118, 2.5112]
+Amp_RoundTripLoss_pdk = [0.953553, 0.953921, 0.954268, 0.954521, 0.954725]
+neff_pdk = [2.680466, 2.680503, 2.680534, 2.680565, 2.680591, 2.680612]
 mode_area = 0.22*0.5
+gamma = 0.947582
 
-bit_num = 5
-v_bias = -1
+bit_num = 50
+v_bias = -0.5
 vpp = 1
 Rs = 53.9
 Cjs = [23.6e-15, 20e-15]
 f_drive=50
 level = "NRZ"
+
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -41,22 +43,29 @@ sim.main(experiment_condition=experiment_condition)
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_pdk,L = 2*np.pi*radius)
+a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_pdk,L = 2*np.pi*radius,input = "amp")
 n_fit = neff_fit(neff_data=neff_pdk)
 ring_mod = ring(L=2*np.pi*radius, 
             alpha=a_fit.alpha_V,
             neff=n_fit.neff_V,
             cross_section=mode_area,
             lambda_incident=wl_in,
-            gamma=[0.95105],
+            gamma=[gamma],
             FSR = FSR,
-            FCA_fit_factor=1
+            FSR_shift=-1,
+            FCA_fit_factor=1,
+            TPA_fit_factor=1,
+            SPM_fit_factor=1,
             )
 
 # wl_min =  1.5464
 # wl_max =  1.55
-wl_min =  ring_mod.lambda0 - ring_mod.lambda0/ring_mod.Q/2
-wl_max =  ring_mod.lambda0 + ring_mod.lambda0/ring_mod.Q/2
+# H = Heater(300,2.42,0.5*150/0.6)
+H = Heater(300,0,0.5*150/0.6)
+wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q/1.5
+wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q/2
+print("wl_min = ",wl_min ," um")
+print("wl_max = ",wl_max ," um")
 
 v = driver(f_drive=f_drive,
            v_bias=v_bias,
@@ -66,7 +75,7 @@ v = driver(f_drive=f_drive,
            cj = Cjs,
            PRBS=1,
            level = level)
-H = Heater(300,0,0.5*150/0.6)
+
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 os.chdir("./eye_diagram_test/")
@@ -78,16 +87,19 @@ if sim.mode == "scan_frequency":
     # vbias = np.arange(0,-0.5,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=10000,resolution=1,buffer=100,driver=v)
-    print("dt = ",t.dt)
+    print("LineWidth = ",ring_mod.lambda0/ring_mod.Q*1000," nm")
+    print(H.P*ring_mod.HE/1e6)
+    print("detuning wabvelength = ",(ring_mod.lambda0+H.P*ring_mod.HE/1e6-wl_in)*1000," nm")
+    print("dt  = ",t.dt)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
-    sim.save_data(ring_mod,t,v)
+    
     T_record = np.zeros( (int(len(t.t_total)-t.buffer*t0/t.dt-1),len(vbias)))
     plt.figure()
     for vb in vbias:
         v.v_bias = vb
-        b,s_minus = solving(sim,ring_mod,v,t,H)
+        sim.b,s_minus = solving(sim,ring_mod,v,t,H)
         T = Transfer_function(ring_mod,t)
-        wl,data = T.mapping(10*np.log10(abs(s_minus)**2/sim.Pin))
+        wl,data = T.mapping(dB(abs(s_minus)**2/sim.Pin))
         wl,data_phase = T.mapping(180/np.pi*np.angle(s_minus))
         plt.plot(wl,data,
                  label="V = "+str(vb))
@@ -103,7 +115,7 @@ if sim.mode == "scan_frequency":
         plt.title('Transfer function (no NL absorb) (func fit alpha)')
         plt.savefig("Transmission_vs_voltage (no NL) (func fit alpha)")
     plt.show()
-    ploting(t.t_total,abs(b)**2,x_label="time (ps)",title="Energy in Ring (mJ)")
+    ploting(t.t_total,abs(sim.b)**2,x_label="time (ps)",title="Energy in Ring (mJ)")
 
     
     highlevel_arg = int(np.argwhere(vbias==v_bias+vpp/2))
@@ -114,7 +126,7 @@ if sim.mode == "scan_frequency":
     ploting(wl*1000,Extinction_ratio,Tranmission_penalty,Insertion_Loss,x_label="wavelength(nm)",\
             title="vswing = "+str(vbias[highlevel_arg])+"~"+str(vbias[lowlevel_arg]),filename="Transmission ER TP",leg=["ER","TP","IL"])
     
-
+    sim.save_data(ring_mod,t,v)
     # v.v_bias=-1.5
     # b,Q,s_minus,N = solving(sim,ring_mod,v,t)
     # T = Transfer_function(ring_mod,t)
@@ -132,8 +144,8 @@ if sim.mode == "scan_frequency":
     # wl,data_phase_v3 = T.mapping(180/np.pi*np.angle(s_minus))
 
     V = np.linspace(-5,0,1000)
-    ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Amplitude absorption coefficient (1/cm)",filename="alpha_V")
-    ploting(V,ring_mod.neff(V),x_label="voltage (V)",title="neff vs Voltage (1/cm)",filename="neff_V")
+    ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
+    ploting(V,ring_mod.neff(V),x_label="voltage (V)",title="neff vs Voltage",filename="neff_V")
 if sim.mode == "voltage_drive":
 
     t.main(ring_mod,N=bit_num,driver=v)
@@ -150,13 +162,14 @@ if sim.mode == "voltage_drive":
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     print("\n\n.................Start Large Signal Simulation.................\n\n")
-    b,Q,s_minus,N ,vneg, vj, i2= solving(sim,ring_mod,v,t,H)
+    b,Q,s_minus,N ,delta_T,vneg, vj, i2= solving(sim,ring_mod,v,t,H)
     
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     name = 'eye_LargeSignal_'+str(bit_num)+'bits_with_TPA_FCA_f'+   \
         str(int(v.f_drive*1e-9))+"GHz_vpp_"+str(int(v.vpp*1000))+"mV_vbias_"+str(v.v_bias)
+    ploting(t.t_total,delta_T,x_label="time",title="delta T")
     sim.eye_diagram(t,v,abs(s_minus)**2,filename=name+str(v.level),plot_bit_num=2)
     sim.eye_diagram(t,v,vneg,filename="vneg LargeSignal"+str(v.level),plot_bit_num=2,title="vneg")
     sim.eye_diagram(t,v,vj,filename="vj LargeSignal"+str(v.level),plot_bit_num=2,title="vj")
