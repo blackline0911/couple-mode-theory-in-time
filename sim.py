@@ -153,8 +153,9 @@ class simulation():
                         f.write(str(ob.gamma))
                         f.write('\n')
 
-                        f.write("\t\tRound trip loss : ")
-                        f.write(str(np.real(2*ob.alpha(0))))
+                        f.write("\t\tRound trip loss : (energy) ")
+                        # f.write(str(np.real(2*ob.alpha(0))))
+                        f.write(str(np.exp(-ob.L*1e-4*ob.alpha(0))))
                         f.write('\n')
 
                         # f.write("\t\tmodulation efficiency : ")

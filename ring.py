@@ -221,7 +221,6 @@ class ring(simulation):
         C = -(self.ng-self.neff(0))/(f0_v0*self.L)*m_pround*c*t0
         n = np.real((-B+sqrt(B**2-4*A*C))/(2*A))
         assert np.imag((-B+sqrt(B**2-4*A*C))/(2*A))==0.0 , "\nimaginary part of index is supposed to be zero\n"
-        print(m_pround)
         return m_pround*c/n/self.L*t0
     
     def CMT(self,f_pround_bar,b_bar,N_bar,delta_T,f_res_bar,alpha_linear,TPA,SPM,T_args,dlambda,Heater):

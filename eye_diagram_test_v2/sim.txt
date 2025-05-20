@@ -16,8 +16,8 @@ Parameter of ring modulator
 		Round trip loss : 59.787554814344276
 		mode cross section : 0.11 um^2
 		Linear Energy absorption coefficient: 29.893777407172134 1/cm
-		Max Two Photon Absorption coefficient : 0.0017453592175970436 1/cm
-		Max Free Carrier Absorption coefficient : 0.005154156729280298 1/cm
+		Max Two Photon Absorption coefficient : 0.001736178169684544 1/cm
+		Max Free Carrier Absorption coefficient : 0.00510007491034328 1/cm
 	Physical parameter : 
 		intrinsic photon life time : 8.892549029665286 ps
 		couple extrinsic photon life time (port 1 ) : 12.186085736433085 ps
@@ -30,10 +30,10 @@ Parameter of ring modulator
 
 		Input Laser photon energy : 0.00015179770951459577 fJ
 
-	The start wavelength is 1.3083942074609851 um
-	The end wavelength is 1.3088068385415799 um
+	The start wavelength is 1.3084000000000002 um
+	The end wavelength is 1.3089 um
 	scanning frequency range for better accuracy is 0.06191588834734473 THz
-	Current frequency range is 0.07223845881546254 THz
+	Current frequency range is 0.08752733473269814 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 

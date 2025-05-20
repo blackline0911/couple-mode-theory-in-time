@@ -1,3 +1,8 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from utility import *
+# Refer to imec paper : 
+# Electro-Opto-Thermal Dynamic Compact Model for Ring Modulator Arrays
 from utility import *
 import numpy as np
 from cmath import *
@@ -10,20 +15,20 @@ import time as timer
 from Heater import Heater
 
 
-# Refer：A 5×200 Gbps microring modulator silicon chip empowered by two-segment Z-shape junction
+# Refer：O-Band Silicon Ring Modulators With Highly Efficient Electro- and Thermo-Optic Modulation
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 mode = "scan_frequency"
 # mode = "voltage_drive"
-wl_in = 1.3086
+wl_in = 1.3054
 Pin = 1 #mW
-FSR = 0.0057
-radius = 12
-La_Lc_ratio = 1/3
+FSR = 0.0135
+radius = 5
+La_Lc_ratio = 1
 dneff_dV = 0.00010048812689651478
 
-G_plus_alpha = 51.70815539157168
-ratio = 81/192
+G_plus_alpha = 38.680029629629686
+ratio = 1-16/48
 alpha_energy0 =  G_plus_alpha*(1-ratio) #1/cm
 G_energy = G_plus_alpha*ratio #1/cm
 print("alpha_energy0 = ",alpha_energy0, "1/cm")
@@ -40,15 +45,15 @@ print(alpha_energy_data)
 
 # gamma = 0.947582
 gamma = np.exp(-G_energy/2*2*np.pi*radius*1e-4)
-print("gamma = ",gamma)
-neff0 = 2.69021788
+print("gamma(amplitude) = ",gamma)
+neff0 = 2.700996734985352
 neff_calculated = [neff0+dneff_dV*(-0.5),neff0, neff0+dneff_dV*0.5, neff0+dneff_dV*1, neff0+dneff_dV*1.5, neff0+dneff_dV*2]
 print("neff_calculated = ",neff_calculated)
 mode_area = 0.22*0.5
 
 
 bit_num = 50
-v_bias = -3
+v_bias = -0.3
 vpp = 1.6
 Rs = 53.9
 Cjs = [23.6e-15, 20e-15]
@@ -83,11 +88,11 @@ ring_mod = ring(L=2*np.pi*radius,
             TPA_fit_factor=1,
             SPM_fit_factor=1,
             band="O",
-            HE = 73
+            HE = 222
             )
-print("G_energy + alpha_energy = ",(2*np.pi*229.08878656875603*1e12*ring_mod.ng/(c*1e-4))/3700," 1/cm")
-print("delta neff/delta V = ",11e-6*ring_mod.D_bar*( -ring_mod.ng/(2*np.pi*ring_mod.f_res_bar) )*(1/La_Lc_ratio))
-# print("ng = ",ring_mod.ng)
+print("G_energy + alpha_energy = ",(2*np.pi*229646656979082.34*ring_mod.ng/(c*1e-4))/5000," 1/cm")
+# print("delta neff/delta V = ",11e-6*ring_mod.D_bar*( -ring_mod.ng/(2*np.pi*ring_mod.f_res_bar) )*(1/La_Lc_ratio))
+print("ng = ",ring_mod.ng)
 # print("lambda0 = ",ring_mod.lambda0)
 # print("f0 = ",ring_mod.f_res_bar," THz")
 
@@ -98,9 +103,9 @@ print("delta neff/delta V = ",11e-6*ring_mod.D_bar*( -ring_mod.ng/(2*np.pi*ring_
 # wl_min =  1.5464
 # wl_max =  1.55
 # H = Heater(300,2.42,0.5*150/0.6)
-H = Heater(300,0,0.5*150/0.6)
-wl_min =  1.3084
-wl_max =  1.3089
+H = Heater(300,0,0.5*2*np.pi*5/0.6)
+wl_min =  1.3052
+wl_max =  1.3058
 # wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q/1.5
 # wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q/2
 print("wl_min = ",wl_min ," um")
@@ -117,17 +122,17 @@ v = driver(f_drive=f_drive,
 
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-os.chdir("./eye_diagram_test_v2/")
+os.chdir("./thermal_model_test_v2/")
 t = time(mode = sim.mode)
 
 if sim.mode == "scan_frequency":
     vbias = np.array([v_bias+vpp/2,v_bias,v_bias-vpp/2])
     # vbias = np.array([0,-1,-2,-3,-4])
-    vbias = np.arange(-3,-3.5,-0.5)
+    vbias = np.arange(0,-0.5,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
-    t.main(ring_mod,t_max=20000,resolution=2,buffer=100,driver=v)
+    t.main(ring_mod,t_max=10000,resolution=2,buffer=100,driver=v)
     print("LineWidth = ",ring_mod.lambda0/ring_mod.Q*1000," nm")
-    print(H.P*ring_mod.HE/1e6)
+    print("Thermal tuning wavelength = ",H.P*ring_mod.HE/1e6," um")
     print("detuning wabvelength = ",(ring_mod.lambda0+H.P*ring_mod.HE/1e6-wl_in)*1000," nm")
     print("dt  = ",t.dt)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
@@ -166,21 +171,6 @@ if sim.mode == "scan_frequency":
     #         title="vswing = "+str(vbias[highlevel_arg])+"~"+str(vbias[lowlevel_arg]),filename="Transmission ER TP",leg=["ER","TP","IL"])
     
     sim.save_data(ring_mod,t,v)
-    # v.v_bias=-1.5
-    # b,Q,s_minus,N = solving(sim,ring_mod,v,t)
-    # T = Transfer_function(ring_mod,t)
-    # wl,data_v1 = T.mapping(10*np.log10(abs(s_minus)**2/sim.Pin))
-    # wl,data_phase_v1 = T.mapping(180/np.pi*np.angle(s_minus))
-    # v.v_bias=0
-    # b,Q,s_minus,N = solving(sim,ring_mod,v,t)
-    # T = Transfer_function(ring_mod,t)
-    # wl,data_v2 = T.mapping(10*np.log10(abs(s_minus)**2/sim.Pin))
-    # wl,data_phase_v2 = T.mapping(180/np.pi*np.angle(s_minus))
-    # v.v_bias=-0.5
-    # b,Q,s_minus,N = solving(sim,ring_mod,v,t)
-    # T = Transfer_function(ring_mod,t)
-    # wl,data_v3 = T.mapping(10*np.log10(abs(s_minus)**2/sim.Pin))
-    # wl,data_phase_v3 = T.mapping(180/np.pi*np.angle(s_minus))
 
     V = np.linspace(-5,0,1000)
     ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
@@ -192,16 +182,38 @@ if sim.mode == "voltage_drive":
     print("\n\nSimulation at ",str(v.f_drive/1e9)," GHz, ",str(v.vpp),"V vpp, ",str(v.v_bias),"V vbias\n\n")
     filename = ('sim_'+str(int(v.f_drive/1e9))+"GHz_vpp_"+str(int(vpp*1000))+"mV"+"_vbias_"+str(v_bias)+str(v.level))
     sim.save_data(ring_mod,t,v,file_name=filename)
-    v.method = "large_signal"
     sim.eye_diagram(t,v,v.v,
                     filename="voltage_eye_"+str(int(v.f_drive/1e9))+"GHz_vpp_"+str(int(vpp))+"_vbias_"+str(v_bias),
                     title="vpos" ,
                     plot_bit_num=2)
-    
+    def CMT_thermal(t_bar,eqs,driver:driver,ring:ring,Heater:Heater,SPM=None,TPA=None,FCA=None,sim=None,T_args=None):
+        # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        b_bar , Q_pround ,N_bar,delta_T, v_neg, vj, i2= eqs
+        voltage = np.real(driver.refering_v(t_bar))
+        dvpos_dt = driver.refering_dv_dt(voltage,t_bar)
+        alpha_linear = ring.alpha(vj)
+        cj = driver.Cj_V(vj)
+        dlambda = ring.lambda0/ring.ng*( ring.neff(vj) - ring.neff(0))
+        tau_heater = 5e-6
+
+        # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
+        da_dt = ring.CMT(sim.f_pround_bar,b_bar,N_bar,delta_T,ring.f_res_bar,alpha_linear,TPA,SPM,T_args,dlambda,Heater)
+        
+        dQ_dt = (voltage/(driver.Rs * driver.cj_normalizing )*t0) \
+            - (1/( driver.Rs ) )*driver.V_Q(Q_pround)*t0/driver.cj_normalizing
+        
+        dN_dt = ring.FC_rate_equation(b_bar,N_bar,FCA,ring.tau_eff)
+
+        dT_dt = Heater.T_rate_equation(b_bar,N_bar,delta_T,T_args,alpha_linear,TPA,ring,sim)
+        return [ da_dt,dQ_dt ,dN_dt, dT_dt, dvneg_dt, dvj_dt, di2_dt]
+
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    print("\n\n.................Start Large Signal Simulation.................\n\n")
     b,Q,s_minus,N ,delta_T,vneg, vj, i2= solving(sim,ring_mod,v,t,H)
     
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -214,31 +226,4 @@ if sim.mode == "voltage_drive":
     sim.eye_diagram(t,v,vneg,filename="vneg LargeSignal"+str(v.level),plot_bit_num=2,title="vneg")
     sim.eye_diagram(t,v,vj,filename="vj LargeSignal"+str(v.level),plot_bit_num=2,title="vj")
 
-    # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    # print("\n\n.................Start Small Signal Simulation.................\n\n")
-    # v.method = "small_signal"
-    # b1,Q1,s_minus1,N1,vneg, vj, i2 = solving(sim,ring_mod,v,t,H)
-
-    # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    # ploting(t.t_total,v.v,v.V_Q(Q/v.cj_normalizing),x_label='time (ps)',title='voltage (V)',filename='voltage_and_Large_signal_vj',leg=['External Voltage','Large Signal Vj'])
-    # ploting(t.t_total,v.v,Q1/v.cj_normalizing,x_label='time (ps)',title='voltage (V)',filename='voltage_and_small_signal_vj',leg=['External Voltage','Small Signal Vj'])
-    # ploting(t.t_total,v.v-v.V_Q(Q/v.cj_normalizing),x_label='time (ps)',title='Resistor Voltage (V)',filename='Rv')
-    # # print("len of t_total = ",len(t.t_total))
-    # # print("len of Q = ",len(Q))
-    # # print("len of Q1 = ",len(Q1))
-    # ploting(t.t_total,Q,Q1,x_label='time (ps)',title='Q',filename='Q',leg=['Large Signal','Small Signal'])
-    # ploting(t.t_total,v.V_Q(Q/v.cj_normalizing),Q1/v.cj_normalizing,x_label='time (ps)',title='junction voltage',filename='junction voltage',leg=['large signal','small signal'])
-    # ploting(t.t_total,abs(s_minus)**2,abs(s_minus1)**2,x_label='time (ps)',title='output Power',filename='output Power',leg=['large signal','small signal'])
-
-    # # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    # # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    # name = 'eye_SmallSignal_'+str(bit_num)+'bits_with_TPA_FCA_f'+   \
-    #     str(int(v.f_drive*1e-9))+"GHz_vpp_"+str(int(v.vpp))+"_vbias_"+str(v.v_bias)
-    # sim.eye_diagram(t,v,abs(s_minus1)**2,filename=name+str(v.level),plot_bit_num=2)
-    # sim.eye_diagram(t,v,vneg,filename="vneg SmallSignal"+str(v.level),plot_bit_num=2,title="vneg")
-    # sim.eye_diagram(t,v,vj,filename="vj SmallSignal"+str(v.level),plot_bit_num=2,title="vj")
