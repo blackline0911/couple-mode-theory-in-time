@@ -1,60 +1,59 @@
 __name__ = __main__
 __doc__ = None
 __package__ = None
-__loader__ = <_frozen_importlib_external.SourceFileLoader object at 0x0000020E5EFD8080>
+__loader__ = <_frozen_importlib_external.SourceFileLoader object at 0x00000245F3B4D910>
 __spec__ = None
 __annotations__ = {}
 __builtins__ = <module 'builtins' (built-in)>
-__file__ = d:\Homework\Master_degree\ring\CMT\CMT\couple-mode-theory-in-time\cmt_test.py
+__file__ = d:\Master_degree\paper\·L¤À¤èµ{\couple-mode-theory-in-time\cmt_test.py
 __cached__ = None
-ploting = <function ploting at 0x0000020E100AFC40>
+ploting = <function ploting at 0x00000245F9002DE0>
 h = 6.626e-34
-np = <module 'numpy' from 'C:\\Users\\kevin\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\numpy\\__init__.py'>
+np = <module 'numpy' from 'C:\\Users\\kevin\\anaconda3\\Lib\\site-packages\\numpy\\__init__.py'>
 AccuracyWarning = <class 'scipy.integrate._quadrature.AccuracyWarning'>
 BDF = <class 'scipy.integrate._ivp.bdf.BDF'>
 DOP853 = <class 'scipy.integrate._ivp.rk.DOP853'>
 DenseOutput = <class 'scipy.integrate._ivp.base.DenseOutput'>
 IntegrationWarning = <class 'scipy.integrate._quadpack_py.IntegrationWarning'>
 LSODA = <class 'scipy.integrate._ivp.lsoda.LSODA'>
-ODEintWarning = <class 'scipy.integrate._odepack_py.ODEintWarning'>
 OdeSolution = <class 'scipy.integrate._ivp.common.OdeSolution'>
 OdeSolver = <class 'scipy.integrate._ivp.base.OdeSolver'>
 RK23 = <class 'scipy.integrate._ivp.rk.RK23'>
 RK45 = <class 'scipy.integrate._ivp.rk.RK45'>
 Radau = <class 'scipy.integrate._ivp.radau.Radau'>
 complex_ode = <class 'scipy.integrate._ode.complex_ode'>
-cumtrapz = <function cumtrapz at 0x0000020E0E20F380>
-cumulative_simpson = <function cumulative_simpson at 0x0000020E0E20F9C0>
-cumulative_trapezoid = <function cumulative_trapezoid at 0x0000020E0E20F420>
-dblquad = <function dblquad at 0x0000020E0E2389A0>
-dop = <module 'scipy.integrate.dop' from 'C:\\Users\\kevin\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\scipy\\integrate\\dop.py'>
-fixed_quad = <function fixed_quad at 0x0000020E0E20F060>
-lsoda = <module 'scipy.integrate.lsoda' from 'C:\\Users\\kevin\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\scipy\\integrate\\lsoda.py'>
-newton_cotes = <function newton_cotes at 0x0000020E0E20FCE0>
-nquad = <function nquad at 0x0000020E0E238AE0>
+cumtrapz = <function cumtrapz at 0x00000245F7202A20>
+cumulative_trapezoid = <function cumulative_trapezoid at 0x00000245F7202AC0>
+dblquad = <function dblquad at 0x00000245F7203C40>
+dop = <module 'scipy.integrate.dop' from 'C:\\Users\\kevin\\anaconda3\\Lib\\site-packages\\scipy\\integrate\\dop.py'>
+fixed_quad = <function fixed_quad at 0x00000245F72027A0>
+lsoda = <module 'scipy.integrate.lsoda' from 'C:\\Users\\kevin\\anaconda3\\Lib\\site-packages\\scipy\\integrate\\lsoda.py'>
+newton_cotes = <function newton_cotes at 0x00000245F7203060>
+nquad = <function nquad at 0x00000245F7203D80>
 ode = <class 'scipy.integrate._ode.ode'>
-odeint = <function odeint at 0x0000020E0E0FFD80>
-odepack = <module 'scipy.integrate.odepack' from 'C:\\Users\\kevin\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\scipy\\integrate\\odepack.py'>
-qmc_quad = <function qmc_quad at 0x0000020E0E238360>
-quad = <function quad at 0x0000020E0E238720>
-quad_vec = <function quad_vec at 0x0000020E0E458AE0>
-quadpack = <module 'scipy.integrate.quadpack' from 'C:\\Users\\kevin\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\scipy\\integrate\\quadpack.py'>
-quadrature = <function quadrature at 0x0000020E0E20F2E0>
-romb = <function romb at 0x0000020E0E20FA60>
-romberg = <function romberg at 0x0000020E0E20FE20>
-simps = <function simps at 0x0000020E0E20F560>
-simpson = <function simpson at 0x0000020E0E20F880>
-solve_bvp = <function solve_bvp at 0x0000020E0E430D60>
-solve_ivp = <function solve_ivp at 0x0000020E0E458360>
-tplquad = <function tplquad at 0x0000020E0E238A40>
-trapezoid = <function trapezoid at 0x0000020E0E20EC00>
-trapz = <function trapz at 0x0000020E0E20ED40>
-vode = <module 'scipy.integrate.vode' from 'C:\\Users\\kevin\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\scipy\\integrate\\vode.py'>
-plt = <module 'matplotlib.pyplot' from 'C:\\Users\\kevin\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\matplotlib\\pyplot.py'>
+odeint = <function odeint at 0x00000245F7203600>
+odepack = <module 'scipy.integrate.odepack' from 'C:\\Users\\kevin\\anaconda3\\Lib\\site-packages\\scipy\\integrate\\odepack.py'>
+qmc_quad = <function qmc_quad at 0x00000245F7203560>
+quad = <function quad at 0x00000245F7203A60>
+quad_vec = <function quad_vec at 0x00000245F76D6A20>
+quadpack = <module 'scipy.integrate.quadpack' from 'C:\\Users\\kevin\\anaconda3\\Lib\\site-packages\\scipy\\integrate\\quadpack.py'>
+quadrature = <function quadrature at 0x00000245F72028E0>
+romb = <function romb at 0x00000245F7202D40>
+romberg = <function romberg at 0x00000245F7202FC0>
+simps = <function simps at 0x00000245F7202C00>
+simpson = <function simpson at 0x00000245F7202CA0>
+solve_bvp = <function solve_bvp at 0x00000245F76AE700>
+solve_ivp = <function solve_ivp at 0x00000245F76D6160>
+tplquad = <function tplquad at 0x00000245F7203CE0>
+trapezoid = <function trapezoid at 0x00000245F7202520>
+trapz = <function trapz at 0x00000245F72025C0>
+vode = <module 'scipy.integrate.vode' from 'C:\\Users\\kevin\\anaconda3\\Lib\\site-packages\\scipy\\integrate\\vode.py'>
+plt = <module 'matplotlib.pyplot' from 'C:\\Users\\kevin\\anaconda3\\Lib\\site-packages\\matplotlib\\pyplot.py'>
 c = 299792458000000.0
 R = 50
-Pin = 0.001
+Pin = 1e-05
 n0 = 2.588
+ng = 2.588
 lambda0 = 1.3550736312483975
 w0 = 1390073221020092.8
 alpha_ring = 0.16
@@ -85,7 +84,7 @@ gamma0 = 10000000000.0
 sigma = 4.726681800648563e-17
 beta = 2.584751976252231e+46
 Kin = 20486.323903546967
-P = 20.486323903546968
+P = 0.20486323903546969
 T_front = 9.990486533189008
 tau = 100.0
 sigma_FCD = 5.246232419819328
@@ -96,57 +95,55 @@ epsilon_T = 0.08492977213189017
 eta_c = 1.0
 tau_theta = 1000.0
 buffer = 5000
-wl_start = 1355.0374959515643
-wl_end = 1355.1097665452307
+wl_start = 1354.7122782800645
+wl_end = 1355.4349842167305
 f_in_bar = 22123.71718764684
 f0_bar = 22123.70243850205
-f_start_bar = 22124.29241963324
-f_end_bar = 22123.112488835683
-tmax = 30000
+f_start_bar = 22129.603666146355
+f_end_bar = 22117.80435734009
+tmax = 10000
 d = 0.18534309613601235
-cmt = <function cmt at 0x0000020E5EFF9620>
+cmt = <function cmt at 0x00000245F3AF04A0>
 a_init = 0j
 n_init = 0
 T_init = 0
 dt = 1e-12
-t = [0.000000e+00 1.000000e-02 2.000000e-02 ... 3.499997e+04 3.499998e+04
- 3.499999e+04]
+t = [0.000000e+00 1.000000e-02 2.000000e-02 ... 1.499997e+04 1.499998e+04
+ 1.499999e+04]
 sol =   message: The solver successfully reached the end of the integration interval.
   success: True
    status: 0
-        t: [ 0.000e+00  1.000e-02 ...  3.500e+04  3.500e+04]
-        y: [[0.00000000e+00+0.00000000e+00j 4.52196133e-02-1.33352758e-04j
-             ... 2.87790095e+00+1.29961220e+00j
-             2.87790045e+00+1.29961295e+00j]
-            [0.00000000e+00+0.00000000e+00j 8.36771884e-09+0.00000000e+00j
-             ... 9.96110947e+03+0.00000000e+00j
-             9.96110763e+03+0.00000000e+00j]
-            [0.00000000e+00+0.00000000e+00j 2.89738786e-07+0.00000000e+00j
-             ... 3.07927214e+06+0.00000000e+00j
-             3.07927134e+06+0.00000000e+00j]]
+        t: [ 0.000e+00  1.000e-02 ...  1.500e+04  1.500e+04]
+        y: [[0.00000000e+00+0.j         4.51936720e-03-0.00013335j ...
+             2.42381941e-03+0.07666367j 2.42380963e-03+0.07666351j]
+            [0.00000000e+00+0.j         8.36429756e-13+0.j         ...
+             3.76939375e-03+0.j         3.76936293e-03+0.j        ]
+            [0.00000000e+00+0.j         2.89530849e-09+0.j         ...
+             9.61085135e-01+0.j         9.61078035e-01+0.j        ]]
       sol: None
  t_events: None
  y_events: None
-     nfev: 940148
+     nfev: 975050
      njev: 0
       nlu: 0
-a = [0.        +0.00000000e+00j 0.04521961-1.33352758e-04j
- 0.09035356-5.32745298e-04j ... 2.87790145+1.29961146e+00j
- 2.87790095+1.29961220e+00j 2.87790045+1.29961295e+00j]
-n = [0.00000000e+00+0.j 8.36771884e-09+0.j 2.66931118e-07+0.j ...
- 9.96111131e+03+0.j 9.96110947e+03+0.j 9.96110763e+03+0.j]
-T = [0.00000000e+00+0.j 2.89738786e-07+0.j 2.31848603e-06+0.j ...
- 3.07927293e+06+0.j 3.07927214e+06+0.j 3.07927134e+06+0.j]
-u = [0.00000000e+00+0.00000000e+00j 4.30113460e-08-1.26840572e-10j
- 8.59412080e-08-5.06729064e-10j ... 2.73736120e-06+1.23614587e-06j
- 2.73736073e-06+1.23614657e-06j 2.73736025e-06+1.23614728e-06j]
-N = [0.00000000e+00+0.j 3.95515444e-25+0.j 1.26169846e-23+0.j ...
- 4.70830035e-13+0.j 4.70829948e-13+0.j 4.70829861e-13+0.j]
-tpa_loss = 2.07187140000643
-fca_loss = (7.808953412444754e-34+0j)
-spm_shift = 0.06508971630125689
-s_minus = [0.03162278+0.00000000e+00j 0.03156422+1.72681733e-07j
- 0.03150578+6.89864856e-07j ... 0.02789611-1.68289852e-03j
- 0.02789611-1.68289948e-03j 0.02789611-1.68290045e-03j]
-w_res = <function w_res at 0x0000020E1094A8E0>
+a = [0.        +0.j         0.00451937-0.00013335j 0.00901466-0.00053226j ...
+ 0.00242383+0.07666382j 0.00242382+0.07666367j 0.00242381+0.07666351j]
+n = [0.00000000e+00+0.j 8.36429756e-13+0.j 2.66496400e-11+0.j ...
+ 3.76942457e-03+0.j 3.76939375e-03+0.j 3.76936293e-03+0.j]
+T = [0.00000000e+00+0.j 2.89530849e-09+0.j 2.31185564e-08+0.j ...
+ 9.61092234e-01+0.j 9.61085135e-01+0.j 9.61078035e-01+0.j]
+u = [0.00000000e+00+0.00000000e+00j 4.29866715e-09-1.26834671e-10j
+ 8.57443853e-09-5.06271548e-10j ... 2.30546325e-09+7.29199971e-08j
+ 2.30545394e-09+7.29198515e-08j 2.30544462e-09+7.29197060e-08j]
+N = [0.00000000e+00+0.j 1.76959184e+04+0.j 5.63812863e+05+0.j ...
+ 7.97477962e+13+0.j 7.97471441e+13+0.j 7.97464921e+13+0.j]
+delta_T = [0.00000000e+00+0.j 2.89806555e-10+0.j 2.31405711e-09+0.j ...
+ 9.62007437e-02+0.j 9.62000330e-02+0.j 9.61993225e-02+0.j]
+tpa_loss = 0.04079816416444328
+fca_loss = (134.60583225638217+0j)
+spm_shift = 0.001281711273714902
+s_minus = [0.00316228+0.00000000e+00j 0.00315643+1.72673700e-07j
+ 0.0031506 +6.89241990e-07j ... 0.00315914-9.92738465e-05j
+ 0.00315914-9.92736483e-05j 0.00315914-9.92734501e-05j]
+w_res = <function w_res at 0x00000245FA120CC0>
 f = <_io.TextIOWrapper name='file.txt' mode='w' encoding='cp950'>
