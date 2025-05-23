@@ -25,6 +25,10 @@ class ring(simulation):
                  sigma_FCA = 1.04,  #1e-17 cm^2
                  eta_h = 2.99,
                  HE = 254.3,
+                 Akerr = 0.204, # um^2
+                 Atpa = 0.1289, # um^2
+                 Afca = 0.116, # um^2
+                 n2 = 11e-9, #um^2/mW
                  FCA_fit_factor = 1,
                  TPA_fit_factor = 1,
                  SPM_fit_factor = 1,
@@ -85,6 +89,7 @@ class ring(simulation):
         elif ng==None:
             self.FSR = FSR
             self.ng = self.lambda0_reference**2/(self.FSR*self.L)
+            self.ng = 2.588
             self.vg = c/self.ng*t0  #um/ps
         else:
             assert False, "\nDo not specify FSR and ng at the same time \nYou have to specify one of them.\n"
@@ -117,6 +122,10 @@ class ring(simulation):
         self.beta_TPA = beta_TPA  #1e-13 (cm/mW)
         self.tau_eff = tau_eff      #1e-9  s,
         self.sigma_FCA = sigma_FCA  #1e-17 cm^2
+        self.Atpa = Atpa
+        self.Afca = Afca
+        self.Akerr = Akerr
+        self.n2 = n2
         super().__init__()
         self.lambda_incident = lambda_incident
         
@@ -159,7 +168,7 @@ class ring(simulation):
     def handle_nonlinear(self):
         #unit of TPA coeff : 1/(cm* mJ) 
         #  beta_TPA in 1e-9 order
-        A_TPA = 0.1289
+        A_TPA = self.Atpa
         self.TPA_coeff = self.beta_TPA/(self.round_trip_time*A_TPA)
         self.TPA_coeff_order = np.log10(1e-13/(1e-12*1e-8)) + np.log10(self.TPA_coeff)//1
         self.TPA_coeff = self.TPA_coeff / ( 10**(np.log10(self.TPA_coeff)//1) )
@@ -167,7 +176,7 @@ class ring(simulation):
         self.TPA_coeff = self.TPA_coeff*self.TPA_fit_factor
         # Note. The unit TPA_coeff here is  1/(cm*mJ), not 1/cm
 
-        A_FCA = 0.116
+        A_FCA = self.Afca
         self.FCA_coeff = self.beta_TPA*self.tau_eff*self.sigma_FCA/ \
             (2*self.photon_energy*self.round_trip_time**2*A_FCA**2) 
         self.FCA_coeff_order = np.log10(1e-13*1e-9*1e-17/( 1e-12*(1e-12)**2*(1e-4)**4 ) ) + np.log10(self.FCA_coeff)//1
@@ -177,8 +186,7 @@ class ring(simulation):
         # Note. The unit FCA_coeff here is  1/(cm*mJ^2), not 1/cm
 
         # Self Phase Modulation
-        self.n2 = 11e-9 #um^2/mW
-        dn_SPM = self.n2/(self.round_trip_time*1e-12*self.cross_section)
+        dn_SPM = self.n2/(self.round_trip_time*1e-12*self.Akerr)
         self.df_SPM_coeff = -dn_SPM*self.f_res_bar/self.ng *self.SPM_fit_factor  # 1/(ps*mJ)
 
     def w_res(self,t):

@@ -46,6 +46,7 @@ sim.main(experiment_condition=experiment_condition)
 a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_pdk,L = 2*np.pi*radius,input = "amp")
 n_fit = neff_fit(neff_data=neff_pdk)
 ring_mod = ring(L=2*np.pi*radius, 
+            L_active=2*np.pi*radius,
             alpha=a_fit.alpha_V,
             neff=n_fit.neff_V,
             cross_section=mode_area,
