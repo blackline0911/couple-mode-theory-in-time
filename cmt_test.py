@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 
 c=299792458e6 #um/s
 R = 50  #um
-Pin = 300e-6 #W
+Pin = 10e-3 #W
 n0 = 2.588
-ng = n0
+ng = 4.08
 # lambda0 = 2*np.pi*R*n0/125  #um
 lambda0 = 2*np.pi*R*n0/600  #um
 w0 = 2*np.pi*c/lambda0
-alpha_ring = 0.16  #1/cm
+alpha_ring = 30  #1/cm
 alpha_c = alpha_ring #critical couple 1/cm
 tau_ph = 1/(c*1e-4*(alpha_ring+alpha_c)/ng) # (energy life time) c*(alpha_ring+alpha_c)/n0
 eta_lin = 0.4
@@ -51,10 +51,10 @@ eta_lin =  0.5 #alpha_abs/alpha_ring
 # //////////////////////////////////////////////////////////////////////////////////////////////////////
 # Normalization
 
-gamma0 = c*1e-4*alpha/(2*n0)   #1/s amplitude
-# gamma0 = 1e10
+# gamma0 = c*1e-4*alpha/(2*n0)   #1/s amplitude
+gamma0 = 1e12
 sigma = sigma_r1*wL/(ng*gamma0) #cm^3 * rad
-beta = (299792458)**2*beta2/(gamma0*2*h*(wL/2/np.pi)*ng**2*(Afca*L*1e-6)**2) #1/J^2
+beta = (299792458)**2*beta2/(gamma0*2*h*(wL/2/np.pi)*ng**2*(Afca*L*1e-6)**2) #1/J^2/m^3
 Kin = (sigma*1e-6*beta)**0.5*gamma_c/(gamma0**2)
 P = Kin*Pin
 T_front = wL*kappa_theta/(ng*gamma0) # *dT dummy
@@ -75,8 +75,8 @@ tau_theta = tau_th*gamma0
 # //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 buffer = 5000
-wl_start = lambda0*1000 - lambda0/Q*1000*100
-wl_end = lambda0*1000 + lambda0/Q*1000*100
+wl_start = lambda0*1000 - lambda0/Q*1000*10
+wl_end = lambda0*1000 + lambda0/Q*1000*500
 
 f_in_bar = wL/gamma0/2/np.pi
 f0_bar = w0/gamma0/2/np.pi
@@ -91,7 +91,7 @@ def cmt(t, eqs):
         fres = -(f_end_bar-f_start_bar)/tmax*(t-buffer)+ f0_bar+ (f_in_bar-f_start_bar)
     delta = (fres - f_in_bar)
     a, n, T = eqs
-    da_dt = ( 1j*delta - 1j*(0*nkerr*abs(a)**2 - 0*(n + sigma_FCD*n**0.8) + 0*T) \
+    da_dt = ( 1j*delta - 1j*(nkerr*abs(a)**2 - (n + sigma_FCD*n**0.8) + T) \
             \
             - ( d + alpha_TPA*abs(a)**2 + Gamma_FCA*n ) )*a \
             \
@@ -119,7 +119,7 @@ u = a/(sigma*1e-6*beta)**0.25
 N = n/sigma         #1/cm
 delta_T = n0*gamma0/(wL*kappa_theta)*T
 tpa_loss = np.max(beta2*(299792458)/(ng*Atpa*L*1e-6)*abs(u)**2  *1e-2) #1/cm
-fca_loss = np.max( sigma_FCA*1e-4*N)       #1/cm
+fca_loss = np.max( sigma_FCA*1e4*N)       #1/cm
 print("linear loss = ", d*gamma0*ng/(c*1e-4)," 1/cm")
 print(beta2*(299792458)/(ng*Atpa*L*1e-6))
 print("max N = ",np.max(N)," 1/cm^3")
@@ -130,15 +130,15 @@ spm_shift = np.max( wL*n2*(299792458)/(ng**2*Akerr*L*1e-6) *abs(u)**2 )*(2*np.pi
 s_minus = (Pin)**0.5 - (gamma_c)**0.5*u
 
 
-def w_res(t):
+def f_res(t):
         """
         return the resonant frequency according to specified time t
         """
         if isinstance(t,np.ndarray):
             ans = -(f_end_bar-f_start_bar)/tmax*(t-buffer) + f0_bar+ (f_in_bar-f_start_bar)
-            return np.where(t<buffer, f0_bar+(f_in_bar-f_start_bar), ans)
-# plt.plot(t,w_res(t))
-# plt.show()
+            return np.where(t<buffer, f0_bar+(f_in_bar-f_start_bar), ans)*gamma0
+plt.plot(t,f_res(t)/1e12 + (n + sigma_FCD*n**0.8)/2/np.pi*gamma0/1e12)
+plt.show()
 
 with open('file.txt', 'w') as f:
     x = dict(globals())
@@ -148,17 +148,19 @@ def mapping(data):
         """
         Convert the frequency scanning time domain signal to transfer function of ring
         """
-        i = int( np.argwhere(t==buffer)[0] )
-        f_res_bar = w_res(t)
+        i = int( np.argwhere(abs(t-buffer)<dt*gamma0)[0] )
+        f_res_bar = f_res(t)
         L = len(f_res_bar)
         wl = c*1e3/(f0_bar + f_in_bar -f_res_bar)/gamma0
         wl = wl[i:L-1]
         data = data[i:L-1]
         return wl, data
 # wl, Trans = mapping(10*np.log10(abs( s_minus)**2/Pin))
-ploting(t,10*np.log10(abs( s_minus)**2/Pin) , x_label="time (normalized by gamma0)",title="Transmission scanning")
-ploting(t, abs(u)**2, x_label="time (normalized by gamma0)",title="Energy in Ring (J)")
-ploting(t, delta_T, x_label="time (normalized by gamma0)",title="T (Kelvin)")
-ploting(t, N, x_label="time (normalized by gamma0)",title="Free Carrier conctration (1/cm^3)")
-ploting(t,beta2*(299792458)/(ng*Atpa*L*1e-6)*abs(u)**2*1e-2,x_label="t",title="tpa loss")
-ploting(t,sigma_FCA*1e-4*N,x_label="t",title="FCA loss (1/cm)")
+ploting(t/gamma0,10*np.log10(abs( s_minus)**2/Pin) , x_label="time (normalized by gamma0)",title="Transmission scanning")
+# ploting(wl,Trans , x_label="time (normalized by gamma0)",title="Transmission scanning")
+ploting(t/gamma0, abs(u)**2, x_label="time (normalized by gamma0)",title="Energy in Ring (J)")
+ploting(t/gamma0, delta_T, x_label="time (normalized by gamma0)",title="T (Kelvin)")
+ploting(t/gamma0, N, x_label="time (normalized by gamma0)",title="Free Carrier conctration (1/cm^3)")
+ploting(t/gamma0,beta2*(299792458)/(ng*Atpa*L*1e-6)*abs(u)**2*1e-2,x_label="t",title="tpa loss")
+ploting(t/gamma0,sigma_FCA*1e4*N,x_label="t",title="FCA loss (1/cm)")
+ploting(t/gamma0,alpha_TPA*abs(a)**2 , Gamma_FCA*n,x_label="t",title="Normalized Nonlinear loss ",leg=["TPA","FCA"])
