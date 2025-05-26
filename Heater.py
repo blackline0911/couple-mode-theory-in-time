@@ -7,6 +7,7 @@ class Heater:
                  V,
                  R,
                  tau_th = 100, #ns 
+                 Aeff = 0.22*0.5,
                  ):
         self.V = V
         self.R = R
@@ -18,7 +19,7 @@ class Heater:
         self.P = self.V**2/self.R*1000 #mW
 
     def T_rate_equation(self,b_bar,N_bar,delta_T,T_args,alpha_linear,TPA,ring,sim):
-        dT_dt = (sim.b0*abs(b_bar))**2 / (T_args[1]*T_args[2]*T_args[3]) * (\
+        dT_dt = abs(b_bar)**2*T_args[1] * (\
         \
         +ring.vg_in_cm*alpha_linear \
         \

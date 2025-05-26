@@ -89,7 +89,6 @@ class ring(simulation):
         elif ng==None:
             self.FSR = FSR
             self.ng = self.lambda0_reference**2/(self.FSR*self.L)
-            self.ng = 2.588
             self.vg = c/self.ng*t0  #um/ps
         else:
             assert False, "\nDo not specify FSR and ng at the same time \nYou have to specify one of them.\n"

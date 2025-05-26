@@ -26,7 +26,7 @@ def CMT_large_signal(t_bar,eqs,driver:driver,ring:ring,Heater:Heater,SPM=None,TP
     alpha_linear = ring.alpha(vj)
     cj = driver.Cj_V(vj)
     cj_bar = cj/t0
-    dlambda = ring.lambda0/ring.ng*( ring.neff(vj) - ring.neff(0))
+    dlambda = ring.lambda0/ring.ng*( ring.neff(vj) - ring.neff(0))*(ring.L_active/ring.L)
     Rs = driver.Rs
     Cox_bar = driver.Cox/t0
     Rsi = driver.Rsi
@@ -59,7 +59,7 @@ def CMT_small_signal(t_bar,eqs,driver:driver,SPM=None,TPA=None,FCA=None,ring=Non
     cj = driver.Cj
     cj_bar = cj/t0
     alpha_linear = ring.alpha(vj)
-    dlambda = ring.lambda0/ring.ng*( ring.neff(vj) - ring.neff(0))
+    dlambda = ring.lambda0/ring.ng*( ring.neff(vj) - ring.neff(0))*(ring.L_active/ring.L)
     Rs = driver.Rs
     Cox_bar = driver.Cox/t0
     Rsi = driver.Rsi
@@ -132,12 +132,15 @@ def CMT_voltage_driving(sim,ring:ring,
         'large_signal' : CMT_large_signal,
         'small_signal' : CMT_small_signal,
     }
+    # Aeff = Heater.Aeff #um^2
     Aeff = 0.204 #um^2
     Veff = Aeff*ring.L #um^3
     ro_si = 2.329e-12 # g/um^3
     cSi = 0.713*1000 # mJ/(g*K)
     kappa_theta = 1.86e-4 # 1/K
-    T_args = [kappa_theta, ro_si, cSi, Veff]
+    T_coeff = sim.b0**2/( ro_si*cSi*Veff)
+    print("T_coeff = ",T_coeff)
+    T_args = [kappa_theta, T_coeff]
     b_record = np.array([])
     Q_record = np.array([])
     N_record = np.array([])

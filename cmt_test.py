@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 
 c=299792458e6 #um/s
 R = 50  #um
-Pin = 1e-3 #W
+Pin = 10e-6 #W
 n0 = 2.588
 ng = n0
 # lambda0 = 2*np.pi*R*n0/125  #um
 lambda0 = 2*np.pi*R*n0/621  #um
 w0 = 2*np.pi*c/lambda0
-alpha_ring = 30  #1/cm
+alpha_ring = 0.16  #1/cm
 alpha_c = alpha_ring #critical couple 1/cm
 tau_ph = 1/(c*1e-4*(alpha_ring+alpha_c)/ng) # (energy life time) c*(alpha_ring+alpha_c)/n0
 eta_lin = 0.4
@@ -51,8 +51,8 @@ eta_lin =  0.5 #alpha_abs/alpha_ring
 # //////////////////////////////////////////////////////////////////////////////////////////////////////
 # Normalization
 
-# gamma0 = c*1e-4*alpha/(2*n0)   #1/s amplitude
-gamma0 = 1e12
+gamma0 = c*1e-4*alpha/(2*n0)   #1/s amplitude
+# gamma0 = 1e12
 sigma = sigma_r1*wL/(ng*gamma0) #cm^3 * rad
 beta = (299792458)**2*beta2/(gamma0*2*h*(wL/2/np.pi)*ng**2*(Afca*L*1e-6)**2) #1/J^2/m^3
 Kin = (sigma*1e-6*beta)**0.5*gamma_c/(gamma0**2)
@@ -74,20 +74,24 @@ tau_theta = tau_th*gamma0
 # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-buffer = 100
-wl_start = lambda0*1000 - lambda0/Q*1000/1.5
-wl_end = lambda0*1000 + lambda0/Q*1000/2
+buffer = 1000
+wl_start = lambda0*1000 - lambda0/Q*1000*100
+wl_end = lambda0*1000 + lambda0/Q*1000*100
+# wl_start = lambda0*1000 - lambda0/Q*1000/1.5
+# wl_end = lambda0*1000 + lambda0/Q*1000/2
 
 f_in_bar = wL/gamma0/2/np.pi
 f0_bar = w0/gamma0/2/np.pi
 f_start_bar = c*1e3/wl_start/gamma0
 f_end_bar = c*1e3/wl_end/gamma0
-tmax = 10000
+tmax = 50000
 d = (c*1e-4*alpha/2/ng)/gamma0
 
 print(1/(c*1e-4*alpha/2/ng))
 print("wl_in = ",wl_in," um")
 print("ng = ",ng)
+print("nkerr = ",nkerr)
+print("1/gamma_c = ",2/gamma_c)
 def cmt(t, eqs):
     if t<(buffer):
         fres = f0_bar+(f_in_bar-f_start_bar)
@@ -98,9 +102,9 @@ def cmt(t, eqs):
     a = eqs
     n = tau*abs(a)**4
     T=0
-    da_dt = ( 1j*delta - 1j*(nkerr*abs(a)**2 - 0*(n + sigma_FCD*n**0.8) + 0*T) \
+    da_dt = ( 1j*2*np.pi*delta - 1j*0*(nkerr*abs(a)**2 - (n + sigma_FCD*n**0.8) + 0*T) \
             \
-            - ( d + 0*alpha_TPA*abs(a)**2 +0* Gamma_FCA*n ) )*a \
+            - ( d + alpha_TPA*abs(a)**2 + Gamma_FCA*n ) )*a \
             \
             +(P)**0.5
     
@@ -115,7 +119,7 @@ a_init = 0+1j*0
 n_init = 0
 T_init = 0
 
-dt = 1e-12
+dt = 1e-13
 print("delta t in normalized time = ",dt*gamma0)
 t = np.arange(0,int(tmax+buffer),dt*gamma0)
 sol = solve_ivp(cmt, [0,int(tmax+buffer)], [a_init, n_init, T_init], method="RK45", t_eval=t,atol=1e-20,rtol=1e-15)

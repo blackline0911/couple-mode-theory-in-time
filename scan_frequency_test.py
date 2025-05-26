@@ -16,13 +16,13 @@ from Heater import Heater
 mode = "scan_frequency"
 # mode = "voltage_drive"
 wl_in =  1309.0917632973328/1000
-Pin = 1 #mW
+Pin = 10e-3 #mW
 FSR = 0.002258
 radius = 50
-energy_RoundTripLoss_data = np.ones(5)*np.exp(-30*2*np.pi*radius*1e-4)
+energy_RoundTripLoss_data = np.ones(5)*np.exp(-0.16*2*np.pi*radius*1e-4)
 neff_pdk =  np.ones(6)*2.588
 mode_area = 0.22*0.5
-gamma = np.exp(-30/2*2*np.pi*radius*1e-4)
+gamma = np.exp(-0.16/2*2*np.pi*radius*1e-4)
 
 bit_num = 50
 v_bias = -0.5
@@ -70,8 +70,8 @@ print("w0 = ",ring_mod.f_res_bar/t0*2*np.pi)
 # wl_max =  1.55
 # H = Heater(300,2.42,0.5*150/0.6)
 H = Heater(300,0,0.5*150/0.6)
-wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q/1.5
-wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q/2
+wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q*100
+wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q*100
 print("wl_min = ",wl_min ," um")
 print("wl_max = ",wl_max ," um")
 
@@ -94,7 +94,7 @@ if sim.mode == "scan_frequency":
     # vbias = np.array([0,-0.5,-1,-1.5,-2])
     vbias = np.arange(0,-0.5,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
-    t.main(ring_mod,t_max=10000,resolution=1,buffer=100,driver=v)
+    t.main(ring_mod,t_max=50000,resolution=1,buffer=1000,driver=v)
     print("LineWidth = ",ring_mod.lambda0/ring_mod.Q*1000," nm")
     print(H.P*ring_mod.HE/1e6)
     print("detuning wabvelength = ",(ring_mod.lambda0+H.P*ring_mod.HE/1e6-wl_in)*1000," nm")
