@@ -17,9 +17,10 @@ from Heater import Heater
 mode = "voltage_drive"
 wl_in = 1.308566
 Pin = 3.68 #mW
+# Pin = 1 #mW
 FSR = 0.0057
 radius = 12
-La_Lc_ratio = 1/3
+La_Lc_ratio = 3/3
 dneff_dV = 0.00010048812689651478
 
 G_plus_alpha = 51.70815539157168
@@ -50,17 +51,29 @@ mode_area = 0.22*0.5
 bit_num = 1000
 v_bias = -1.5
 vpp = 0.8
-Rs = 68.1
-a_cj = 20e-15
-b_cj = a_cj**2/(6.6e-15)**2 - 3
+Rs = 35.4*3
+# Rs = 35.4
+# Rs = 68.1
+a_cj = 60e-15
+# a_cj = 40e-15
+# a_cj = 20e-15
+# b_cj = a_cj**2/(6.6e-15)**2 - 3
+# b_cj = a_cj**2/(13.2e-15)**2 - 3
+b_cj = a_cj**2/(3*6.6e-15)**2 - 3
 Cjs = [a_cj/(b_cj)**0.5, a_cj/(b_cj + 1)**0.5]
 print("a_cj = ",a_cj)
 print("b_cj = ",b_cj)
 f_drive=100
-level = "NRZ"
-Cox = 1.3e-15
-Rsi = 2289.6
-Cpad = 31.6e-15
+level = "PAM4"
+Cox = 3.9e-15
+# Cox = 2.6e-15
+# Cox = 1.3e-15
+Rsi = 665.2
+# Rsi = 1477.4
+# Rsi = 2289.6
+Cpad = 33.1e-15
+# Cpad = 33.1e-15
+# Cpad = 31.6e-15
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -216,17 +229,20 @@ if sim.mode == "voltage_drive":
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     print("\n\n.................Start Small Signal Simulation.................\n\n")
-    sim.b,Q,s_minus,N ,delta_T,vneg, vj, i2= solving(sim,ring_mod,v,t,H)
+    sim.b,Q,s_minus,N ,delta_T,vneg, vA, vB, vC= solving(sim,ring_mod,v,t,H)
+    # sim.b,Q,s_minus,N ,delta_T,vneg, vj, i2= solving(sim,ring_mod,v,t,H)
     
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     sim.save_data(ring_mod,t,v,file_name=filename)
     name = 'eye_SmallSignal_'+str(bit_num)+'bits_with_TPA_FCA_f'+   \
-        str(int(v.f_drive*1e-9))+"GHz_vpp_"+str(int(v.vpp*1000))+"mV_vbias_"+str(int(v.v_bias*1000))+"mV"
+        str(int(v.f_drive*1e-9))+"GHz_vpp_"+str(-int(v.vpp*1000))+"mV_vbias_"+str(-int(v.v_bias*1000))+"mV"
     ploting(t.t_total,delta_T,x_label="time",title="delta T")
-    sim.eye_diagram(t,v,abs(s_minus)**2,filename=name+str(v.level),plot_bit_num=5,title="Output power (mW)")
-    sim.eye_diagram(t,v,vneg,filename="vneg SmallSignal"+str(v.level),plot_bit_num=5,title="vneg")
-    sim.eye_diagram(t,v,vj,filename="vj SmallSignal"+str(v.level),plot_bit_num=5,title="vj")
+    sim.eye_diagram(t,v,abs(s_minus)**2,filename=name+str(v.level),plot_bit_num=2,title="Output power (mW)")
+    sim.eye_diagram(t,v,vneg,filename="vneg_SmallSignal"+str(v.level),plot_bit_num=2,title="vneg")
+    sim.eye_diagram(t,v,vA-vB,filename="vj_SmallSignal"+str(v.level),plot_bit_num=2,title="vj")
+    sim.eye_diagram(t,v,vA,filename="vA_SmallSignal"+str(v.level),plot_bit_num=2,title="vA")
+    sim.eye_diagram(t,v,v.v+vneg,filename="vpos + vneg SmallSignal"+str(v.level),plot_bit_num=2,title="vpos_plus_vneg")
 
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

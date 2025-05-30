@@ -277,6 +277,24 @@ class driver(simulation) :
                 - 1/Rsi/Cox_bar*i2)
     
         return dvneg_dt, dvj_dt, di2_dt
+    
+
+    def TML_v2(self,v_neg, voltage, dvpos_dt, vA,vB,vC, Z0,Lp_bar,Rp,Rs,Cj_bar,Cox_bar,Rsi,Cp_bar):
+        # Lp_bar =  Lp/t0
+        dvneg_dt = dvpos_dt - Z0/Lp_bar*(voltage + \
+                                        v_neg - Rp/Z0*(voltage-v_neg) -\
+                                        vA)
+        
+        dvA_dt = 1/Cp_bar*( 1/Z0*(voltage - v_neg) - \
+                           vB/Rs - vC/Rsi)
+        
+        dvB_dt = dvA_dt - vB/Rs/Cj_bar
+
+        dvC_dt = dvA_dt - vC/Rsi/Cox_bar
+        
+        # vj = vA - vB
+
+        return dvneg_dt, dvA_dt, dvB_dt, dvC_dt
 
 
 

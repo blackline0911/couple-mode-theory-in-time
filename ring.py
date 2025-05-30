@@ -289,6 +289,7 @@ class alpha_fit():
             self.m, self.b = np.polyfit(V, self.alpha_data, 1)
         if self.fit_mode == "func":
             self.popt, pcov = curve_fit(self.func, V, self.alpha_data)
+            print("alpha_fit.popt = ",self.popt)
     def __init__(self,RoundTripLoss:np.ndarray,L,input,fit_mode = "linear"):
         """input: specify which physic parameter of RoundTripLoss is using, energy or amplitude."""
         """Now, alpha_pdk is Loss of Energy"""

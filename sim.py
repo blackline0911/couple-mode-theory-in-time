@@ -75,14 +75,14 @@ class simulation():
                     t_array = np.append(t_array,np.array(time.t_all_segment[j][:]))
             for k in range(0,N-self.discarding-plot_bit_num+1,plot_bit_num):
                 sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
-                plt.plot( t_array,sig_segment, color='crimson')
+                plt.plot( t_array,sig_segment, color='r')
         else:
             t_array = np.array(time.t_all_segment[0][:])
             for j in range(1,plot_bit_num):
                     t_array = np.append(t_array,np.array(time.t_all_segment[j][:]))
             for k in range(N-self.discarding-plot_bit_num,plot_bit_num):
                 sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
-                plt.plot( t_array,sig_segment, color='crimson')
+                plt.plot( t_array,sig_segment, color='r')
 
         plt.grid(color='w')
         ax = plt.gca()
