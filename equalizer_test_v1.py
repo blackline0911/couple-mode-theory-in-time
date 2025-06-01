@@ -7,59 +7,31 @@ import matplotlib.pyplot as plt
 
 #All AC parameters are specified at this frequency
 w_0 = 2*np.pi*10e9
+theta_0 = 0.01                  #loss tangent = theta_0/(2*pi)
+k_r = 87                        #skin-effect scaling factor [ohms/m @ w_0]
+RDC = 0.0001                    #dc resistance [ohm/m]
 
-#loss tangent = theta_0/(2*pi)
-#theta_0 = 0.022
-theta_0 = 0.01
-
-#skin-effect scaling factor [ohms/m @ w_0]
-k_r = 87
-
-#dc resistance [ohm/m]
-RDC = 0.0001
-
-# Biuld frequency vector
-
-#fmax=1e12 -> time step = 500fs
-fmax=1e12
-
-#frequency vector (Hz)
+# Build frequency vector
+fmax=1e12                       #fmax=1e12 -> time step = 500fs
 k = 14
-f = np.linspace(0,fmax,2**k+1)
-
-#frequency vector (rad/s)
-w = f*2*np.pi
+f = np.linspace(0,fmax,2**k+1)  #frequency vector (Hz)
+w = f*2*np.pi                   #frequency vector (rad/s)
 
 # Constants
-
-#speed of light [m/s]
-c = 2.998e8
-
-#Vacuum permittivity [F/m]
-eps_0 = 8.85*1e-12
+c = 2.998e8                     #speed of light [m/s]
+eps_0 = 8.85*1e-12              #Vacuum permittivity [F/m]
 
 # Transmission line parameters
-
-#Effective relative dielectric constant
 eps_r = 4.9
+v0 = np.sqrt(1/eps_r)*c         #Propagation velocity of the transmission line [m/s]
+Z0 = 50                         #Characteristic impedance [ohm]
+L0 = Z0/v0                      #Inductance [H/m]
+C0 = 1/(Z0*v0)                  #Capacitance [F/m]
+G0 = 1e-12                      #Conductance [S/m]
+RAC = (k_r*(1+1j)*np.sqrt(w/w_0))#Resistance
 
-#Propagation velocity of the transmission line [m/s]
-v0 = np.sqrt(1/eps_r)*c
-
-#Characteristic impedance [ohm]
-Z0 = 50
-
-#Inductance [H/m]
-L0 = Z0/v0
-
-#Capacitance [F/m]
-C0 = 1/(Z0*v0)
-
-#Conductance [S/m]
-G0 = 1e-12
-
-#Resistance
-RAC = (k_r*(1+1j)*np.sqrt(w/w_0))
+# /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #%% Generate frequency-dependent RLGC for the lossy transmission line
 R=np.sqrt(RDC**2 + RAC**2)
