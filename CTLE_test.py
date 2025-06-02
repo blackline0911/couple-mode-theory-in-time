@@ -24,7 +24,7 @@ RDC = 0.0001
 fmax=1e12
 
 #frequency vector (Hz)
-k = 14
+k = 20
 f = np.linspace(0,fmax,2**k+1)
 
 #frequency vector (rad/s)
@@ -191,7 +191,7 @@ plt.axvline(x=wp/(2*np.pi)*1e-9,color = 'blue', label = "Pole Location")
 plt.legend()
 plt.show()
 
-#%% Convert CTLE frequency response to impulse response
+# #%% Convert CTLE frequency response to impulse response
 h_ctle , t_ctle = sdp.freq2impulse(H_ctle,f) 
 plt.plot(t*1e9, h_ctle)
 plt.xlabel("time (ns)")
@@ -199,7 +199,7 @@ plt.title("CTLE impulse reponse")
 plt.grid()
 plt.show()
 
-#%% Process equalizer
+# #%% Process equalizer
 signal_ctle = sp.signal.convolve(signal_out,h_ctle)
 sdp.simple_eye(signal_ctle[100*samples_per_symbol:], samples_per_symbol*3, 500, 500e-15, res=dpi ,title="{}Gbps PAM4 signal with CTLE".format(data_rate*1e-9))
 plt.show()
@@ -216,7 +216,7 @@ sdp.channel_coefficients(hpulse[:t.size], t, samples_per_symbol,FFE_pre,FFE_post
 plt.show()
 h = sdp.channel_coefficients(h_pulse_ctle[:t.size],t,samples_per_symbol,FFE_pre,FFE_post,res=dpi)
 plt.show()
-
+print("h = ",h)
 channel_main = h.argmax()
 
 #main_cursor = h[channel_main]
@@ -231,15 +231,24 @@ voltage_levels = np.array([-3, -1, 1, 3])
 # Convert 4-level signal to voltage
 signal_BR = sdp.pam4_input_BR(data)
 
+# Let ideal PAM4 voltage signal convolute with ISI signal
 signal_rx = sp.signal.fftconvolve(h, signal_BR)[:len(signal_BR)]
+plt.plot(signal_rx)
+plt.title("signal_rx")
+plt.show()
 
-signal_rx_cropped = signal_rx[channel_main:]
+signal_rx_cropped = signal_rx[channel_main:]  
+plt.plot(signal_rx_cropped)
+plt.title("signal_rx_cropped")
+plt.show()
 
+# providing reference PRBS for weight optimization, so optimizer don't need to find reference voltage by itself.
 reference_signal = signal_BR[:1000]
 
 w_ffe_init = np.zeros([7,])
 w_dfe_init = np.zeros([2,])
 
+# Optimize FFE and DFE weight coefficient based on signal before equalization
 w_ffe, w_dfe, v_combined_ffe, v_combined_dfe, z_combined, e_combined = \
 sdp.lms_equalizer(signal_rx_cropped, 0.001, len(signal_rx_cropped), w_ffe_init, FFE_pre, w_dfe_init,  voltage_levels, reference=reference_signal[:1000])
 
@@ -257,8 +266,8 @@ RX.FFE(w_ffe, FFE_pre)
 
 sdp.simple_eye(RX.signal[int(100.5*samples_per_symbol):], samples_per_symbol*3, 800, 500*1e-15, "Eye Diagram with CTLE and FFE",res=dpi)
 plt.show()
-RX.pam4_DFE(w_dfe)
 
+RX.pam4_DFE(w_dfe)
 sdp.simple_eye(RX.signal[int(100.5*samples_per_symbol):], samples_per_symbol*3, 800, 500*1e-15, "Eye Diagram with CTLE, FFE, and DFE",res=dpi)
 plt.show()
 
