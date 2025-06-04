@@ -71,7 +71,7 @@ plt.show()
 
 h_ctle , t_ctle = sd.freq2impulse(H_ctle,f) 
 signal_ctle = sp.signal.fftconvolve(signal_ideal,h_ctle,mode="same")
-sd.simple_eye(signal_ctle, samples_per_symbol*eye_num, bit_num//eye_num , dt,  res=100 ,title="{}Gbps PAM4 signal with CTLE".format(1/T/1e9))
+sd.simple_eye(signal_ctle, samples_per_symbol*eye_num, bit_num//eye_num , dt,  res=100 ,title="{}Gbps NRZ signal with CTLE".format(1/T/1e9))
 plt.show()
 
 h_pulse_ctle = sp.signal.convolve(rs, h_ctle)
@@ -113,6 +113,7 @@ RX = sd.Receiver(signal_ctle, samples_per_symbol,max(f), voltage_level, main_cur
 signal_temp = RX.signal
 
 RX.FFE(w_ffe,FFE_pre)
+signal_ffe_temp = RX.signal
 sd.simple_eye(RX.signal, samples_per_symbol*eye_num, bit_num//eye_num , dt,  res=100 ,title="{}Gbps NRZ signal with FFE".format(1/T/1e9))
 plt.show()
 
@@ -120,3 +121,29 @@ RX.signal = signal_temp
 RX.nrz_DFE(w_dfe)
 sd.simple_eye(RX.signal, samples_per_symbol*eye_num, bit_num//eye_num , dt,  res=100 ,title="{}Gbps NRZ signal with DFE".format(1/T/1e9))
 plt.show()
+
+RX.signal = signal_ffe_temp
+RX.nrz_DFE(w_dfe)
+sd.simple_eye(RX.signal, samples_per_symbol*eye_num, bit_num//eye_num , dt,  res=100 ,title="{}Gbps NRZ signal with FFE and DFE".format(1/T/1e9))
+plt.show()
+
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# jitter
+
+#TX signal with jitter
+signal_jitter = sd.gaussian_jitter(signal_ideal, T, bit_num, samples_per_symbol, stdev=1000e-15)
+
+#eye diagram of TX with jitter
+sd.simple_eye(signal_jitter, samples_per_symbol*eye_num, bit_num//eye_num, dt, "{}Gbps NRZ Signal with jitter".format(1/T/1e9),linewidth=0.05,res=100)
+plt.show()
+
+# #signal at receiver with no jitter
+# signal_out_ideal = sp.signal.convolve(h_ctle,signal_ideal)
+# sd.simple_eye(signal_out_ideal[100*samples_per_symbol:], samples_per_symbol, bit_num//eye_num, dt, "rx eye diagram no jitter",linewidth=0.05)
+# plt.show()
+
+# #signal at reciever with tx jitter
+# signal_out_jitter_tx = sp.signal.convolve(h,signal_jitter)
+# sd.simple_eye(signal_out_jitter_tx[100*samples_per_symbol:], samples_per_symbol, bit_num//eye_num,  dt, "rx eye diagram with tx jitter",linewidth=0.05)
+# plt.show()
