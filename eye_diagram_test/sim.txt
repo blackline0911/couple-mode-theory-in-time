@@ -4,7 +4,7 @@ Just for Future checking or further research
 Simulation Parameters and Settings
 	time scaling : 1e-12 sec
 	Simulation mode = scan_frequency
-	Input Laser Power : 1 mW
+	Input Laser Power : 10 mW
 
 	Input Laser wavelength : 1.54 um
 
@@ -16,8 +16,8 @@ Parameter of ring modulator
 		Round trip loss : (energy) 0.9093698647074799
 		mode cross section : 0.11 um^2
 		Linear Energy absorption coefficient: 30.240513704644023 1/cm
-		Max Two Photon Absorption coefficient : 0.004162847276816404 1/cm
-		Max Free Carrier Absorption coefficient : 0.03450505578261825 1/cm
+		Max Two Photon Absorption coefficient : 0.03734038891889198 1/cm
+		Max Free Carrier Absorption coefficient : 2.7762556259949367 1/cm
 	Physical parameter : 
 		intrinsic photon life time : 8.78859302419962 ps
 		couple extrinsic photon life time (port 1 ) : 7.753696665583759 ps
@@ -30,10 +30,10 @@ Parameter of ring modulator
 
 		Input Laser photon energy : 0.0001289886251109091 fJ
 
-	The start wavelength is 1.5399294940603674 um
-	The end wavelength is 1.5406429633397503 um
+	The start wavelength is 1.5391141005982156 um
+	The end wavelength is 1.5464526417575826 um
 	scanning frequency range for better accuracy is 0.0772711878464234 THz
-	Current frequency range is 0.09015568949720887 THz
+	Current frequency range is 0.9243213734676488 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 

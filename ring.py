@@ -7,10 +7,12 @@ from scipy.optimize import curve_fit
 
 class ring(simulation):
     id='ring'
+    ro_si = 2.329e-12 # g/um^3 density of silicon
+    cSi = 0.713*1000 # mJ/(g*K) specific heat capacity of silicon
+
     def __init__(self,L:float, 
                  L_active:float,
                  alpha:float,
-                #  me:float,
                  gamma:np.ndarray,
                  cross_section:float,
                  lambda_incident:float,
@@ -25,6 +27,7 @@ class ring(simulation):
                  sigma_FCA = 1.04,  #1e-17 cm^2
                  eta_h = 2.99,
                  HE = 254.3,
+                 kappa_thermal = 1.95e-4, # 1/K, index change rate per Kelvin 
                  Akerr = 0.204, # um^2
                  Atpa = 0.1289, # um^2
                  Afca = 0.116, # um^2
@@ -32,6 +35,7 @@ class ring(simulation):
                  FCA_fit_factor = 1,
                  TPA_fit_factor = 1,
                  SPM_fit_factor = 1,
+                 self_heating_factor = 1,
                  input_port = 1,
                 ):
         """
@@ -63,7 +67,6 @@ class ring(simulation):
         self.gamma=np.real(gamma)
         assert (not np.imag(g)==0.0 for g in gamma) , "\nCoupling coefficient shall not over one\n"
         self.alpha = alpha
-        # self.me = me
         self.band = band
         self.support_band = {"C","O"}
 
@@ -73,6 +76,7 @@ class ring(simulation):
         self.eta_h = eta_h
         self.HE = HE 
         self.dlambda_dT = self.eta_h / (self.HE*1e-6)
+        self.kappa_thermal = kappa_thermal # 1/K, index change rate per Kelvin
         
         # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +118,6 @@ class ring(simulation):
             self.tu_e_bar_total_inv += 1/tu_e_bar
         assert input_port>0 , "\nInput port should start from one\n"
         
-        # 為了保持微分方程不動，alpha_linear和gamma皆為Amplitude的loss(coupling through ratio)
         self.input_kappa = (2/self.tu_e_bar[input_port-1])**0.5 
         self.alpha_linear = np.real(2/(self.vg*1e-4*self.tu_o_bar)) #Energy absorption (1/cm)
         self.tu_t_bar = (self.tu_e_bar_total_inv+1/self.tu_o_bar)**(-1)
@@ -131,6 +134,7 @@ class ring(simulation):
         self.FCA_fit_factor = FCA_fit_factor
         self.TPA_fit_factor = TPA_fit_factor
         self.SPM_fit_factor = SPM_fit_factor
+        self.self_heating_factor = self_heating_factor
         # normalized dw/dlambda
         self.D_bar = -2*np.pi*c/self.lambda_incident**2 * t0
         self.vg_in_cm = self.vg*1e-4
@@ -138,7 +142,6 @@ class ring(simulation):
 
         
         self.Q = np.real( ( (2*self.tu_e_bar_total_inv + 2/self.tu_o_bar  )/(self.f_res_bar*2*np.pi) )**(-1) )
-        # self.Q = np.real( ( (1/self.tu_e_bar + 1/self.tu_o_bar  )/(self.f_res_bar*np.pi) )**(-1) )
         
         self.renew()
         
@@ -158,9 +161,7 @@ class ring(simulation):
         """
         self.time = time
         self.f_start_bar = c/wl_start*t0
-        # print(self.f_start_bar)
         self.f_end_bar = c/wl_end*t0
-        # print(self.f_end_bar)
         self.f_in_bar = c/self.lambda_incident*t0
         self.f_res = np.zeros(len(self.time.t_total))
     
@@ -241,11 +242,11 @@ class ring(simulation):
         self.vg_in_cm*TPA/2*abs(b_bar)**2 \
         + self.vg_in_cm*N_bar*1e-5/2  ) *b_bar + \
         \
-        self.input_kappa *1 + \
+        self.input_kappa + \
         \
         1j*self.D_bar*dlambda*b_bar + \
         \
-        1j*self.D_bar*( self.dlambda_dT*(Heater.T_surround-300) + (self.HE*1e-6)*Heater.P)*b_bar
+        1j*self.D_bar*( (self.HE*1e-6)*Heater.P)*b_bar
         return da_dt
 
     def FC_rate_equation(self,b_bar,N_bar,FCA,tau_eff):
@@ -290,13 +291,13 @@ class alpha_fit():
         if self.fit_mode == "func":
             self.popt, pcov = curve_fit(self.func, V, self.alpha_data)
             print("alpha_fit.popt = ",self.popt)
-    def __init__(self,RoundTripLoss:np.ndarray,L,input,fit_mode = "linear"):
+    def __init__(self,RoundTripLoss:np.ndarray,L,input2,fit_mode = "linear"):
         """input: specify which physic parameter of RoundTripLoss is using, energy or amplitude."""
         """Now, alpha_pdk is Loss of Energy"""
         self.L = L
         self.fit_mode = fit_mode
         self.RoundTripLoss = RoundTripLoss
-        self.input_mode = input 
+        self.input_mode = input2
         self.renew()
     def alpha_V(self,V):
         if self.fit_mode=="linear":

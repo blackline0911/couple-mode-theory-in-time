@@ -14,7 +14,7 @@ from Heater import Heater
 mode = "scan_frequency"
 # mode = "voltage_drive"
 wl_in = 1.54
-Pin = 1 #mW
+Pin = 10 #mW
 FSR = 0.019431
 radius = 5
 Amp_RoundTripLoss_pdk = [0.953553, 0.953921, 0.954268, 0.954521, 0.954725]
@@ -59,12 +59,11 @@ ring_mod = ring(L=2*np.pi*radius,
             SPM_fit_factor=1,
             )
 
-# wl_min =  1.5464
-# wl_max =  1.55
+
 # H = Heater(300,2.42,0.5*150/0.6)
-H = Heater(300,0,0.5*150/0.6)
-wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q/1.5
-wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q/2
+H = Heater(300,0,0.5*150/0.6,tau_th=10)
+wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q*2
+wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q*10
 print("wl_min = ",wl_min ," um")
 print("wl_max = ",wl_max ," um")
 
@@ -84,13 +83,13 @@ t = time(mode = sim.mode)
 
 if sim.mode == "scan_frequency":
     vbias = np.array([v_bias+vpp/2,v_bias,v_bias-vpp/2])
-    vbias = np.array([0,-0.5,-1,-1.5,-2])
-    # vbias = np.arange(0,-0.5,-0.5)
+    # vbias = np.array([0,-0.5,-1,-1.5,-2])
+    vbias = np.arange(0,-0.5,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
-    t.main(ring_mod,t_max=10000,resolution=1,buffer=100,driver=v)
+    t.main(ring_mod,t_max=10000,resolution=0,buffer=100,driver=v)
     print("LineWidth = ",ring_mod.lambda0/ring_mod.Q*1000," nm")
-    print(H.P*ring_mod.HE/1e6)
-    print("detuning wabvelength = ",(ring_mod.lambda0+H.P*ring_mod.HE/1e6-wl_in)*1000," nm")
+    print("Heater shifting wavelength = ",H.P*ring_mod.HE/1e6," um")
+    print("detuning wavelength = ",(ring_mod.lambda0+H.P*ring_mod.HE/1e6-wl_in)*1000," nm")
     print("dt  = ",t.dt)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
     
@@ -117,15 +116,14 @@ if sim.mode == "scan_frequency":
         plt.savefig("Transmission_vs_voltage (no NL) (func fit alpha)")
     plt.show()
     ploting(t.t_total,abs(sim.b)**2,x_label="time (ps)",title="Energy in Ring (mJ)")
-
     
-    highlevel_arg = int(np.argwhere(vbias==v_bias+vpp/2))
-    lowlevel_arg = int(np.argwhere(vbias==v_bias-vpp/2))
-    Extinction_ratio = ER(t,dB_inv(T_record[:,lowlevel_arg]),dB_inv(T_record[:,highlevel_arg]))
-    Tranmission_penalty = TP(dB_inv(T_record[:,highlevel_arg]),dB_inv(T_record[:,lowlevel_arg]),1)
-    Insertion_Loss = IL(t,dB_inv(T_record[:,highlevel_arg]),dB_inv(T_record[:,lowlevel_arg]))
-    ploting(wl*1000,Extinction_ratio,Tranmission_penalty,Insertion_Loss,x_label="wavelength(nm)",\
-            title="vswing = "+str(vbias[highlevel_arg])+"~"+str(vbias[lowlevel_arg]),filename="Transmission ER TP",leg=["ER","TP","IL"])
+    # highlevel_arg = int(np.argwhere(vbias==v_bias+vpp/2))
+    # lowlevel_arg = int(np.argwhere(vbias==v_bias-vpp/2))
+    # Extinction_ratio = ER(t,dB_inv(T_record[:,lowlevel_arg]),dB_inv(T_record[:,highlevel_arg]))
+    # Tranmission_penalty = TP(dB_inv(T_record[:,highlevel_arg]),dB_inv(T_record[:,lowlevel_arg]),1)
+    # Insertion_Loss = IL(t,dB_inv(T_record[:,highlevel_arg]),dB_inv(T_record[:,lowlevel_arg]))
+    # ploting(wl*1000,Extinction_ratio,Tranmission_penalty,Insertion_Loss,x_label="wavelength(nm)",\
+    #         title="vswing = "+str(vbias[highlevel_arg])+"~"+str(vbias[lowlevel_arg]),filename="Transmission ER TP",leg=["ER","TP","IL"])
     
     sim.save_data(ring_mod,t,v)
     # v.v_bias=-1.5

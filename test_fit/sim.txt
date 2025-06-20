@@ -11,33 +11,32 @@ Simulation Parameters and Settings
 Parameter of ring modulator
 	Structure parameter : 
 		cavity length : 31.41592653589793 um
-		Group index : 3.983820815915829
+		Group index : 3.983815578756569
 		couple through coefficient : [0.947582]
-		Round trip loss : 0.953553
-		modulation efficiency : 39.3 pm/V (for reverse bias)
+		Round trip loss : (energy) 0.8966043974969786
 		mode cross section : 0.11 um^2
-		Linear absorption coefficient: 15.138904384722732 1/cm
-		Two Photon Absorption coefficient : 1088800603.44784 1/cm.mJ
-		Free Carrier Absorption coefficient : 1.933995056370126e+21 1/cm.mJ^2
+		Linear Energy absorption coefficient: 34.74051370464404 1/cm
+		Max Two Photon Absorption coefficient : 0.04150962670236237 1/cm
+		Max Free Carrier Absorption coefficient : 0.07027426597542775 1/cm
 	Physical parameter : 
-		intrinsic photon life time : 8.77777910555755 ps
-		couple extrinsic photon life time (port 1 ) : 7.7537068586621 ps
-		resonant frequency : 192.24200726415518 THz
-		resonant wavelength : 1.5594534319861857 um
-		Q factor : 2486.4532479912123
-		LineWidth : 0.6271798728755736 nm
-		Group velocity : 75252495494349.08 um/s
-		Round Trip time : 0.41747355126923386 ps
+		intrinsic photon life time : 7.650191072370922 ps
+		couple extrinsic photon life time (port 1 ) : 7.753696665583759 ps
+		resonant frequency : 192.2421336256367 THz
+		resonant wavelength : 1.5594524069515465 um
+		Q factor : 2325.6759128051194
+		LineWidth : 0.6705372826734959 nm
+		Group velocity : 75252594421946.45 um/s
+		Round Trip time : 0.41747300245552565 ps
 
-		Input Laser photon energy : 0.0001274983842559692 pJ
+		Input Laser photon energy : 0.0001274983842559692 fJ
 
-	The start wavelength is 1.562 um
-	The end wavelength is 1.557 um
-	scanning frequency range for better accuracy is 0.07731575384313624 THz
-	Current frequency range is 0.6163410092128743 THz
+	The start wavelength is 1.5597119121731788 um
+	The end wavelength is 1.566417284999914 um
+	scanning frequency range for better accuracy is 0.08266075791865747 THz
+	Current frequency range is 0.8227952525906801 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 
-	time resolution : 1e-15 sec
-	Max time range : 5000 ps
+	time resolution : 1e-14 sec
+	Max time range : 10000 ps
 		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 

@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 
 c=299792458e6 #um/s
 R = 50  #um
-Pin = 10e-6 #W
+Pin = 10e-3 #W
 n0 = 2.588
 ng = n0
 # lambda0 = 2*np.pi*R*n0/125  #um
 lambda0 = 2*np.pi*R*n0/621  #um
 w0 = 2*np.pi*c/lambda0
-alpha_ring = 0.16  #1/cm
+alpha_ring = 0.16*100  #1/cm
 alpha_c = alpha_ring #critical couple 1/cm
 tau_ph = 1/(c*1e-4*(alpha_ring+alpha_c)/ng) # (energy life time) c*(alpha_ring+alpha_c)/n0
 eta_lin = 0.4
@@ -38,7 +38,7 @@ rho_si = 2.329e6        #g/m^3
 csi = 0.713             #J/(g*K)
 sigma_r1 = 8.8e-22      #cm^3
 sigma_r2 = 8.5e-18      #cm^3
-kappa_theta = 1.86e-4   #1/K
+kappa_theta = 2e-4   #1/K
 tau_car = 10e-9         #s
 tau_th = 100e-9         #s
 
@@ -75,8 +75,8 @@ tau_theta = tau_th*gamma0
 # //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 buffer = 1000
-wl_start = lambda0*1000 - lambda0/Q*1000*100
-wl_end = lambda0*1000 + lambda0/Q*1000*100
+wl_start = lambda0*1000 - lambda0/Q*1000*10
+wl_end = lambda0*1000 + lambda0/Q*1000*10
 # wl_start = lambda0*1000 - lambda0/Q*1000/1.5
 # wl_end = lambda0*1000 + lambda0/Q*1000/2
 
@@ -84,7 +84,7 @@ f_in_bar = wL/gamma0/2/np.pi
 f0_bar = w0/gamma0/2/np.pi
 f_start_bar = c*1e3/wl_start/gamma0
 f_end_bar = c*1e3/wl_end/gamma0
-tmax = 50000
+tmax = 100000
 d = (c*1e-4*alpha/2/ng)/gamma0
 
 print(1/(c*1e-4*alpha/2/ng))
@@ -101,8 +101,9 @@ def cmt(t, eqs):
     # a, n, T = eqs
     a = eqs
     n = tau*abs(a)**4
-    T=0
-    da_dt = ( 1j*2*np.pi*delta - 1j*0*(nkerr*abs(a)**2 - (n + sigma_FCD*n**0.8) + 0*T) \
+    # T=
+    T = epsilon_T*abs(a)**2 *(eta_lin*eta_c + 2*alpha_TPA*abs(a)**2 + 2*Gamma_FCA*n)*tau_theta
+    da_dt = ( 1j*2*np.pi*delta - 1j*(nkerr*abs(a)**2 - (n + sigma_FCD*n**0.8)*0 + T) \
             \
             - ( d + alpha_TPA*abs(a)**2 + Gamma_FCA*n ) )*a \
             \
@@ -111,6 +112,7 @@ def cmt(t, eqs):
     # dn_dt = abs(a)**4 - n/tau
 
     # dT_dt = epsilon_T*abs(a)**2 *(eta_lin*eta_c + 2*alpha_TPA*abs(a)**2 + 2*Gamma_FCA*n) -T/tau_theta   
+    # dT_dt = epsilon_T*abs(a)**2 *(eta_lin*eta_c ) -T/tau_theta   
 
     # return [da_dt, dn_dt, dT_dt]
     return [da_dt]
@@ -119,10 +121,11 @@ a_init = 0+1j*0
 n_init = 0
 T_init = 0
 
-dt = 1e-13
+dt = 1e-12
 print("delta t in normalized time = ",dt*gamma0)
 t = np.arange(0,int(tmax+buffer),dt*gamma0)
-sol = solve_ivp(cmt, [0,int(tmax+buffer)], [a_init, n_init, T_init], method="RK45", t_eval=t,atol=1e-20,rtol=1e-15)
+sol = solve_ivp(cmt, [0,int(tmax+buffer)], [a_init], method="RK45", t_eval=t,atol=1e-20,rtol=1e-15)
+# sol = solve_ivp(cmt, [0,int(tmax+buffer)], [a_init, n_init, T_init], method="RK45", t_eval=t,atol=1e-20,rtol=1e-15)
 
 a = sol.y[0]
 # n = sol.y[1]
@@ -141,7 +144,7 @@ u = a/(sigma*1e-6*beta)**0.25
 
 s_minus = (Pin)**0.5 - (gamma_c)**0.5*u
 
-print(abs(s_minus)**2)
+# print(abs(s_minus)**2)
 def f_res(t):
         """
         return the resonant frequency according to specified time t
@@ -169,9 +172,9 @@ def mapping(data):
         return wl, data
 import os
 os.chdir("./cmt_test/")
-wl, Trans = mapping(10*np.log10(abs( s_minus)**2/Pin))
-# ploting(t/gamma0,10*np.log10(abs( s_minus)**2/Pin) , x_label="time (normalized by gamma0)",title="Transmission scanning",filename="Transmission scanning")
-ploting(wl,Trans , x_label="wavelength (nm)",title="Transmission scanning")
+# wl, Trans = mapping(10*np.log10(abs( s_minus)**2/Pin))
+ploting(t/gamma0,10*np.log10(abs( s_minus)**2/Pin) , x_label="time (normalized by gamma0)",title="Transmission scanning",filename="Transmission scanning")
+# ploting(wl,Trans , x_label="wavelength (nm)",title="Transmission scanning")
 ploting(t/gamma0, abs(u)**2, x_label="time (normalized by gamma0)",title="Energy in Ring (J)",filename="Energy in Ring")
 # ploting(t/gamma0, delta_T, x_label="time (normalized by gamma0)",title="T (Kelvin)",filename="T (Kelvin)")
 # ploting(t/gamma0, N, x_label="time (normalized by gamma0)",title="Free Carrier conctration (1/cm^3)",filename="Free Carrier conctration)")

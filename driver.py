@@ -36,14 +36,10 @@ class driver(simulation) :
 
         assert len(self.cj_array)>=2, "\n\ncj must have at least two elements\n\n"
         assert np.any( [ self.cj_array[i]<self.cj_array[i-1] for i in range(1,len(self.cj_array)) ] ) , "\n\nYou must input cj as a decreasing array ,since Junction capacitance decrease with voltage\n\n"
-        # self.__b = ( self.cj_array[1]**2*(-2) - self.cj_array[0]**2*(-1) ) / (self.cj_array[1]**2 - self.cj_array[0]**2)
-        # self.__a = self.cj_array[0]*(self.__b-(-1))**0.5
         self.__b = ( self.cj_array[1]**2*(-1)  ) / (self.cj_array[1]**2 - self.cj_array[0]**2)
         self.__a = self.cj_array[0]*(self.__b)**0.5
 
         self.cj_normalizing = self.Cj_V(self.v_bias)
-        # print(self.__a)
-        # print(self.__b)
         assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
         self.A = self.__a**2/(self.cj_normalizing**2)
         self.B = self.cj_normalizing**2 / (2*self.__a**2)
@@ -112,7 +108,6 @@ class driver(simulation) :
             self.Cj = self.Cj_V(self.v_bias)
             # Generating PRBS 
             if self.PRBS:
-                # self.prbs = np.array([0,0,0,1,0,0],dtype=float)
                 self.prbs =(np.zeros(self.time.N))
                 if self.level == 'NRZ':
                     for i in range(self.time.N):
@@ -168,10 +163,6 @@ class driver(simulation) :
             if self.raise_cosine:
                 assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
                 v = self.cubic_interp_voltage(t)
-                # T_period_normalized = self.time.T_normalized
-                # v=0
-                # v = raise_cosine.refering_rcos_signal(self.prbs,t,self.time.T_normalized,self.time.N,self,self.beta)
-                # v = v+self.v_bias-self.vpp/2
             return v
         if self.time.mode == "scan_frequency":
             return self.v_bias
@@ -196,20 +187,16 @@ class driver(simulation) :
         t: given a arbitary voltage value, this function can return the corresponding capacitance value
         """
         if self.varying_cj:
-            # print(self.Cj_V(voltage))
             return self.Cj_V(voltage)
         else:
-            # print(float(self.Cj))
             return float(self.Cj)
         
     def Cj_V(self,vol):
         assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
-        # return 3.7675e-14/( (2.5485-vol)**0.5 )
         return self.__a/( (self.__b-vol)**0.5 )
     
     def Q_V(self,vol):
         assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
-        # return 3.7675e-14/( (2.5485-vol)**0.5 )*vol
         return self.__a/( (self.__b-vol)**0.5 )*vol
     
     def V_Q(self,Q_bar):
@@ -277,25 +264,3 @@ class driver(simulation) :
                 - 1/Rsi/Cox_bar*i2)
     
         return dvneg_dt, dvj_dt, di2_dt
-    
-
-    def TML_v2(self,v_neg, voltage, dvpos_dt, vA,vB,vC, Z0,Lp_bar,Rp,Rs,Cj_bar,Cox_bar,Rsi,Cp_bar):
-        # Lp_bar =  Lp/t0
-        dvneg_dt = dvpos_dt - Z0/Lp_bar*(voltage + \
-                                        v_neg - Rp/Z0*(voltage-v_neg) -\
-                                        vA)
-        
-        dvA_dt = 1/Cp_bar*( 1/Z0*(voltage - v_neg) - \
-                           vB/Rs - vC/Rsi)
-        
-        dvB_dt = dvA_dt - vB/Rs/Cj_bar
-
-        dvC_dt = dvA_dt - vC/Rsi/Cox_bar
-        
-        # vj = vA - vB
-
-        return dvneg_dt, dvA_dt, dvB_dt, dvC_dt
-
-
-
-        

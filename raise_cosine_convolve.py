@@ -133,7 +133,13 @@ plt.show()
 
 #TX signal with jitter
 signal_jitter = sd.gaussian_jitter(signal_ideal, T, bit_num, samples_per_symbol, stdev=1000e-15)
-
+plt.figure(figsize=(8, 4))
+plt.hist(signal_jitter, bins=50, color='skyblue', edgecolor='black')
+plt.title('Histogram of Gaussian Jitter (stdev=1e-12, n_symbols=3000)')
+plt.xlabel('Jitter Value (seconds)')
+plt.ylabel('Count')
+plt.grid(True)
+plt.show()
 #eye diagram of TX with jitter
 sd.simple_eye(signal_jitter, samples_per_symbol*eye_num, bit_num//eye_num, dt, "{}Gbps NRZ Signal with jitter".format(1/T/1e9),linewidth=0.05,res=100)
 plt.show()

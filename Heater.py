@@ -11,6 +11,7 @@ class Heater:
                  ):
         self.V = V
         self.R = R
+        self.Aeff = Aeff
         self.T_surround = T_surround
         self.tau_th = tau_th*1e-9
         self.renew()

@@ -105,3 +105,29 @@ def FDM(dt,signal):
     for i in range(1,N-1):
         FDM[i] = (signal[i+1]-signal[i-1])/2/dt
     return FDM
+
+def FFT(signal,dt):
+    """
+    Fast Fourier Transform
+    """
+    N = len(signal)
+    F = 2*np.fft.fftshift(np.fft.fft(signal)/N)
+    F = F[N//2:-1]
+    f = np.fft.fftshift( np.fft.fftfreq(N, d=dt) )
+    f = f[N//2:-1]
+    return F, f
+
+# def EO_response(output_power, input_voltage,dt):
+    """
+    Calculate the electro-optic response of a modulator.
+    
+    Parameters:
+    output_power : array-like
+        The output power of the modulator.
+    input_voltage : array-like
+        The input voltage applied to the modulator.
+    Returns:
+    response : array-like
+        The electro-optic response of the modulator.
+    """
+
