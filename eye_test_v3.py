@@ -13,8 +13,8 @@ from Heater import Heater
 # Refer：Ultra-Wide Free-Spectral-Range Silicon Microring Modulator for High Capacity WDM
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-mode = "scan_frequency"
-# mode = "voltage_drive"
+# mode = "scan_frequency"
+mode = "voltage_drive"
 wl_in = 1.54969
 Pin = 1 #mW
 FSR = 0.0324
@@ -42,7 +42,7 @@ print("neff_calculated = ",neff_calculated)
 mode_area = 0.22*0.5
 
 
-bit_num = 1000
+bit_num = 500
 v_bias = -1.5
 vpp = 2
 Rs =250
@@ -68,10 +68,10 @@ sim.main(experiment_condition=experiment_condition)
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,L = 2*np.pi*radius,input = "amp",fit_mode="func")
+a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,L = 2*np.pi*radius,input2 = "amp",fit_mode="func")
 n_fit = neff_fit(neff_data=neff_calculated)
 ring_mod = ring(L=2*np.pi*radius, 
-            L_active = 2*np.pi*radius*La_Lc_ratio,
+            L_active = [2*np.pi*radius*La_Lc_ratio],
             alpha=a_fit.alpha_V,
             neff=n_fit.neff_V,
             cross_section=mode_area,
@@ -86,11 +86,7 @@ ring_mod = ring(L=2*np.pi*radius,
             band="C",
             HE = 73
             )
-# print("G_energy + alpha_energy = ",(2*np.pi* 193.41448903225793*1e12*ring_mod.ng/(c*1e-4))/1050," 1/cm")
-# print("delta neff/delta V = ",32.485e-6*ring_mod.D_bar*( -ring_mod.ng/(2*np.pi*ring_mod.f_res_bar) )*(1/La_Lc_ratio))
-# print("ng = ",ring_mod.ng)
-# print("lambda0 = ",ring_mod.lambda0)
-# print("f0 = ",ring_mod.f_res_bar," THz")
+
 
 
 H = Heater(300,0,0.5*150/0.6)
@@ -102,17 +98,17 @@ wl_max =  1.552
 v = driver(f_drive=f_drive,
            v_bias=v_bias,
            vpp=vpp,
-           Rs=Rs,
+           Rs=[Rs],
            raise_cosine=1,
-           cj = Cjs,
+           cj = [Cjs],
            PRBS=1,
            level = level,
-           Cox = Cox,
-           Rsi=Rsi,
-           Cp=Cpad,
+           Cox = [Cox],
+           Rsi=[Rsi],
+           Cp=[Cpad],
            )
 V = np.linspace(-5,0,1000)
-ploting(V,v.Cj_V(V),x_label="voltage (V)",title="junction capacitance (F)",filename="Cj_V")
+ploting(V,v.Cj_V(V,v.a,v.b),x_label="voltage (V)",title="junction capacitance (F)",filename="Cj_V")
 
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +138,6 @@ if sim.mode == "scan_frequency":
         wl,data_phase = T.mapping(180/np.pi*np.angle(s_minus))
         plt.plot(wl*1000,data,
                  label="V = "+str(vb))
-        T_record[:,int(np.argwhere(vbias==vb))] = data
     plt.grid(color='g',linestyle='--', alpha=0.5)
     plt.xlabel('wavelength(nm)')
    
@@ -162,7 +157,7 @@ if sim.mode == "scan_frequency":
     
     ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
     ploting(V,ring_mod.neff(V),x_label="voltage (V)",title="neff vs Voltage",filename="neff_V")
-    ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active/ring_mod.L),\
+    ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active[0]/ring_mod.L),\
             x_label="voltage (V)",title="resonant wavelength vs Voltage (pm/V)",filename="lambda_V")
 if sim.mode == "voltage_drive":
     t.main(ring_mod,N=bit_num,driver=v)
@@ -179,8 +174,7 @@ if sim.mode == "voltage_drive":
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     print("\n\n.................Start Small Signal Simulation.................\n\n")
-    # sim.b,Q,s_minus,N ,delta_T,vneg, vA, vB, vC= solving(sim,ring_mod,v,t,H)
-    sim.b,Q,s_minus,N ,delta_T,vneg, vj, i2= solving(sim,ring_mod,v,t,H)
+    sim.b,s_minus,N ,delta_T,vneg, vj, i2= solving(sim,ring_mod,v,t,H)
     
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

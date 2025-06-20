@@ -28,6 +28,9 @@ Parameter of ring modulator
 		Heater efficiency : 73 pm/mW
 		Kerr effect coefficient (n2) : 1.1e-08 um^2/mW
 		Kerr effect mode area (Akerr) : 0.204 um^2
+		index change rate per Kelvin : 0.000195 1/K
+		Density of Silicon : 2.329e-12 g/um^3
+		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
 		intrinsic photon life time : 3.029964436802957 ps
 		couple extrinsic photon life time (port 1 ) : 4.0215891615748305 ps

@@ -23,43 +23,64 @@ class driver(simulation) :
     voltage_record = []
 
     # Notes : a, b are variables in Junction capacitance formula
-    __a = 0
-    __b = 0
+    a = 0
+    b = 0
+    c = 0
+    d = 0
+
+    # shift bit is used to shift the time in raise cosine function,
+    # when using two NRZ signal to create a raise cosine signal, the first NRZ signal is used as the reference, and the second NRZ signal is shifted by shift_bit bits.
+    shift_bit = 100
     def renew(self):
         # Renew driver data earned by calculation, such as w_drive, Cj
+
+        # If you want to use two NRZ signal to combine a new NRZ, don't shift bit.
+        # If you want to use two NRZ signal to combine a new PAM4, please shift bit.
         if self.level == "NRZ":
             self.level_num = 2
+            shift_bit = 0
         if self.level == "PAM4":
             self.level_num = 4
+            shift_bit = 100
         self.w_drive = 2*np.pi*self.f_drive
         
 
-        assert len(self.cj_array)>=2, "\n\ncj must have at least two elements\n\n"
-        assert np.any( [ self.cj_array[i]<self.cj_array[i-1] for i in range(1,len(self.cj_array)) ] ) , "\n\nYou must input cj as a decreasing array ,since Junction capacitance decrease with voltage\n\n"
-        self.__b = ( self.cj_array[1]**2*(-1)  ) / (self.cj_array[1]**2 - self.cj_array[0]**2)
-        self.__a = self.cj_array[0]*(self.__b)**0.5
+        assert len(self.cj_array[0])>=2, "\n\ncj must have at least two elements\n\n"
+        assert np.any( [ self.cj_array[0,0] > self.cj_array[0,1] ] ) , "\n\nYou must input cj as a decreasing array ,since Junction capacitance decrease with voltage\n\n"
+        assert np.any( [ self.cj_array[self.segment-1,0] > self.cj_array[self.segment-1,1]  ] ) , "\n\nYou must input cj as a decreasing array ,since Junction capacitance decrease with voltage\n\n"
+        self.  b = ( self.cj_array[0,1]**2*(-1)  ) / (self.cj_array[0,1]**2 - self.cj_array[0,0]**2)
+        self.  a = self.cj_array[0,0]*(self.  b)**0.5
+        if self.segment == 2:
+            self.  d = ( self.cj_array[1,1]**2*(-1)  ) / (self.cj_array[1,1]**2 - self.cj_array[1,0]**2)
+            self.  c = self.cj_array[1,0]*(self.  d)**0.5
+            self.cj_normalizing2 = self.Cj_V(self.v_bias,self.  c,self.  d)
+            assert ( not (self.  c==0) ) and ( not (self.  d==0) ), "\n\nYou must calculate it first\n\n"
+            self.C = self.  c**2/(self.cj_normalizing2**2)
+            self.D = self.cj_normalizing2**2 / (2*self.  c**2)
 
-        self.cj_normalizing = self.Cj_V(self.v_bias)
-        assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
-        self.A = self.__a**2/(self.cj_normalizing**2)
-        self.B = self.cj_normalizing**2 / (2*self.__a**2)
+        self.cj_normalizing1 = self.Cj_V(self.v_bias,self.  a,self.  b)
+        assert ( not (self.  a==0) ) and ( not (self.  b==0) ), "\n\nYou must calculate it first\n\n"
+        self.A = self.  a**2/(self.cj_normalizing1**2)
+        self.B = self.cj_normalizing1**2 / (2*self.  a**2)
+        
     def __init__(self,
                  f_drive,
                  v_bias,
                  vpp,
-                 Rs:float,
+                 Rs:np.ndarray,
+                 Cox:np.ndarray,
+                 Rsi:np.ndarray,
+                 Cp:np.ndarray,
                  cj:np.ndarray,
+                 level,
                  square_wave = 0,
                  sine_wave =0,
                  raise_cosine =0,
-                 PRBS = 0,
+                 PRBS = 1,
                  beta = 0.6,
-                 method = "small_signal",
-                 level = "NRZ",
                  Z0 = 50,
-                 Cox = 34.7e-15,
-                 Rsi = 1439.8,
-                 Cp = 6.6e-15
+                 method = "small_signal",
+                 segment = 1
                  ):
         """
         input argments:
@@ -78,6 +99,11 @@ class driver(simulation) :
         self.Cox = Cox
         self.Rsi = Rsi
         self.Cp = Cp
+        self.segment = segment
+        assert len(Rs)==segment, "\nRs should be a 1D array with length of segment\n"
+        assert len(Cox)==segment, "\nCox should be a 1D array with length of segment\n"
+        assert len(Rsi)==segment, "\nRsi should be a 1D array with length of segment\n"
+        assert len(Cp)==segment, "\nCp should be a 1D array with length of segment\n"
         self.Z0 = Z0
 
         self.square_wave = square_wave
@@ -88,9 +114,12 @@ class driver(simulation) :
         self.beta = beta
 
         self.cj_array = cj
+        self.cj_array = np.array(self.cj_array)
+        self.cj_array = self.cj_array.reshape((self.segment,2))
+        assert np.size(self.cj_array)==self.segment*2, "\n\ncj must have at least two elements\n\n"
         self.level = level
         self.renew()
-        self.cj_normalizing = self.Cj_V(self.v_bias)
+        self.cj_normalizing = self.Cj_V(self.v_bias,self.  a,self.  b)
         
         return 
     def create_voltage(self, 
@@ -105,7 +134,7 @@ class driver(simulation) :
         """
         self.time = time
         if time.mode == "voltage_drive":
-            self.Cj = self.Cj_V(self.v_bias)
+            self.Cj = self.Cj_V(self.v_bias,self.a,self.b)
             # Generating PRBS 
             if self.PRBS:
                 self.prbs =(np.zeros(self.time.N))
@@ -133,14 +162,21 @@ class driver(simulation) :
                 assert not (self.square_wave or self.raise_cosine) , "Only one kind of signal should apply "
             if self.raise_cosine:
                 assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
-                if self.PRBS:
-                    a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized,time.N,self,self.beta)
-                else:
-                    a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N,self,self.beta)
+                if self.segment == 1:
+                    if self.PRBS:
+                        a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized,time.N,self,self.beta)
+                    else:
+                        a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N,self,self.beta)
+                if self.segment == 2:
+                    if self.PRBS:
+                        self.level_num = 2
+                        a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized,time.N,self,self.beta)
+                    else:
+                        a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N,self,self.beta)
                 self.v = a + self.v_bias - self.vpp/2
             self.cubic_interp_voltage = CubicSpline(self.time.t_total,self.v)
         if self.method == 'small_signal':
-            self.Cj = self.Cj_V(self.v_bias)
+            self.Cj = self.Cj_V(self.v_bias,self.a,self.b)
         
         return
     step =0 
@@ -191,18 +227,18 @@ class driver(simulation) :
         else:
             return float(self.Cj)
         
-    def Cj_V(self,vol):
-        assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
-        return self.__a/( (self.__b-vol)**0.5 )
+    def Cj_V(self,vol,a,b):
+        assert ( not (a==0) ) and ( not (b==0) ), "\n\nYou must calculate it first\n\n"
+        return a/( (b-vol)**0.5 )
     
-    def Q_V(self,vol):
-        assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
-        return self.__a/( (self.__b-vol)**0.5 )*vol
+    def Q_V(self,vol,a,b):
+        assert ( not (a==0) ) and ( not (b==0) ), "\n\nYou must calculate it first\n\n"
+        return a/( (b-vol)**0.5 )*vol
     
-    def V_Q(self,Q_bar):
-        assert ( not (self.__a==0) ) and ( not (self.__b==0) ), "\n\nYou must calculate it first\n\n"
-        return  (-Q_bar**2*self.B + \
-                self.B*Q_bar*(Q_bar**2 + 4*self.__b*self.A)**0.5 )
+    def V_Q(self,Q_bar,A,B,a,b):
+        assert ( not (a==0) ) and ( not (b==0) ), "\n\nYou must calculate it first\n\n"
+        return  (-Q_bar**2*B + \
+                B*Q_bar*(Q_bar**2 + 4*b*A)**0.5 )
     
     def varying_Cj(self):
         """

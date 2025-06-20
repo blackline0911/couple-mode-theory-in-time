@@ -11,7 +11,7 @@ class ring(simulation):
     cSi = 0.713*1000 # mJ/(g*K) specific heat capacity of silicon
 
     def __init__(self,L:float, 
-                 L_active:float,
+                 L_active:np.ndarray,
                  alpha:float,
                  gamma:np.ndarray,
                  cross_section:float,
@@ -36,11 +36,14 @@ class ring(simulation):
                  TPA_fit_factor = 1,
                  SPM_fit_factor = 1,
                  self_heating_factor = 1,
+                 segment = 1,
                  input_port = 1,
                 ):
         """
         input argments:\n
         \tL : Length of cavity (micron)\n
+        \tL_active : Length of active region in ring (micron), can be a 1D array with length of segment\n
+        \t\tdefault first element is LSB length, last element is MSB length\n
         \tneff : effective phase index of waveguide in ring\n
         \tng: group index of waveguide in ring\n
         \tgamma:AMPLITUDE couple through coefficient of the bus waveguide of ring\n
@@ -63,6 +66,9 @@ class ring(simulation):
         """
         self.L=L
         self.L_active = L_active
+        self.L_active = np.array(L_active)
+        assert len(L_active)==segment, "\nL_active should be a 1D array with length of segment\n"
+        self.segment = segment
         self.ng=ng
         self.gamma=np.real(gamma)
         assert (not np.imag(g)==0.0 for g in gamma) , "\nCoupling coefficient shall not over one\n"

@@ -4,7 +4,7 @@ Just for Future checking or further research
 Simulation Parameters and Settings
 	time scaling : 1e-12 sec
 	Simulation mode = scan_frequency
-	Input Laser Power : 3.68 mW
+	Input Laser Power : 1 mW
 
 	Input Laser wavelength : 1.308566 um
 
@@ -16,8 +16,21 @@ Parameter of ring modulator
 		Round trip loss : (energy) 0.798201847667911
 		mode cross section : 0.11 um^2
 		Linear Energy absorption coefficient: 29.893777407172134 1/cm
+		Energy coupling coefficient: [21.81437806] 1/cm
 		Max Two Photon Absorption coefficient : 0.0 1/cm
 		Max Free Carrier Absorption coefficient : 0.0 1/cm
+		Free Carrier time constant : 20 ns
+		Two photon absorption coefficient : 5e-13 cm/mW
+		Two photon absorption mode area : 0.1289 um^2
+		Free Carrier time constant : 20 ns
+		Free carrier absorption area : 1.04 cm^2
+		Free carrier absorption mode area : 0.116 um^2
+		Heater efficiency : 73 pm/mW
+		Kerr effect coefficient (n2) : 1.1e-08 um^2/mW
+		Kerr effect mode area (Akerr) : 0.204 um^2
+		index change rate per Kelvin : 0.000195 1/K
+		Density of Silicon : 2.329e-12 g/um^3
+		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
 		intrinsic photon life time : 8.892549029665286 ps
 		couple extrinsic photon life time (port 1 ) : 12.186085736433085 ps
@@ -30,13 +43,15 @@ Parameter of ring modulator
 
 		Input Laser photon energy : 0.00015180165361991675 fJ
 
-	The start wavelength is 1.3084000000000002 um
-	The end wavelength is 1.3089 um
+	The start wavelength is 1.3083942074609851 um
+	The end wavelength is 1.3088068385415799 um
 	scanning frequency range for better accuracy is 0.06191588834734473 THz
-	Current frequency range is 0.08752733473269814 THz
+	Current frequency range is 0.07223845881546254 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 
-	time resolution : 1e-14 sec
-	Max time range : 20000 ps
-		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
+	time resolution : 1e-12 sec
+	Max time range : 10000 ps
+	Number of bit in squence : []
+
+	Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
