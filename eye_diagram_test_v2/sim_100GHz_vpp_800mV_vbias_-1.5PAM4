@@ -16,8 +16,21 @@ Parameter of ring modulator
 		Round trip loss : (energy) 0.798201847667911
 		mode cross section : 0.11 um^2
 		Linear Energy absorption coefficient: 29.893777407172134 1/cm
+		Energy coupling coefficient: [21.81437806] 1/cm
 		Max Two Photon Absorption coefficient : 0.0 1/cm
 		Max Free Carrier Absorption coefficient : 0.0 1/cm
+		Free Carrier time constant : 20 ns
+		Two photon absorption coefficient : 5e-13 cm/mW
+		Two photon absorption mode area : 0.1289 um^2
+		Free Carrier time constant : 20 ns
+		Free carrier absorption area : 1.04 cm^2
+		Free carrier absorption mode area : 0.116 um^2
+		Heater efficiency : 73 pm/mW
+		Kerr effect coefficient (n2) : 1.1e-08 um^2/mW
+		Kerr effect mode area (Akerr) : 0.204 um^2
+		index change rate per Kelvin : 0.000195 1/K
+		Density of Silicon : 2.329e-12 g/um^3
+		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
 		intrinsic photon life time : 8.892549029665286 ps
 		couple extrinsic photon life time (port 1 ) : 12.186085736433085 ps
@@ -31,12 +44,16 @@ Parameter of ring modulator
 		Input Laser photon energy : 0.00015180165361991675 fJ
 
 Simulation Parameter of time 
-	time resolution : 1e-14 sec
+	time resolution : 1e-13 sec
 	Max time range : 10000 ps
-		Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
+	Number of bit in squence : 1000
+
+	Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
 	Driver information : 
 	Driving Signal is raise_cosine signal
 		Driving frequency is 100.0 GHz
 		Bias voltage is -1.5 V
 		Peak to Peak voltage is 0.8 V
+
+		beta of raise cosine signal is 0.6
 

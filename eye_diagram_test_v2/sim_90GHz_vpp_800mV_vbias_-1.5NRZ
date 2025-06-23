@@ -1,0 +1,59 @@
+This script is used to save the simulation variable that A simulation used. 
+Just for Future checking or further research
+
+Simulation Parameters and Settings
+	time scaling : 1e-12 sec
+	Simulation mode = voltage_drive
+	Input Laser Power : 3.68 mW
+
+	Input Laser wavelength : 1.308566 um
+
+Parameter of ring modulator
+	Structure parameter : 
+		cavity length : 75.39822368615503 um
+		Group index : 3.984719655112499
+		couple through coefficient : [0.92105248]
+		Round trip loss : (energy) 0.798201847667911
+		mode cross section : 0.11 um^2
+		Linear Energy absorption coefficient: 29.893777407172134 1/cm
+		Energy coupling coefficient: [21.81437806] 1/cm
+		Max Two Photon Absorption coefficient : 0.0 1/cm
+		Max Free Carrier Absorption coefficient : 0.0 1/cm
+		Free Carrier time constant : 20 ns
+		Two photon absorption coefficient : 5e-13 cm/mW
+		Two photon absorption mode area : 0.1289 um^2
+		Free Carrier time constant : 20 ns
+		Free carrier absorption area : 1.04 cm^2
+		Free carrier absorption mode area : 0.116 um^2
+		Heater efficiency : 73 pm/mW
+		Kerr effect coefficient (n2) : 1.1e-08 um^2/mW
+		Kerr effect mode area (Akerr) : 0.204 um^2
+		index change rate per Kelvin : 0.000195 1/K
+		Density of Silicon : 2.329e-12 g/um^3
+		specific heat capacity of silicon : 713.0 mJ/(g*K)
+	Physical parameter : 
+		intrinsic photon life time : 8.892549029665286 ps
+		couple extrinsic photon life time (port 1 ) : 12.186085736433085 ps
+		resonant frequency : 229.08878656875603 THz
+		resonant wavelength : 1.3086299966498962 um
+		Q factor : 3699.999994889527
+		LineWidth : 0.35368378336686157 nm
+		Group velocity : 75235520675929.73 um/s
+		Round Trip time : 1.0021625823648663 ps
+
+		Input Laser photon energy : 0.00015180165361991675 fJ
+
+Simulation Parameter of time 
+	time resolution : 1e-13 sec
+	Max time range : 8889 ps
+	Number of bit in squence : 800
+
+	Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
+	Driver information : 
+	Driving Signal is raise_cosine signal
+		Driving frequency is 90.0 GHz
+		Bias voltage is -1.5 V
+		Peak to Peak voltage is 0.8 V
+
+		beta of raise cosine signal is 0.6
+

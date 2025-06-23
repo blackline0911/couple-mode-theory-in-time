@@ -66,18 +66,27 @@ class simulation():
                     linewidth=0.15):
         assert self.mode=="voltage_drive", "\neye diagram only available at voltage driving mode\n"
         N = time.N
-        np.save("./"+filename+".npy",signal)
+        # np.save("./"+filename+".npy",signal)
         cum_t_index, sig= self.discard_func(time,signal)
-        step = cum_t_index[1]-cum_t_index[0]
+        step = int(cum_t_index[1]-cum_t_index[0])
+        
         plt.figure()
         # discarding the first two bits
         if driver.PRBS:
             t_array = np.array(time.t_all_segment[0][:])
             for j in range(1,plot_bit_num):
-                    t_array = np.append(t_array,np.array(time.t_all_segment[j][:]))
-            for k in range(0,N-self.discarding-plot_bit_num+1,plot_bit_num):
-                sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
-                plt.plot( t_array,sig_segment, color='blue', linewidth=linewidth)
+                t_array = np.append(t_array,np.array(time.t_all_segment[j][:]))
+            total_seg = len(sig)//(step*plot_bit_num)
+            sig = sig[0:step*total_seg*plot_bit_num]
+            segment = np.array_split(sig,total_seg)
+            for s in (segment):
+                plt.plot( t_array,s, color='blue', linewidth=linewidth)
+            # for k in range(0,N-self.discarding-plot_bit_num-driver.shift_bit+1,plot_bit_num):
+            #     print(k)
+                
+            #     sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
+            #     sig_segment = sig[int(cum_t_index[k]-step*self.discarding):int(cum_t_index[k+plot_bit_num]-step*self.discarding)]
+                
         else:
             t_array = np.array(time.t_all_segment[0][:])
             for j in range(1,plot_bit_num):

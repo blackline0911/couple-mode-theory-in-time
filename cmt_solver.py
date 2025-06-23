@@ -83,11 +83,10 @@ def CMT_voltage_driving(sim,ring:ring,
         i2_init      =  sol.y[5][-1]
         
         for i in range(1,time.N):
-            init = [b_init, N_init, delta_T_init, vneg_init, vj_init, i2_init]
             sol =  solve_ivp(ode_func ,
                             [time.t_all_segment[i-1][-1] ,\
                             time.t_all_segment[i][-1]], 
-                            init,
+                            [b_init, N_init, delta_T_init, vneg_init, vj_init, i2_init],
                             method=sim.algorithm,
                             t_eval = append(array([time.t_all_segment[i-1][-1]]), \
                                             array(time.t_all_segment[i])),
@@ -118,6 +117,12 @@ def CMT_voltage_driving(sim,ring:ring,
                N_record/(ring.sigma_FCA*1e-17)*1e-5, T_record,  \
                vneg_record, vj_record, i2_record
     if ring.segment == 2:
+        vneg_LSB_init   =   0
+        vj_LSB_init     =   0
+        i2_LSB_init     =   0
+        vneg_MSB_init   =   0
+        vj_MSB_init     =   0
+        i2_MSB_init     =   0
         b_record =          array([])
         N_record =          array([])
         T_record =          array([])
@@ -127,28 +132,54 @@ def CMT_voltage_driving(sim,ring:ring,
         vneg_MSB_record =   array([])
         vj_MSB_record   =   array([])
         i2_MSB_record   =   array([])
-        vneg_LSB_init   =   0
-        vj_LSB_init     =   0
-        i2_LSB_init     =   0
-        vneg_MSB_init   =   0
-        vj_MSB_init     =   0
-        i2_MSB_init     =   0
         func_name = driver.method+ '_dual_segment'
-        start = driver.shift_bit+1
         init = [b_init, N_init, delta_T_init, vneg_LSB_init, vj_LSB_init, i2_LSB_init,
                 vneg_MSB_init, vj_MSB_init, i2_MSB_init]
         ode_func = partial(method_dict[func_name],
                         SPM=SPM,FCA=FCA,TPA=TPA,
                         T_args=T_args,
                         ring = ring,sim=sim,
-                        driver=driver,Heater=Heater)
-        
-        for i in range(start,time.N):
+                        driver=driver,Heater=Heater,)
+        sol =  solve_ivp(ode_func ,[0 ,time.t_all_segment[0][-1]], 
+                                init,
+                                method=sim.algorithm,
+                                t_eval = time.t_all_segment[0] ,
+                                atol = atol,rtol = rtol,)
+        b               =  sol.y[0]
+        n               =  sol.y[1]
+        T               =  sol.y[2]
+        vneg_LSB        =  sol.y[3]
+        vj_LSB          =  sol.y[4]
+        i2_LSB          =  sol.y[5]
+        vneg_MSB        =  sol.y[6]
+        vj_MSB          =  sol.y[7]
+        i2_MSB          =  sol.y[8]
+        b_record    =   append(b_record,b)
+        N_record    =   append(N_record,n)
+        T_record    =   append(T_record,T)
+        vneg_LSB_record =   append(vneg_LSB_record,vneg_LSB)
+        vj_LSB_record   =   append(vj_LSB_record,vj_LSB)
+        i2_LSB_record   =   append(i2_LSB_record,i2_LSB)
+        vneg_MSB_record =   append(vneg_MSB_record,vneg_MSB)
+        vj_MSB_record   =   append(vj_MSB_record,vj_MSB)
+        i2_MSB_record   =   append(i2_MSB_record,i2_MSB)
+
+        b_init       =  sol.y[0][-1]
+        N_init       =  sol.y[1][-1]
+        delta_T_init =  sol.y[2][-1]
+        vneg_LSB_init = sol.y[3][-1]
+        vj_LSB_init =   sol.y[4][-1]
+        i2_LSB_init =   sol.y[5][-1]
+        vneg_MSB_init = sol.y[6][-1]
+        vj_MSB_init =   sol.y[7][-1]
+        i2_MSB_init =   sol.y[8][-1]
+        for i in range(1,time.N-driver.shift_bit):
             sol =  solve_ivp(ode_func ,
                             [time.t_all_segment[i-1][-1] ,\
                             time.t_all_segment[i][-1]], 
                             [b_init, N_init, delta_T_init,\
-                              vneg_init, vj_init, i2_init],
+                              vneg_LSB_init, vj_LSB_init, i2_LSB_init,\
+                              vneg_MSB_init, vj_MSB_init, i2_MSB_init,],
                             method=sim.algorithm,
                             t_eval =  append(array([time.t_all_segment[i-1][-1]]), \
                                             array(time.t_all_segment[i])),
@@ -182,7 +213,6 @@ def CMT_voltage_driving(sim,ring:ring,
             vj_MSB_init =   sol.y[7][-1]
             i2_MSB_init =   sol.y[8][-1]
         s_minus_bar = (1-ring.input_kappa*b_record)
-
         return  b_record*sim.b0, s_minus_bar*sim.S0,               \
                 N_record/(ring.sigma_FCA*1e-17)*1e-5,  T_record,   \
                 vneg_LSB_record, vj_LSB_record, i2_LSB_record,     \

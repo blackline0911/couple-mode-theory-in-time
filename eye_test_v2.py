@@ -11,57 +11,129 @@ from Heater import Heater
 
 
 # Refer：A 5×200 Gbps microring modulator silicon chip empowered by two-segment Z-shape junction
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# mode = "scan_frequency"
-mode = "voltage_drive"
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+mode = "scan_frequency"
+# mode = "voltage_drive"
 wl_in = 1.308566
-# Pin = 3.68 #mW
-Pin = 1 #mW
+Pin = 3.68 #mW
+# Pin = 1 #mW
 FSR = 0.0057
 radius = 12
 La_LSB_ratio = 1/3
 La_MSB_ratio = 2/3
 dneff_dV = 0.00010048812689651478
+segment = 1
+SB = "LSB"
+mode_area = 0.22*0.5
+lambda_res = 1.3086299966498962
+Q = 3700
+me_LSB = 11 # pm/V
+
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Cox_LSB = 1.3e-15
+Cox_MSB = 2.6e-15
+Rs_LSB = 68.1
+Rs_MSB = 35.4
+Rsi_LSB = 2289.6
+Rsi_MSB = 1477.4
+Cpad_LSB = 31.6e-15
+Cpad_MSB = 33.1e-15
+bit_num = 1000
+v_bias = -1.5
+vpp = 0.8
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# Calculate group index
+cavity_length = 2*np.pi*radius
+ng = lambda_res**2/(FSR*cavity_length)
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# Calculate total loss (intrinsic loss + coupling loss)
+w_res = 2*np.pi*c/(lambda_res) # THz
+print("G_energy + alpha_energy = ",( w_res*ng/(c*1e-4))/Q," 1/cm")
+
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# Define the energy absorption coefficient (varing with voltage)
 
 G_plus_alpha = 51.70815539157168
 ratio = 81/192
 alpha_energy0 =  G_plus_alpha*(1-ratio) #1/cm
 G_energy = G_plus_alpha*ratio #1/cm
 
-dalpha_dv = 0.5
 def func(V,alpha0,b,c):
     return b*V/(abs(V)+c)**0.5+alpha0
 V = np.array([0,-0.5,-1,-1.5,-2])
 alpha_energy_data = func(V,alpha_energy0,0.5,2e-06)
 Amp_RoundTripLoss_data = np.exp(-alpha_energy_data/2*2*np.pi*radius*1e-4)
+a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,L = 2*np.pi*radius,input2 = "amp",fit_mode="func")
 
-
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# Define the coupling coefficient
 gamma = np.exp(-G_energy/2*2*np.pi*radius*1e-4)
-print("gamma = ",gamma)
+# print("gamma = ",gamma)
+
+
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# Define the index (varing with voltage)
 neff0 = 2.69021788
+D_bar = -2*np.pi*c/lambda_res**2
+print("delta neff/delta V = ",me_LSB*1e-6*D_bar*( -ng/(w_res) )*(1/La_LSB_ratio))
+
 neff_calculated = [neff0+dneff_dV*(-0.5),neff0, neff0+dneff_dV*0.5, neff0+dneff_dV*1, neff0+dneff_dV*1.5, neff0+dneff_dV*2]
-print("neff_calculated = ",neff_calculated)
-mode_area = 0.22*0.5
+# print("neff_calculated = ",neff_calculated)
+n_fit = neff_fit(neff_data=neff_calculated)
+
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-bit_num = 100
-v_bias = -1.5
-vpp = 0.8
-Rs = [68.1,35.4]
-a_cj = 60e-15
-b_cj = a_cj**2/(3*6.6e-15)**2 - 3
+
+a_cj = 20e-15
+b_cj = a_cj**2/(6.6e-15)**2 - 3
 Cjs_LSB = [a_cj/(b_cj)**0.5, a_cj/(b_cj + 1)**0.5]
 a_cj = 100e-15
-b_cj = a_cj**2/(3*13.2e-15)**2 - 3
+b_cj = a_cj**2/(13.2e-15)**2 - 3
 Cjs_MSB = [a_cj/(b_cj)**0.5, a_cj/(b_cj + 1)**0.5]
-print("Cjs_LSB = ",Cjs_LSB)
-print("Cjs_MSB = ",Cjs_MSB)
 f_drive=100
 level = "PAM4"
-Cox = [1.3e-15,2.6e-15]
-Rsi = [2289.6,1477.4]
-Cpad = [31.6e-15,33.1e-15]
+print("Cjs_LSB = ",Cjs_LSB)
+print("Cjs_MSB = ",Cjs_MSB)
+
+# ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+if segment==2:
+    Cox = [Cox_LSB,Cox_MSB]
+    Rsi = [Rsi_LSB,Rsi_MSB]
+    Cpad = [Cpad_LSB,Cpad_MSB]
+    Rs = [Rs_LSB,Rs_MSB]
+    Cj = [Cjs_LSB,Cjs_MSB]
+    La = [2*np.pi*radius*La_LSB_ratio,2*np.pi*radius*La_MSB_ratio]
+if segment==1:
+    if SB=="LSB":
+        Cox = [Cox_LSB]
+        Rsi = [Rsi_LSB]
+        Cpad = [Cpad_LSB]
+        Rs = [Rs_LSB]
+        Cj = [Cjs_LSB]
+        La = [2*np.pi*radius*La_LSB_ratio]
+    if SB=="MSB":
+        Cox = [Cox_MSB]
+        Rsi = [Rsi_MSB]
+        Cpad = [Cpad_MSB]
+        Rs = [Rs_MSB]
+        Cj = [Cjs_MSB]
+        La = [2*np.pi*radius*La_MSB_ratio]
 
 
 
@@ -77,10 +149,9 @@ sim.main(experiment_condition=experiment_condition)
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,L = 2*np.pi*radius,input2 = "amp",fit_mode="func")
-n_fit = neff_fit(neff_data=neff_calculated)
+
 ring_mod = ring(L=2*np.pi*radius, 
-            L_active = [2*np.pi*radius*La_LSB_ratio,2*np.pi*radius*La_MSB_ratio],
+            L_active = La,
             alpha=a_fit.alpha_V,
             neff=n_fit.neff_V,
             cross_section=mode_area,
@@ -93,27 +164,17 @@ ring_mod = ring(L=2*np.pi*radius,
             SPM_fit_factor=0,
             band="O",
             HE = 73,
-            segment=2,
+            segment=segment,
             self_heating_factor=0
             )
-# print("G_energy + alpha_energy = ",(2*np.pi*229.08878656875603*1e12*ring_mod.ng/(c*1e-4))/3700," 1/cm")
-# print("delta neff/delta V = ",11e-6*ring_mod.D_bar*( -ring_mod.ng/(2*np.pi*ring_mod.f_res_bar) )*(1/La_Lc_ratio))
-# print("ng = ",ring_mod.ng)
-# print("lambda0 = ",ring_mod.lambda0)
-# print("f0 = ",ring_mod.f_res_bar," THz")
+ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active[0]/ring_mod.L),\
+            x_label="voltage (V)",title="resonant wavelength vs Voltage (pm/V)",filename="lambda_V")
 
-# f0 =  229.08878656875603  THz
-# ng =  3.984719655112499
-# lambda0 =  1.3086299966498962 um
-
-# wl_min =  1.5464
-# wl_max =  1.55
-# H = Heater(300,2.42,0.5*150/0.6)
 H = Heater(300,0,0.5*150/0.6)
 # wl_min =  1.3084
 # wl_max =  1.3089
-wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q/1.5
-wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q/2
+wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q*1.5
+wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q*2
 print("wl_min = ",wl_min ," um")
 print("wl_max = ",wl_max ," um")
 
@@ -122,18 +183,22 @@ v = driver(f_drive=f_drive,
            vpp=vpp,
            Rs=Rs,
            raise_cosine=1,
-           cj = [Cjs_LSB,Cjs_MSB],
-           PRBS=1,
+           cj = Cj,
            level = level,
            Cox = Cox,
            Rsi=Rsi,
            Cp=Cpad,
-           segment=2)
+           segment=segment)
+
 V = np.linspace(-5,0,1000)
-plt.plot(V,v.Cj_V(V,v.a,v.b))
-plt.xlabel("voltage (V)")
-plt.title("junction capacitance (F)")
-plt.show()
+if segment==2:
+    ploting(V,v.Cj_V(V,v.a,v.b),v.Cj_V(V,v.c,v.d),x_label="voltage (V)",title="junction capacitance LSB (F)",filename="Cj_V_LSB",leg=["LSB","MSB"])
+if segment==1:
+    if SB=="LSB":
+        ploting(V,v.Cj_V(V,v.a,v.b),x_label="voltage (V)",title="junction capacitance LSB (F)",filename="Cj_V_LSB")
+    if SB=="MSB":
+        ploting(V,v.Cj_V(V,v.a,v.b),x_label="voltage (V)",title="junction capacitance MSB (F)",filename="Cj_V_MSB")
+        
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 os.chdir("./eye_diagram_test_v2/")
@@ -184,32 +249,66 @@ if sim.mode == "scan_frequency":
     # ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active/ring_mod.L),\
     #         x_label="voltage (V)",title="resonant wavelength vs Voltage (pm/V)",filename="lambda_V")
 if sim.mode == "voltage_drive":
-    t.main(ring_mod,N=bit_num,driver=v)
+    t.main(ring_mod,N=bit_num,driver=v,resolution=1)
     print("\n\nSimulation at ",str(v.f_drive/1e9)," GHz, ",str(v.vpp),"V vpp, ",str(v.v_bias),"V vbias\n\n")
     filename = ('sim_'+str(int(v.f_drive/1e9))+"GHz_vpp_"+str(int(vpp*1000))+"mV"+"_vbias_"+str(v_bias)+str(v.level))
     
     # v.method = "large_signal"
-    sim.eye_diagram(t,v,v.v,
-                    filename="voltage_eye_"+str(int(v.f_drive/1e9))+"GHz_vpp_"+str(int(vpp*1000))+"mV_vbias_"+str(int(1000*v_bias))+"mV",
-                    title="vpos" ,
-                    plot_bit_num=2)
+    if segment==2:
+        sim.eye_diagram(t,v,v.v_LSB,
+                        filename="voltage_LSB_eye_"+str(int(v.f_drive/1e9))+"GHz_vpp_"+str(int(vpp*1000))+"mV_vbias_"+str(int(1000*v_bias))+"mV",
+                        title="vpos LSB" ,
+                        plot_bit_num=2)
+        sim.eye_diagram(t,v,v.v_MSB,
+                        filename="voltage_LSB_eye_"+str(int(v.f_drive/1e9))+"GHz_vpp_"+str(int(vpp*1000))+"mV_vbias_"+str(int(1000*v_bias))+"mV",
+                        title="vpos MSB" ,
+                        plot_bit_num=2)
+    if segment==1:
+        sim.eye_diagram(t,v,v.v,
+                        filename="voltage_eye_"+str(int(v.f_drive/1e9))+"GHz_vpp_"+str(int(vpp*1000))+"mV_vbias_"+str(int(1000*v_bias))+"mV",
+                        title="vpos" ,
+                        plot_bit_num=2)
     
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     print("\n\n.................Start Small Signal Simulation.................\n\n")
-    sim.b,s_minus,N ,delta_T,vneg_LSB, vj_LSB, i2_LSB, \
-        vneg_MSB, vj_MSB, i2_MSB,= solving(sim,ring_mod,v,t,H)
+    if segment==2:
+        sim.b,s_minus,N ,delta_T,vneg_LSB, vj_LSB, i2_LSB, \
+            vneg_MSB, vj_MSB, i2_MSB,= solving(sim,ring_mod,v,t,H)
+    else:
+        if SB=="LSB":
+            sim.b,s_minus,N ,delta_T,vneg_LSB, vj_LSB, i2_LSB = solving(sim,ring_mod,v,t,H)
+        if SB=="MSB":
+            sim.b,s_minus,N ,delta_T,vneg_MSB, vj_MSB, i2_MSB = solving(sim,ring_mod,v,t,H)
     
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     sim.save_data(ring_mod,t,v,file_name=filename)
-    name = 'eye_SmallSignal_'+str(bit_num)+'bits_with_TPA_FCA_f'+   \
+    
+    if segment==2:
+        name = 'eye_SmallSignal_'+str(bit_num)+'bit_two_segment_f'+   \
         str(int(v.f_drive*1e-9))+"GHz_vpp_"+str(-int(v.vpp*1000))+"mV_vbias_"+str(-int(v.v_bias*1000))+"mV"
-    ploting(t.t_total,delta_T,x_label="time",title="delta T")
-    sim.eye_diagram(t,v,abs(s_minus)**2,filename=name+str(v.level),plot_bit_num=2,title="Output power (mW)")
-    sim.eye_diagram(t,v,vneg,filename="vneg_SmallSignal"+str(v.level),plot_bit_num=2,title="vneg")
-    sim.eye_diagram(t,v,v.v+vneg,filename="vpos + vneg SmallSignal"+str(v.level),plot_bit_num=2,title="vpos_plus_vneg")
+        sim.eye_diagram(t,v,abs(s_minus)**2,filename=name+str(v.level),plot_bit_num=2,title="Output power (mW)")
+        sim.eye_diagram(t,v,vneg_LSB,filename="vneg_MSB_SmallSignal"+str(v.level),plot_bit_num=2,title="vneg_LSB")
+        sim.eye_diagram(t,v,vneg_MSB,filename="vneg_MSB_SmallSignal"+str(v.level),plot_bit_num=2,title="vneg_MSB")
+        sim.eye_diagram(t,v,vj_LSB,filename="vj_MSB_SmallSignal"+str(v.level),plot_bit_num=2,title="vj_LSB")
+        sim.eye_diagram(t,v,vj_MSB,filename="vj_MSB_SmallSignal"+str(v.level),plot_bit_num=2,title="vj_MSB")
+    else:
+        if SB=="LSB":
+            name = 'eye_SmallSignal_'+str(bit_num)+'bit_LSB_f'+   \
+            str(int(v.f_drive*1e-9))+"GHz_vpp_"+str(-int(v.vpp*1000))+"mV_vbias_"+str(-int(v.v_bias*1000))+"mV"
+            sim.eye_diagram(t,v,abs(s_minus)**2,filename=name+str(v.level),plot_bit_num=2,title="Output power (mW)")
+            sim.eye_diagram(t,v,vneg_LSB,filename="vneg_SmallSignal"+str(v.level),plot_bit_num=2,title="vneg")
+            sim.eye_diagram(t,v,vj_LSB,filename="vj_SmallSignal"+str(v.level),plot_bit_num=2,title="vj")
+        if SB=="MSB":
+            name = 'eye_SmallSignal_'+str(bit_num)+'bits_MSB_f'+   \
+            str(int(v.f_drive*1e-9))+"GHz_vpp_"+str(-int(v.vpp*1000))+"mV_vbias_"+str(-int(v.v_bias*1000))+"mV"
+            sim.eye_diagram(t,v,abs(s_minus)**2,filename=name+str(v.level),plot_bit_num=2,title="Output power (mW)")
+            sim.eye_diagram(t,v,vneg_MSB,filename="vneg_SmallSignal"+str(v.level),plot_bit_num=2,title="vneg")
+            sim.eye_diagram(t,v,vj_MSB,filename="vj_SmallSignal"+str(v.level),plot_bit_num=2,title="vj")
+
+    # sim.eye_diagram(t,v,v.v+vneg,filename="vpos + vneg SmallSignal"+str(v.level),plot_bit_num=2,title="vpos_plus_vneg")
 
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

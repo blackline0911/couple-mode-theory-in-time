@@ -36,7 +36,7 @@ ng = lambda_res**2/(FSR*cavity_length)
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Calculate total loss (intrinsic loss + coupling loss)
 w_res = 2*np.pi*c/(lambda_res) # THz
-print("G_energy + alpha_energy = ",( w_res*ng/(c*1e-4))/8015," 1/cm")
+print("G_energy + alpha_energy = ",( w_res*ng/(c*1e-4))/Q," 1/cm")
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the energy absorption coefficient (varing with voltage)

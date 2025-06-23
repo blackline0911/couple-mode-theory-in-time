@@ -11,7 +11,7 @@ Simulation Parameters and Settings
 Parameter of ring modulator
 	Structure parameter : 
 		cavity length : 18.84955592153876 um
-		Group index : 3.9338451726160377
+		Group index : 3.933845172616042
 		couple through coefficient : [0.94034963]
 		Round trip loss : (energy) 0.8493670169040524
 		mode cross section : 0.11 um^2
@@ -32,21 +32,21 @@ Parameter of ring modulator
 		Density of Silicon : 2.329e-12 g/um^3
 		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
-		intrinsic photon life time : 3.029964436802957 ps
-		couple extrinsic photon life time (port 1 ) : 4.0215891615748305 ps
-		resonant frequency : 193.414489032258 THz
-		resonant wavelength : 1.5500000000000007 um
-		Q factor : 1050.0
-		LineWidth : 1.476190476190477 nm
-		Group velocity : 76208504617032.42 um/s
-		Round Trip time : 0.24734189466467932 ps
+		intrinsic photon life time : 3.0299644368029606 ps
+		couple extrinsic photon life time (port 1 ) : 4.021589161574835 ps
+		resonant frequency : 193.41448903225788 THz
+		resonant wavelength : 1.5500000000000016 um
+		Q factor : 1050.0000000000005
+		LineWidth : 1.4761904761904772 nm
+		Group velocity : 76208504617032.33 um/s
+		Round Trip time : 0.2473418946646796 ps
 
 		Input Laser photon energy : 0.0001281820768481438 fJ
 
 Simulation Parameter of time 
 	time resolution : 1e-14 sec
-	Max time range : 5000 ps
-	Number of bit in squence : 500
+	Max time range : 1500 ps
+	Number of bit in squence : 150
 
 	Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
 	Driver information : 

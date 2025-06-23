@@ -42,7 +42,7 @@ print("neff_calculated = ",neff_calculated)
 mode_area = 0.22*0.5
 
 
-bit_num = 500
+bit_num = 150
 v_bias = -1.5
 vpp = 2
 Rs =250
@@ -50,7 +50,7 @@ a_cj = 20e-15
 b_cj = a_cj**2/(6e-15)**2 - 3
 Cjs = [a_cj/(b_cj)**0.5, a_cj/(b_cj + 1)**0.5]
 f_drive= 100
-level = "PAM4"
+level = "NRZ"
 Cox = 19.2e-15
 Rsi = 760.0
 Cpad = 20.1e-15

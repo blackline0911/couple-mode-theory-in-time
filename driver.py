@@ -36,12 +36,18 @@ class driver(simulation) :
 
         # If you want to use two NRZ signal to combine a new NRZ, don't shift bit.
         # If you want to use two NRZ signal to combine a new PAM4, please shift bit.
-        if self.level == "NRZ":
+        if (self.level == "NRZ") and (self.segment==1):
             self.level_num = 2
-            shift_bit = 0
-        if self.level == "PAM4":
+            self.shift_bit = 0
+        if (self.level == "NRZ") and (self.segment==2):
+            self.level_num = 2
+            self.shift_bit = 0
+        if (self.level == "PAM4") and (self.segment==1):
             self.level_num = 4
-            shift_bit = 100
+            self.shift_bit = 0
+        if (self.level == "PAM4") and (self.segment==2):
+            self.level_num = 2
+            self.shift_bit = 10
         self.w_drive = 2*np.pi*self.f_drive
         
 
@@ -138,10 +144,12 @@ class driver(simulation) :
             # Generating PRBS 
             if self.PRBS:
                 self.prbs =(np.zeros(self.time.N))
-                if self.level == 'NRZ':
+                if (self.level == 'NRZ' and self.segment == 2) or \
+                    (self.level == 'NRZ' and self.segment == 1) or \
+                    (self.level == 'PAM4' and self.segment == 2)    :
                     for i in range(self.time.N):
                         self.prbs[i] = (randint(0,1))
-                if self.level == "PAM4":
+                if self.level == "PAM4" and self.segment == 1:
                     for i in range(self.time.N):
                         self.prbs[i] = (randint(0,3))
                 self.prbs[int(randint(0,time.N-1))] = (1)
@@ -157,9 +165,13 @@ class driver(simulation) :
             if self.square_wave:
                 self.v = self.vpp/2*signal.square(self.w_drive*self.time.t_total*t0,duty=0.5)+self.v_bias
                 assert not (self.sine_wave or self.raise_cosine) , "Only one kind of signal should apply "
+                self.v = a + self.v_bias - self.vpp/2
+                self.cubic_interp_voltage = CubicSpline(self.time.t_total,self.v)
             if self.sine_wave:
                 self.v = self.vpp/2*np.exp(1j*self.w_drive*self.time.t_total*t0)+self.v_bias
                 assert not (self.square_wave or self.raise_cosine) , "Only one kind of signal should apply "
+                self.v = a + self.v_bias - self.vpp/2
+                self.cubic_interp_voltage = CubicSpline(self.time.t_total,self.v)
             if self.raise_cosine:
                 assert not (self.square_wave or self.sine_wave) , "Only one kind of signal should apply "
                 if self.segment == 1:
@@ -167,14 +179,33 @@ class driver(simulation) :
                         a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized,time.N,self,self.beta)
                     else:
                         a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N,self,self.beta)
+                    self.v = a + self.v_bias - self.vpp/2
+                    self.cubic_interp_voltage = CubicSpline(self.time.t_total,self.v)
                 if self.segment == 2:
                     if self.PRBS:
-                        self.level_num = 2
+                        # vpp_temp = self.vpp
+                        # self.vpp = self.vpp*2/3
                         a = raise_cosine.create_rcos_signal(self.prbs,time.t_total,time.T_normalized,time.N,self,self.beta)
                     else:
                         a = raise_cosine.create_rcos_signal(self.bit_sequence,time.t_total,time.T_normalized,time.N,self,self.beta)
-                self.v = a + self.v_bias - self.vpp/2
-            self.cubic_interp_voltage = CubicSpline(self.time.t_total,self.v)
+                    a = a - self.vpp/2
+                    length_UI = len(self.time.t_all_segment[0])
+                    shift_NRZ_wobias = a [int(self.shift_bit*length_UI):]
+                    if not (self.shift_bit==0):
+                        a = a[:-int(self.shift_bit*length_UI)]
+                        t_slice = self.time.t_total[:-int(self.shift_bit*length_UI)]
+                    else:
+                        t_slice = self.time.t_total
+                    a_wobias = a 
+                    a_wbias = a +self.v_bias
+                    shift_NRZ_wbias = shift_NRZ_wobias + self.v_bias
+                    self.v_LSB = a_wbias
+                    self.v_MSB = shift_NRZ_wbias
+                    self.v = a_wobias + shift_NRZ_wobias + self.v_bias
+                    self.cubic_interp_voltage = CubicSpline(t_slice,self.v_LSB)
+                    self.cubic_interp_voltage_shift = CubicSpline(t_slice,self.v_MSB )
+                    # self.vpp = vpp_temp
+            
         if self.method == 'small_signal':
             self.Cj = self.Cj_V(self.v_bias,self.a,self.b)
         
@@ -202,7 +233,9 @@ class driver(simulation) :
             return v
         if self.time.mode == "scan_frequency":
             return self.v_bias
-
+    def refering_v_shifted(self,t):
+        v = self.cubic_interp_voltage_shift(t)
+        return v
     def refering_dv_dt(self,v0,t):
         # v0：voltage point at time t
         if (t<2*self.time.dt/t0):
@@ -212,6 +245,18 @@ class driver(simulation) :
         if (t>=2*self.time.dt/t0):
             v1 = self.cubic_interp_voltage(t-self.time.dt/t0)
             v2 = self.cubic_interp_voltage(t-2*self.time.dt/t0)
+            dv_dt = (3*v0 - 4*v1 + v2)/2/(self.time.dt/t0)
+        return dv_dt
+    
+    def refering_dv_dt_shifted(self,v0,t):
+        # v0：voltage point at time t
+        if (t<2*self.time.dt/t0):
+            v1 = self.cubic_interp_voltage_shift(t+self.time.dt/t0)
+            v2 = self.cubic_interp_voltage_shift(t+2*self.time.dt/t0)
+            dv_dt = (-3*v0 + 4*v1 - v2)/2/(self.time.dt/t0)
+        if (t>=2*self.time.dt/t0):
+            v1 = self.cubic_interp_voltage_shift(t-self.time.dt/t0)
+            v2 = self.cubic_interp_voltage_shift(t-2*self.time.dt/t0)
             dv_dt = (3*v0 - 4*v1 + v2)/2/(self.time.dt/t0)
         return dv_dt
 

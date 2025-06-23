@@ -4,18 +4,18 @@ Just for Future checking or further research
 Simulation Parameters and Settings
 	time scaling : 1e-12 sec
 	Simulation mode = scan_frequency
-	Input Laser Power : 1 mW
+	Input Laser Power : 3.68 mW
 
 	Input Laser wavelength : 1.308566 um
 
 Parameter of ring modulator
 	Structure parameter : 
 		cavity length : 75.39822368615503 um
-		Group index : 3.984719655112499
+		Group index : 3.993664678241437
 		couple through coefficient : [0.92105248]
 		Round trip loss : (energy) 0.798201847667911
 		mode cross section : 0.11 um^2
-		Linear Energy absorption coefficient: 29.893777407172134 1/cm
+		Linear Energy absorption coefficient: 29.893777407172145 1/cm
 		Energy coupling coefficient: [21.81437806] 1/cm
 		Max Two Photon Absorption coefficient : 0.0 1/cm
 		Max Free Carrier Absorption coefficient : 0.0 1/cm
@@ -32,25 +32,25 @@ Parameter of ring modulator
 		Density of Silicon : 2.329e-12 g/um^3
 		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
-		intrinsic photon life time : 8.892549029665286 ps
-		couple extrinsic photon life time (port 1 ) : 12.186085736433085 ps
-		resonant frequency : 229.08878656875603 THz
-		resonant wavelength : 1.3086299966498962 um
-		Q factor : 3699.999994889527
-		LineWidth : 0.35368378336686157 nm
-		Group velocity : 75235520675929.73 um/s
-		Round Trip time : 1.0021625823648663 ps
+		intrinsic photon life time : 8.912511301451085 ps
+		couple extrinsic photon life time (port 1 ) : 12.21344144227898 ps
+		resonant frequency : 228.83208584395962 THz
+		resonant wavelength : 1.3100980000000009 um
+		Q factor : 3704.150604612512
+		LineWidth : 0.3536837833668616 nm
+		Group velocity : 75067007912144.0 um/s
+		Round Trip time : 1.0044122682283896 ps
 
 		Input Laser photon energy : 0.00015180165361991675 fJ
 
-	The start wavelength is 1.3083942074609851 um
-	The end wavelength is 1.3088068385415799 um
-	scanning frequency range for better accuracy is 0.06191588834734473 THz
-	Current frequency range is 0.07223845881546254 THz
+	The start wavelength is 1.3095674743249506 um
+	The end wavelength is 1.3108053675667346 um
+	scanning frequency range for better accuracy is 0.061777208939348065 THz
+	Current frequency range is 0.21619109628053934 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 
-	time resolution : 1e-12 sec
+	time resolution : 1e-13 sec
 	Max time range : 10000 ps
 	Number of bit in squence : []
 
