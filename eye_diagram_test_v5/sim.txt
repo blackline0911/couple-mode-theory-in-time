@@ -4,19 +4,19 @@ Just for Future checking or further research
 Simulation Parameters and Settings
 	time scaling : 1e-12 sec
 	Simulation mode = scan_frequency
-	Input Laser Power : 3.68 mW
+	Input Laser Power : 1.0 mW
 
-	Input Laser wavelength : 1.308566 um
+	Input Laser wavelength : 1.5400179999999999 um
 
 Parameter of ring modulator
 	Structure parameter : 
-		cavity length : 75.39822368615503 um
-		Group index : 3.993664678241437
-		couple through coefficient : [0.88436327]
-		Round trip loss : (energy) 0.8512709472868321
+		cavity length : 31.41592653589793 um
+		Group index : 3.983820815915836
+		couple through coefficient : [0.92795083]
+		Round trip loss : (energy) 0.9159859299459029
 		mode cross section : 0.11 um^2
-		Linear Energy absorption coefficient: 21.356579275971608 1/cm
-		Energy coupling coefficient: [32.59688418] 1/cm
+		Linear Energy absorption coefficient: 27.933053206872813 1/cm
+		Energy coupling coefficient: [47.60421744] 1/cm
 		Max Two Photon Absorption coefficient : 0.0 1/cm
 		Max Free Carrier Absorption coefficient : 0.0 1/cm
 		Free Carrier time constant : 20 ns
@@ -32,26 +32,30 @@ Parameter of ring modulator
 		Density of Silicon : 2.329e-12 g/um^3
 		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
-		intrinsic photon life time : 12.475248284927586 ps
-		couple extrinsic photon life time (port 1 ) : 8.173438525921815 ps
-		resonant frequency : 228.83208584395962 THz
-		resonant wavelength : 1.3100980000000009 um
-		Q factor : 3550.00000095976
-		LineWidth : 0.3690416900410731 nm
-		Group velocity : 75067007912144.0 um/s
-		Round Trip time : 1.0044122682283896 ps
+		intrinsic photon life time : 9.514603191072354 ps
+		couple extrinsic photon life time (port 1 ) : 5.582948979885438 ps
+		resonant frequency : 194.62768302409313 THz
+		resonant wavelength : 1.5403382157248846 um
+		Q factor : 2151.306482606994
+		LineWidth : 0.7160012895318726 nm
+		Group velocity : 75252495494348.95 um/s
+		Round Trip time : 0.4174735512692346 ps
 
-		Input Laser photon energy : 0.00015180165361991675 fJ
+		Input Laser photon energy : 0.00012898711746927636 fJ
 
-	The start wavelength is 1.3097289583099596 um
-	The end wavelength is 1.310467041690042 um
-	scanning frequency range for better accuracy is 0.06445974247382921 THz
-	Current frequency range is 0.12891949517734247 THz
+	The start wavelength is 1.5396222144353529 um
+	The end wavelength is 1.5414122176591827 um
+	scanning frequency range for better accuracy is 0.09046952844591423 THz
+	Current frequency range is 0.22612133997944284 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 
-	time resolution : 1e-12 sec
-	Max time range : 15000 ps
+	time resolution : 1e-15 sec
+	Max time range : 10000 ps
 	Number of bit in squence : []
 
 	Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
+Voltage applied to Heater is 0 V
+Resistance of Heater is 125.0 ohm
+Thermal time constant of waveguide is 1.0000000000000001e-07 ns
+		Thermal mode area : 0.11 um^2
