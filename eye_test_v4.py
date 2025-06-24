@@ -13,8 +13,8 @@ from Heater import Heater
 # Refer：44-Gb/s Silicon Microring Modulators Based on Zigzag PN Junctions
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-mode = "scan_frequency"
-# mode = "voltage_drive"
+#mode = "scan_frequency"
+mode = "voltage_drive"
 delta_f = 8 # GHz
 wl_in = 1.540082-0.0008/100*delta_f
 Pin = 1.0 #mW
@@ -82,8 +82,8 @@ Rs =33
 a_cj = 111.6e-15
 b_cj = a_cj**2/(34e-15)**2 - 6
 Cjs = np.real([a_cj/(b_cj)**0.5, a_cj/(b_cj + 1)**0.5])
-f_drive= 44
-level = "NRZ"
+f_drive= 50
+level = "PAM4"
 Cox = 113e-15
 Rsi = 776.0
 Cpad = 6e-15
@@ -102,7 +102,7 @@ sim.main(experiment_condition=experiment_condition)
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ring_mod = ring(L=cavity_length, 
-            L_active = cavity_length*La_Lc_ratio,
+            L_active = [cavity_length*La_Lc_ratio],
             alpha=a_fit.alpha_V,
             neff=n_fit.neff_V,
             cross_section=mode_area,
@@ -138,18 +138,18 @@ wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q*1.
 v = driver(f_drive=f_drive,
            v_bias=v_bias,
            vpp=vpp,
-           Rs=Rs,
+           Rs=[Rs],
            raise_cosine=1,
-           cj = Cjs,
+           cj = [Cjs],
            PRBS=1,
            level = level,
-           Cox = Cox,
-           Rsi=Rsi,
-           Cp=Cpad,
+           Cox = [Cox],
+           Rsi=[Rsi],
+           Cp=[Cpad],
            beta=0.6,
            )
 V = np.linspace(-6,0,1000)
-ploting(V,v.Cj_V(V),x_label="voltage (V)",title="junction capacitance (F)",filename="Cj_V")
+ploting(V,v.Cj_V(V,v.a,v.b),x_label="voltage (V)",title="junction capacitance (F)",filename="Cj_V")
 
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ if sim.mode == "voltage_drive":
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     print("\n\n.................Start Small Signal Simulation.................\n\n")
-    sim.b,Q,s_minus,N ,delta_T,vneg, vj, i2= solving(sim,ring_mod,v,t,H)
+    sim.b,s_minus,N ,delta_T,vneg, vj, i2= solving(sim,ring_mod,v,t,H)
     
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -15,7 +15,7 @@ Parameter of ring modulator
 		couple through coefficient : [0.95387226]
 		Round trip loss : (energy) 0.9460861157569821
 		mode cross section : 0.11 um^2
-		Linear Energy absorption coefficient: 8.292704761343147 1/cm
+		Linear Energy absorption coefficient: 8.292704761343144 1/cm
 		Energy coupling coefficient: [14.13263769] 1/cm
 		Max Two Photon Absorption coefficient : 0.0 1/cm
 		Max Free Carrier Absorption coefficient : 0.0 1/cm
@@ -32,12 +32,12 @@ Parameter of ring modulator
 		Density of Silicon : 2.329e-12 g/um^3
 		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
-		intrinsic photon life time : 35.43989988847159 ps
-		couple extrinsic photon life time (port 1 ) : 20.79531315769821 ps
+		intrinsic photon life time : 35.4398998884716 ps
+		couple extrinsic photon life time (port 1 ) : 20.795313157698214 ps
 		resonant frequency : 194.67224961251705 THz
 		resonant wavelength : 1.539985583958259 um
-		Q factor : 8015.000000000006
-		LineWidth : 0.19213793935848508 nm
+		Q factor : 8015.000000000008
+		LineWidth : 0.19213793935848505 nm
 		Group velocity : 68052064575445.15 um/s
 		Round Trip time : 0.9820694418125036 ps
 
@@ -45,7 +45,7 @@ Parameter of ring modulator
 
 	The start wavelength is 1.5397934460189007 um
 	The end wavelength is 1.5402737908672965 um
-	scanning frequency range for better accuracy is 0.024288490282285326 THz
+	scanning frequency range for better accuracy is 0.024288490282285323 THz
 	Current frequency range is 0.060717439385484795 THz
 		Warning : This Transfer function result may not be accurate.
 
