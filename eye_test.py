@@ -13,8 +13,8 @@ from Heater import Heater
 # Refer：Ring modulator in IMEC PDK
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-mode = "scan_frequency"
-# mode = "voltage_drive"
+# mode = "scan_frequency"
+mode = "voltage_drive"
 delta_f = 8 # GHz
 wl_in = 1.5593-0.0008/100*delta_f
 Pin = 1.0 #mW
@@ -74,13 +74,13 @@ n_fit = neff_fit(neff_data=neff_calculated)
 # The values are chosen to match the simulation conditions in the paper
 # The values can be adjusted based on the specific device characteristics
 bit_num = 1000
-v_bias = -3
-vpp = 3.
+v_bias = -1/2
+vpp = 1/2
 Rs =53.9
 a_cj = 37.5e-15
 b_cj = a_cj**2/(20e-15)**2 - 1
 Cjs = np.real([a_cj/(b_cj)**0.5, a_cj/(b_cj + 1)**0.5])
-f_drive= 50
+f_drive= 70
 level = "PAM4"
 Cox = 34.7e-15
 Rsi = 1439.0
@@ -155,7 +155,7 @@ ploting(V,v.Cj_V(V,v.a,v.b),x_label="voltage (V)",title="junction capacitance (F
 V = np.linspace(-2,0,1000)
 ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
 ploting(V,ring_mod.neff(V),x_label="voltage (V)",title="neff vs Voltage",filename="neff_V")
-ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active/ring_mod.L),\
+ploting(V,1e6*c*1e-12/ring_mod.f_res_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active/ring_mod.L),\
             x_label="voltage (V)",title="resonant wavelength vs Voltage (pm/V)",filename="lambda_V")
 
 os.chdir("./eye_diagram_test/")
@@ -166,7 +166,7 @@ if sim.mode == "scan_frequency":
     vbias = np.array([0,-0.5,-1,-1.5,-2])
     # vbias = np.arange(-0,-0.5,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
-    t.main(ring_mod,t_max=10000,resolution=2,buffer=50,driver=v)
+    t.main(ring_mod,t_max=10000,resolution=1,buffer=50,driver=v)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
     
     T_record = np.zeros( (int(len(t.t_total)-t.buffer*t0/t.dt-1),len(vbias)))
