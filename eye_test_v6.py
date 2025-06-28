@@ -66,7 +66,7 @@ G_energy = G_plus_alpha*ratio #1/cm
 def func(V,alpha0,b,c):
     return b*V/(abs(V)+c)**0.5+alpha0
 V = np.array([0,-0.5,-1,-1.5,-2])
-d = 0.23355001135484965
+# d = 0.23355001135484965
 d = 0.28
 # alpha_energy_data = func(V,alpha_energy0,0.6,0.6)
 alpha_energy_data = V*d + alpha_energy0
@@ -208,10 +208,6 @@ if sim.mode == "scan_frequency":
     # vbias = np.arange(0,-0.5,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=15000,resolution=0,buffer=200,driver=v)
-    print("LineWidth = ",ring_mod.lambda0/ring_mod.Q*1000," nm")
-    print(H.P*ring_mod.HE/1e6)
-    print("detuning wabvelength = ",(ring_mod.lambda0+H.P*ring_mod.HE/1e6-wl_in)*1000," nm")
-    print("dt  = ",t.dt)
     wl_scan =  c/ring_mod.w_res(t.t_total)*t0
     
     plt.figure()
