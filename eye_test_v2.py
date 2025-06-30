@@ -15,8 +15,8 @@ from Heater import Heater
 # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#mode = "scan_frequency"
-mode = "voltage_drive"
+mode = "scan_frequency"
+# mode = "voltage_drive"
 wl_in = 1.308566
 Pin = 3.68 #mW
 # Pin = 1 #mW
@@ -72,9 +72,16 @@ G_energy = G_plus_alpha*ratio #1/cm
 def func(V,alpha0,b,c):
     return b*V/(abs(V)+c)**0.5+alpha0
 V = np.array([0,-0.5,-1,-1.5,-2])
-alpha_energy_data = func(V,alpha_energy0,0.5,2e-06)
-Amp_RoundTripLoss_data = np.exp(-alpha_energy_data/2*2*np.pi*radius*1e-4)
-a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,L = 2*np.pi*radius,input2 = "amp",fit_mode="func")
+# alpha_energy_data = func(V,alpha_energy0,9.1,5.5)
+alpha_energy_data = func(V,alpha_energy0,2,2e-06)
+if segment==1:
+    if SB=="LSB":
+        Amp_RoundTripLoss_data = np.exp(-0.5*( (alpha_energy_data- alpha_energy_data[0])*La_LSB_ratio + alpha_energy_data[0])* 2*np.pi*radius*1e-4)
+    if SB=="MSB":
+        Amp_RoundTripLoss_data = np.exp(-0.5*( (alpha_energy_data- alpha_energy_data[0])*La_MSB_ratio + alpha_energy_data[0])* 2*np.pi*radius*1e-4)
+if segment==2:
+    Amp_RoundTripLoss_data = np.exp(-0.5*alpha_energy_data* 2*np.pi*radius*1e-4)
+a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La = 2*np.pi*radius*La_LSB_ratio,L=2*np.pi*radius,input2 = "amp",fit_mode="func")
 
 # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,10 +179,10 @@ ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod
             x_label="voltage (V)",title="resonant wavelength vs Voltage (pm/V)",filename="lambda_V")
 
 H = Heater(300,0,0.5*150/0.6)
-# wl_min =  1.3084
-# wl_max =  1.3089
-wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q*1.5
-wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q*2
+wl_min =  1.3084
+wl_max =  1.3089
+# wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q/2
+# wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q/2
 print("wl_min = ",wl_min ," um")
 print("wl_max = ",wl_max ," um")
 
@@ -190,7 +197,9 @@ v = driver(f_drive=f_drive,
            Rsi=Rsi,
            Cp=Cpad,
            segment=segment)
-
+V = np.linspace(-5,0,1000)
+ploting(V,dB(ring_mod.alpha(V)/ring_mod.alpha(0)),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
+    
 V = np.linspace(-5,0,1000)
 if segment==2:
     ploting(V,v.Cj_V(V,v.a,v.b),v.Cj_V(V,v.c,v.d),x_label="voltage (V)",title="junction capacitance LSB (F)",filename="Cj_V_LSB",leg=["LSB","MSB"])
@@ -206,8 +215,8 @@ os.chdir("./eye_diagram_test_v2/")
 t = time(mode = sim.mode)
 
 if sim.mode == "scan_frequency":
-    vbias = np.array([v_bias+vpp/2,v_bias,v_bias-vpp/2])
-    # vbias = np.array([0,-1,-2,-3,-4])
+    # vbias = np.array([v_bias+vpp/2,v_bias,v_bias-vpp/2])
+    vbias = np.array([0,-1,-2,-3,-4])
     # vbias = np.arange(0,-0.5,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=10000,resolution=0,buffer=100,driver=v)
@@ -244,8 +253,6 @@ if sim.mode == "scan_frequency":
     sim.save_data(ring_mod,t,v)
 
 
-    V = np.linspace(-5,0,1000)
-    ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
     ploting(V,ring_mod.neff(V),x_label="voltage (V)",title="neff vs Voltage",filename="neff_V")
     # ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active/ring_mod.L),\
     #         x_label="voltage (V)",title="resonant wavelength vs Voltage (pm/V)",filename="lambda_V")

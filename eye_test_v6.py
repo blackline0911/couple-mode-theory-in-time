@@ -21,7 +21,7 @@ wl_in = 1.555
 Pin = 1 #mW
 FSR = 0.012667
 radius = 7.5
-La_LSB_ratio = 1/3
+La_LSB_ratio = 1
 La_MSB_ratio = 2/3
 segment = 1
 SB = "LSB"
@@ -71,7 +71,7 @@ d = 0.28
 # alpha_energy_data = func(V,alpha_energy0,0.6,0.6)
 alpha_energy_data = V*d + alpha_energy0
 Amp_RoundTripLoss_data = np.exp(-alpha_energy_data/2*2*np.pi*radius*1e-4)
-a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,L = 2*np.pi*radius,input2 = "amp",fit_mode="linear")
+a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La=2*np.pi*radius,L = 2*np.pi*radius,input2 = "amp",fit_mode="linear")
 
 # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
