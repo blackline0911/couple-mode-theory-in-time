@@ -198,7 +198,7 @@ v = driver(f_drive=f_drive,
            Cp=Cpad,
            segment=segment)
 V = np.linspace(-5,0,1000)
-ploting(V,dB(ring_mod.alpha(V)/ring_mod.alpha(0)),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
+ploting(V,dB(np.exp(-ring_mod.alpha(V)))-dB(np.exp(-ring_mod.alpha(0))),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
     
 V = np.linspace(-5,0,1000)
 if segment==2:
