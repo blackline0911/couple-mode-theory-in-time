@@ -73,7 +73,7 @@ def func(V,alpha0,b,c):
     return b*V/(abs(V)+c)**0.5+alpha0
 V = np.array([0,-0.5,-1,-1.5,-2])
 # alpha_energy_data = func(V,alpha_energy0,9.1,5.5)
-alpha_energy_data = func(V,alpha_energy0,2,2e-06)
+alpha_energy_data = func(V,alpha_energy0,1.5,2e-06)
 if segment==1:
     if SB=="LSB":
         Amp_RoundTripLoss_data = np.exp(-0.5*( (alpha_energy_data- alpha_energy_data[0])*La_LSB_ratio + alpha_energy_data[0])* 2*np.pi*radius*1e-4)
@@ -198,7 +198,8 @@ v = driver(f_drive=f_drive,
            Cp=Cpad,
            segment=segment)
 V = np.linspace(-5,0,1000)
-ploting(V,dB(np.exp(-ring_mod.alpha(V)))-dB(np.exp(-ring_mod.alpha(0))),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
+ploting(V,-dB(np.exp(-ring_mod.alpha(V)))+dB(np.exp(-ring_mod.alpha(0))),x_label="voltage (V)",title="Energy absorption coefficient (dB/cm)",filename="alpha_V")
+ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
     
 V = np.linspace(-5,0,1000)
 if segment==2:
