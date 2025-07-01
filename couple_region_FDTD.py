@@ -1,8 +1,4 @@
-from utility import ploting
 import numpy as np
-from scipy.interpolate import interp1d
-import scipy.io
-import subprocess
 import importlib
 import argparse
 
@@ -12,22 +8,36 @@ fdtd = lumapi.FDTD(hide=True)
 
 def main(radius,
          gap,
-         z_span=0.22,
-         wg_width=0.45,
-         from_wg=1,
-         from_ring=0):
-    run = False
+         wg_width=0.5,
+         bus_wg_width=0.45,
+         ):
     scale = 1e-6
     pad = 2
-    res = 5
+    res = 4
     Si = 'Si (Silicon) - Palik'
     SiO2 = 'SiO2 (Glass) - Palik'
+    SKT_height  = 0.0622
+    WG_height  = 0.2114
+
+    fdtd.setglobalsource("wavelength start",1.5e-6)
+    fdtd.setglobalsource("wavelength start",1.6e-6)
 
     fdtd_x_span = (2*radius+wg_width+2*pad)*scale
     fdtd_y_min = (-gap/2-wg_width-pad)*scale
-    fdtd_y_max = (gap/2+wg_width+radius+2*pad)*scale
+    fdtd_y_max = (gap/2+radius-1)*scale
     fdtd_z_span = (3)*scale
     simulation_time = 1000e-15
+
+    fdtd.addrect(name="slab")
+    fdtd.set("x",0)
+    fdtd.set("y",0)
+    fdtd.set("z",0)
+    fdtd.set("x span",fdtd_x_span+2*pad*scale)
+    fdtd.set("y max",(gap/2+wg_width+radius+pad)*scale)
+    fdtd.set("y min",(fdtd_y_min))
+    fdtd.set("z",(-WG_height/2+SKT_height/2)*scale)
+    fdtd.set("z span",SKT_height*scale)
+    fdtd.set('material',Si)
 
     fdtd.addring(name="new_ring")
     fdtd.set("x",0)
@@ -35,18 +45,18 @@ def main(radius,
     fdtd.set("inner radius",(radius - wg_width/2)*scale)
     fdtd.set("outer radius",(radius + wg_width/2)*scale)
     fdtd.set("z",0)
-    fdtd.set("z span",z_span*scale)
+    fdtd.set("z span",WG_height*scale)
     fdtd.set("theta start",180)
     fdtd.set("theta stop",360)
     fdtd.set('material',Si)
 
     fdtd.addrect(name="bus")
-    fdtd.set("x",0);
-    fdtd.set("y",(-gap/2-wg_width/2)*scale);
-    fdtd.set("z",0);
-    fdtd.set("x span",fdtd_x_span+2*pad*scale);
-    fdtd.set("y span",wg_width*scale);
-    fdtd.set("z span",z_span*scale);
+    fdtd.set("x",0) 
+    fdtd.set("y",(-gap/2-0.45/2)*scale) 
+    fdtd.set("z",0) 
+    fdtd.set("x span",fdtd_x_span+2*pad*scale) 
+    fdtd.set("y span",bus_wg_width*scale) 
+    fdtd.set("z span",WG_height*scale) 
     fdtd.set('material',Si)
 
     fdtd.addfdtd(simulation_time=simulation_time)
@@ -115,7 +125,7 @@ def main(radius,
     fdtd.set("mode selection","user select")
     fdtd.set("number of field profile samples",3)
     fdtd.updateportmodes(1) 
-    fdtd.set("x",(radius/2+wg_width/2)*scale)
+    fdtd.set("x",(radius+wg_width/2)*scale)
     fdtd.set("y",(-gap/2-wg_width/2)*scale)
     fdtd.set("z",0)
     fdtd.set("z span",(3)*scale)
@@ -123,18 +133,14 @@ def main(radius,
     fdtd.set("x span",(0)*scale)
     fdtd.select("FDTD::ports") 
     
-    if from_ring:
-        fdtd.set("source port","bottom_left")
-    if from_wg:
-        fdtd.set("source port","top_left")
-    fdtd.set("source mode","mode 1")
+    # if from_ring:
+    fdtd.set("source port","bottom_left")
+    # if from_wg:
+    #     fdtd.set("source port","top_left")
+    # fdtd.set("source mode","mode 1")
 
     fdtd.save("coupler_fsp")
 
-    if run:
-        print('complete build\nrunning...........\n')
-        process0 = subprocess.Popen(['/opt/lumerical/v212/mpich2/nemesis/bin/mpiexec --hostfile host_file /opt/lumerical/v212/bin/fdtd-engine-mpich2nem '+filename],shell=True)
-        process0.wait()
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()

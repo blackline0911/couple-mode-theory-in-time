@@ -13,19 +13,20 @@ from Heater import Heater
 # Refer：Ring modulator in IMEC PDK
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# mode = "scan_frequency"
-mode = "voltage_drive"
+mode = "scan_frequency"
+# mode = "voltage_drive"
 delta_f = 8 # GHz
-wl_in = 1.5593-0.0008/100*delta_f
+wl_in = 1.559453431986187
+# wl_in = 1.5593-0.0008/100*delta_f
 Pin = 1.0 #mW
-FSR = 0.019431 # um
+FSR = 0.0194 # um
 radius = 5 #um
 cavity_length = 2*np.pi*radius 
 La_Lc_ratio = 1
 mode_area = 0.22*0.5
 lambda_res =  1.559453431986187
 Q = 2125
-me = 39.3 # pm/V
+me = 38 # pm/V
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +37,7 @@ ng = lambda_res**2/(FSR*cavity_length)
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Calculate total loss (intrinsic loss + coupling loss)
 w_res = 2*np.pi*c/(lambda_res) # THz
-print("G_energy + alpha_energy = ",( w_res*ng/(c*1e-4))/Q," 1/cm")
+print("G_energy + alpha_energy = ",( w_res*ng/(c*1e-4))/Q," 1/cm") 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the energy absorption coefficient (varing with voltage)
@@ -47,22 +48,25 @@ alpha_energy0 =  G_plus_alpha*(1-ratio) #1/cm
 G_energy = G_plus_alpha*ratio #1/cm
 
 
-Amp_RoundTripLoss_data = np.array([0.95124,0.95248,0.95273,0.95292,0.95305])
-a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,L = cavity_length,input2 = "amp",fit_mode="func")
+# Amp_RoundTripLoss_data = np.array([0.95124,0.95248,0.95273,0.95292,0.95305])
+Amp_RoundTripLoss_data = np.array([0.95004,0.95212,0.95246,0.95245,0.95266])
+a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La=cavity_length,L = cavity_length,input2 = "amp",fit_mode="func")
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the coupling coefficient
-gamma = 0.95105
+gamma = 0.95012
+# gamma = 0.95105
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the index (varing with voltage)
 D_bar = -2*np.pi*c/lambda_res**2
-# print("delta neff/delta V = ",me*1e-6*D_bar*( -ng/(w_res) )*(1/La_Lc_ratio))
-neff0 = 2.5111
+print("delta neff/delta V = ",me*1e-6*D_bar*( -ng/(w_res) )*(1/La_Lc_ratio))
+# neff0 = 2.5111
 # dneff_dV = me*1e-6*D_bar*( -ng/(w_res) )*(1/La_Lc_ratio)
-neff_calculated = [2.51105,neff0, 2.51113, 2.51116, 2.51118, 2.5112]
+# neff_calculated = [2.51105,neff0, 2.51113, 2.51116, 2.51118, 2.5112]
+neff_calculated = [2.51461,2.51464, 2.51467, 2.5147, 2.51473, 2.51475]
 # neff_calculated = [neff0+dneff_dV*(-0.5),neff0, neff0+dneff_dV*0.5, neff0+dneff_dV*1, neff0+dneff_dV*1.5, neff0+dneff_dV*2]
 
 n_fit = neff_fit(neff_data=neff_calculated)
@@ -127,8 +131,8 @@ H = Heater(300,0,0.5*150/0.6)
 # The range is set based on the resonant wavelength and the heater power
 # The values can be adjusted based on the specific device characteristics
 
-wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q
-wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q*1.5
+wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q/2
+wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q/2
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +159,9 @@ ploting(V,v.Cj_V(V,v.a,v.b),x_label="voltage (V)",title="junction capacitance (F
 V = np.linspace(-2,0,1000)
 ploting(V,ring_mod.alpha(V),x_label="voltage (V)",title="Energy absorption coefficient (1/cm)",filename="alpha_V")
 ploting(V,ring_mod.neff(V),x_label="voltage (V)",title="neff vs Voltage",filename="neff_V")
-ploting(V,1e6*c*1e-12/ring_mod.f_res_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active/ring_mod.L),\
+plt.scatter(np.array([0.5,0,-0.5,-1,-1.5,-2]), neff_calculated)
+plt.show()
+ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active[0]/ring_mod.L),\
             x_label="voltage (V)",title="resonant wavelength vs Voltage (pm/V)",filename="lambda_V")
 
 os.chdir("./eye_diagram_test/")
@@ -163,13 +169,11 @@ t = time(mode = sim.mode)
 
 if sim.mode == "scan_frequency":
     # vbias = np.array([v_bias+vpp/2,v_bias,v_bias-vpp/2])
-    vbias = np.array([0,-0.5,-1,-1.5,-2])
-    # vbias = np.arange(-0,-0.5,-0.5)
+    # vbias = np.array([0,-0.5,-1,-1.5,-2])
+    vbias = np.arange(-0,-0.5,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=10000,resolution=1,buffer=50,driver=v)
-    wl_scan =  c/ring_mod.w_res(t.t_total)*t0
-    
-    T_record = np.zeros( (int(len(t.t_total)-t.buffer*t0/t.dt-1),len(vbias)))
+
     plt.figure()
     for vb in vbias:
         v.v_bias = vb
@@ -190,7 +194,7 @@ if sim.mode == "scan_frequency":
         plt.title('Transfer function (no NL absorb) (func fit alpha)')
         plt.savefig("Transmission_vs_voltage (no NL) (func fit alpha)")
     plt.show()
-    ploting(t.t_total,abs(sim.b)**2,x_label="time (ps)",title="Energy in Ring (mJ)")
+    # ploting(t.t_total,abs(sim.b)**2,x_label="time (ps)",title="Energy in Ring (mJ)")
 
     sim.save_data(ring_mod,t,v,H)
     
