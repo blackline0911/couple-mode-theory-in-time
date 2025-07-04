@@ -254,24 +254,6 @@ class ring(simulation):
         \
         1j*self.D_bar*( (self.HE*1e-6)*Heater.P)*b_bar
         return da_dt
-    
-    # def CMT_single_segment(self,f_pround_bar,b_bar,N_bar,delta_T,f_res_bar,alpha_0,alpha_bias,TPA,SPM,T_args,dlambda,Heater):
-    #     da_dt = 1j*2*np.pi*(f_res_bar-f_pround_bar + SPM*abs(b_bar)**2 + \
-    #     \
-    #     (-self.f_res_bar/self.ng)*T_args[0]*delta_T )*b_bar \
-    #     \
-    #     - (self.tu_e_bar_total_inv + \
-    #     \
-    #     self.vg_in_cm*alpha_0/2 +\
-    #     self.vg_in_cm*TPA/2*abs(b_bar)**2 \
-    #     + self.vg_in_cm*N_bar*1e-5/2  ) *b_bar + \
-    #     \
-    #     self.input_kappa + \
-    #     \
-    #     1j*self.D_bar*dlambda*b_bar + \
-    #     \
-    #     1j*self.D_bar*( (self.HE*1e-6)*Heater.P)*b_bar
-    #     return da_dt
 
     def FC_rate_equation(self,b_bar,N_bar,FCA,tau_eff):
 
@@ -312,12 +294,12 @@ class alpha_fit():
         V = np.array([0,-0.5,-1,-1.5,-2])
         # if La not = L, then self.alpha_data =  (alpha_1 - alpha(V=0) )*La/L + alpha(V=0) 
         self.alpha_V0 = self.alpha_data[0]
+        print("self.alpha_V0 = ",self.alpha_data)
         self.alpha_1 = (self.alpha_data - self.alpha_V0 ) * self.L/self.La + self.alpha_V0
         if self.fit_mode=="linear":
             self.m, self.b = np.polyfit(V, self.alpha_1, 1)
         if self.fit_mode == "func":
             self.popt, pcov = curve_fit(self.func, V, self.alpha_1)
-            print("alpha_fit.popt = ",self.popt)
     def __init__(self,RoundTripLoss:np.ndarray,La,L,input2,fit_mode = "linear"):
         """input: specify which physic parameter of RoundTripLoss is using, energy or amplitude."""
         """Now, alpha_pdk is Loss of Energy"""

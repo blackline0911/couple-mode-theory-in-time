@@ -10,13 +10,13 @@ Simulation Parameters and Settings
 
 Parameter of ring modulator
 	Structure parameter : 
-		cavity length : 31.41592653589793 um
+		cavity length : 75.39822368615503 um
 		Group index : 3.9697242191825954
 		couple through coefficient : [0.95105]
-		Round trip loss : (energy) 0.9068105954812775
+		Round trip loss : (energy) 0.906906675820038
 		mode cross section : 0.11 um^2
-		Linear Energy absorption coefficient: 31.13760653564299 1/cm
-		Energy coupling coefficient: [31.95108158] 1/cm
+		Linear Energy absorption coefficient: 12.959950863040834 1/cm
+		Energy coupling coefficient: [13.31295066] 1/cm
 		Max Two Photon Absorption coefficient : 0.0 1/cm
 		Max Free Carrier Absorption coefficient : 0.0 1/cm
 		Free Carrier time constant : 20 ns
@@ -32,21 +32,21 @@ Parameter of ring modulator
 		Density of Silicon : 2.329e-12 g/um^3
 		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
-		intrinsic photon life time : 8.505197506700327 ps
-		couple extrinsic photon life time (port 1 ) : 8.288655043081919 ps
-		resonant frequency : 192.242007264155 THz
-		resonant wavelength : 1.559453431986187 um
-		Q factor : 2535.223770202822
-		LineWidth : 0.6151147091293753 nm
+		intrinsic photon life time : 20.43460629367142 ps
+		couple extrinsic photon life time (port 1 ) : 19.892772103396602 ps
+		resonant frequency : 192.83534679274806 THz
+		resonant wavelength : 1.554655113733922 um
+		Q factor : 6106.5807958951555
+		LineWidth : 0.2545868409337942 nm
 		Group velocity : 75519719115835.75 um/s
-		Round Trip time : 0.4159963371647435 ps
+		Round Trip time : 0.9983912091953842 ps
 
 		Input Laser photon energy : 0.0001273795540132291 fJ
 
-	The start wavelength is 1.558838317277058 um
-	The end wavelength is 1.5600685466953164 um
-	scanning frequency range for better accuracy is 0.07582841780028567 THz
-	Current frequency range is 0.1516568591960663 THz
+	The start wavelength is 1.5544005268929884 um
+	The end wavelength is 1.5549097005748558 um
+	scanning frequency range for better accuracy is 0.03157828467976253 THz
+	Current frequency range is 0.06315657105315609 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 

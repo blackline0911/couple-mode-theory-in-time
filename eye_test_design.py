@@ -11,6 +11,8 @@ from Heater import Heater
 
 
 # Refer：Ring modulator in IMEC PDK，以PDK 3.6.1為例
+# 此模擬檔案為自行設計ring modulator，以PDK 3.6.1的ring modulator為參考
+# ring內的round trip loss、調變效率訂為跟PDK 3.6.1的ring modulator相同，然後調整ring radius和couple coefficient，為了有更高Q和更深deep
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 mode = "scan_frequency"
@@ -19,63 +21,30 @@ delta_f = 8 # GHz
 wl_in = 1.559453431986187
 # wl_in = 1.5593-0.0008/100*delta_f
 Pin = 1.0 #mW
-FSR = 0.0195 # um
-radius = 5 #um
+ng = 3.9697242191825954
+radius = 7.5 #um
 cavity_length = 2*np.pi*radius 
-La_Lc_ratio = 1
+La_Lc_ratio = 2*np.pi*5/(2*np.pi*radius)
 mode_area = 0.22*0.5
-lambda_res =  1.559
-# Q = 3310
-Q = 2660
+lambda_res =  1.559453431986187
 me = 38 # pm/V
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# Calculate group index
-ng = lambda_res**2/(FSR*cavity_length)
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# Calculate total loss (intrinsic loss + coupling loss)
-w_res = 2*np.pi*c/(lambda_res) # THz
-print("G_energy + alpha_energy = ",( w_res*ng/(c*1e-4))/Q," 1/cm") 
-
-# //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# Define the energy absorption coefficient (varing with voltage)
-G_plus_alpha = ( w_res*ng/(c*1e-4))/Q
-ratio = 1-181/(192*2)
-alpha_energy0 =  G_plus_alpha*(1-ratio) #1/cm
-G_energy = G_plus_alpha*ratio #1/cm
-
-def func(V,alpha0,b,c):
-    return b*V/(abs(V)+c)**0.5+alpha0
-V = np.array([0,-0.5,-1,-1.5,-2])
-# alpha_energy_data = func(V,alpha_energy0,2,0.1)
-# d = 1.3
-# alpha_energy_data = V*d + alpha_energy0
-# Amp_RoundTripLoss_data = np.exp(-alpha_energy_data/2*2*np.pi*radius*1e-4)
-
 Amp_RoundTripLoss_data = np.array([0.95223,0.95248,0.95273,0.95292,0.95305])
-# Amp_RoundTripLoss_data = np.array([0.95188,0.95212,0.95246,0.95245,0.95266])
-a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La=cavity_length,L = cavity_length,input2 = "amp")
+a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La=cavity_length*La_Lc_ratio,L = cavity_length,input2 = "amp")
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the coupling coefficient
 gamma = 0.95105
-# gamma = np.exp(-G_energy/2*2*np.pi*radius*1e-4) 
-
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the index (varing with voltage)
+w_res = 2*np.pi*c/lambda_res
 D_bar = -2*np.pi*c/lambda_res**2
-print("ng = ",ng)
 print("delta neff/delta V = ",me*1e-6*D_bar*( -ng/(w_res) )*(1/La_Lc_ratio))
 neff0 = 2.680503
 dneff_dV = me*1e-6*D_bar*( -ng/(w_res) )*(1/La_Lc_ratio)
-# neff_calculated = [2.51105,neff0, 2.51113, 2.51116, 2.51118, 2.5112]
-# neff_calculated = [2.51461,2.51464, 2.51467, 2.5147, 2.51473, 2.51475]
 neff_calculated = [neff0+dneff_dV*(-0.5),neff0, neff0+dneff_dV*0.5, neff0+dneff_dV*1, neff0+dneff_dV*1.5, neff0+dneff_dV*2]
 
 n_fit = neff_fit(neff_data=neff_calculated)
@@ -119,7 +88,7 @@ ring_mod = ring(L=cavity_length,
             cross_section=mode_area,
             lambda_incident=wl_in,
             gamma=[gamma],
-            FSR = FSR,
+            ng=ng,
             FSR_shift=0,
             FCA_fit_factor=0,
             TPA_fit_factor=0,
@@ -139,9 +108,6 @@ H = Heater(300,0,0.5*150/0.6)
 # Define the wavelength range for the scan
 # The range is set based on the resonant wavelength and the heater power
 # The values can be adjusted based on the specific device characteristics
-
-# wl_min =  1.5525
-# wl_max = 1.5527
 wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q
 wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q
 
@@ -175,7 +141,7 @@ plt.show()
 ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active[0]/ring_mod.L),\
             x_label="voltage (V)",title="resonant wavelength vs Voltage (pm/V)",filename="lambda_V")
 
-os.chdir("./eye_diagram_test/")
+os.chdir("./eye_test_design/")
 t = time(mode = sim.mode)
 
 if sim.mode == "scan_frequency":
