@@ -1,26 +1,30 @@
 import numpy as np
 import importlib
 import argparse
+import subprocess
+import matplotlib.pyplot as plt
 
 lumapi = importlib.machinery.SourceFileLoader('Lumapi','/opt/lumerical/v212/api/python/lumapi.py').load_module()
 
-fdtd = lumapi.FDTD(hide=True)
+
 
 def main(radius,
          gap,
          wg_width=0.5,
-         bus_wg_width=0.45,
+         bus_wg_width=0.479,
+         WG_height=0.2114,
+         SKT_height=0.0622
          ):
+    fdtd = lumapi.FDTD(hide=True)
     scale = 1e-6
     pad = 2
-    res = 4
+    res = 5
     Si = 'Si (Silicon) - Palik'
     SiO2 = 'SiO2 (Glass) - Palik'
-    SKT_height  = 0.0622
-    WG_height  = 0.2114
-
+    fdtd.switchtolayout()
     fdtd.setglobalsource("wavelength start",1.5e-6)
     fdtd.setglobalsource("wavelength start",1.6e-6)
+    fdtd.setglobalmonitor("frequency points",500)
 
     fdtd_x_span = (2*radius+wg_width+2*pad)*scale
     fdtd_y_min = (-gap/2-wg_width-pad)*scale
@@ -69,82 +73,153 @@ def main(radius,
     fdtd.set('z',0)
     fdtd.set('z span',fdtd_z_span)
     fdtd.set('mesh accuracy',res)
-    fdtd.set("background material",SiO2)
-    
-    fdtd.addport ()
+    fdtd.set("background material",SiO2)    
+
+    fdtd.addpower()
     fdtd.set("name","bottom_left")
-    fdtd.set("direction","forward")
-    fdtd.set("mode selection","user select")
-    fdtd.set("number of field profile samples",3)
-    fdtd.set("bent waveguide",True)
-    fdtd.set("bend radius",radius*scale)
-    fdtd.set("theta",-45)
-    fdtd.updateportmodes(1) 
+    fdtd.set("monitor type","2D X-normal")
     fdtd.set("x",-(radius/(2)**0.5)*scale)
     fdtd.set("y",((radius+wg_width/2+gap/2)-radius/(2)**0.5)*scale)
     fdtd.set("z",0)
     fdtd.set("z span",(3)*scale)
     fdtd.set("y span",(3)*scale)
-    fdtd.set("x span",(0)*scale)
-    fdtd.select("FDTD::ports") 
+    
 
-    fdtd.addport ()
-    fdtd.set("name","bottom_right")
-    fdtd.set("direction","backward")
+    fdtd.addmodeexpansion()
     fdtd.set("mode selection","user select")
-    fdtd.set("number of field profile samples",3)
+    fdtd.set("name","mode_output_bottom_left")
+    fdtd.set("monitor type","2D X-normal")
+    fdtd.set("mode selection","user select")
     fdtd.set("bent waveguide",True)
     fdtd.set("bend radius",radius*scale)
-    fdtd.set("theta",45)
-    fdtd.updateportmodes(1)
+    fdtd.set("theta",-45)
+    fdtd.set("frequency points",3)
+    fdtd.set("x",-(radius/(2)**0.5)*scale)
+    fdtd.set("y",((radius+wg_width/2+gap/2)-radius/(2)**0.5)*scale)
+    fdtd.set("z",0)
+    fdtd.set("z span",(3)*scale)
+    fdtd.set("y span",(3)*scale)
+    fdtd.setexpansion("bottom_left","bottom_left")
+    fdtd.set('mode selection','user select')
+    fdtd.set('selected mode numbers',1)
+    fdtd.set("frequency points",3)
+
+    
+    fdtd.addpower()
+    fdtd.set("name","bottom_right")
+    fdtd.set("monitor type","2D X-normal")
     fdtd.set("x",(radius/(2)**0.5)*scale)
     fdtd.set("y",((radius+wg_width/2+gap/2)-radius/(2)**0.5)*scale)
     fdtd.set("z",0)
     fdtd.set("z span",(3)*scale)
     fdtd.set("y span",(3)*scale)
-    fdtd.set("x span",(0)*scale)
-    fdtd.select("FDTD::ports")
     
-    fdtd.addport ()
-    fdtd.set("name","top_left")
-    fdtd.set("direction","forward")
+
+    fdtd.addmodeexpansion()
     fdtd.set("mode selection","user select")
-    fdtd.set("number of field profile samples",3)
-    fdtd.updateportmodes(1) 
+    fdtd.set("name","mode_output_bottom_right")
+    fdtd.set("monitor type","2D X-normal")
+    fdtd.set("mode selection","user select")
+    fdtd.set("bent waveguide",True)
+    fdtd.set("bend radius",radius*scale)
+    fdtd.set("theta",45)
+    fdtd.set("frequency points",3)
+    fdtd.set("x",(radius/(2)**0.5)*scale)
+    fdtd.set("y",((radius+wg_width/2+gap/2)-radius/(2)**0.5)*scale)
+    fdtd.set("z",0)
+    fdtd.set("z span",(3)*scale)
+    fdtd.set("y span",(3)*scale)
+    fdtd.setexpansion("bottom_right","bottom_right")
+    fdtd.set('mode selection','user select')
+    fdtd.set('selected mode numbers',1)
+
+    fdtd.addmode()
+    fdtd.set("name","mode source")
+    fdtd.set("injection axis","x")
     fdtd.set("x",-(radius+wg_width/2)*scale)
     fdtd.set("y",(-gap/2-wg_width/2)*scale)
     fdtd.set("z",0)
     fdtd.set("z span",(3)*scale)
     fdtd.set("y span",(3)*scale)
-    fdtd.set("x span",(0)*scale)
-    fdtd.select("FDTD::ports") 
-
-    fdtd.addport ()
-    fdtd.set("name","top_right")
-    fdtd.set("direction","backward")
     fdtd.set("mode selection","user select")
-    fdtd.set("number of field profile samples",3)
-    fdtd.updateportmodes(1) 
+    fdtd.set("center wavelength",1.55*scale)
+    fdtd.set("wavelength span",0.1*scale)
+    fdtd.set("mode selection","user select")
+    fdtd.set('mode selection','user select')
+    fdtd.set('selected mode number',1)
+   
+
+    fdtd.addpower()
+    fdtd.set("name","dft_output")
+    fdtd.set("monitor type","2D X-normal")
     fdtd.set("x",(radius+wg_width/2)*scale)
     fdtd.set("y",(-gap/2-wg_width/2)*scale)
     fdtd.set("z",0)
     fdtd.set("z span",(3)*scale)
     fdtd.set("y span",(3)*scale)
-    fdtd.set("x span",(0)*scale)
-    fdtd.select("FDTD::ports") 
-    
-    # if from_ring:
-    fdtd.set("source port","bottom_left")
-    # if from_wg:
-    #     fdtd.set("source port","top_left")
-    # fdtd.set("source mode","mode 1")
+
+    fdtd.addmodeexpansion()
+    fdtd.set("mode selection","user select")
+    fdtd.set("name","mode_output")
+    fdtd.set("monitor type","2D X-normal")
+    fdtd.set("x",(radius+wg_width/2)*scale)
+    fdtd.set("y",(-gap/2-wg_width/2)*scale)
+    fdtd.set("z",0)
+    fdtd.set("z span",(3)*scale)
+    fdtd.set("y span",(3)*scale)
+    fdtd.set("mode selection","user select")
+    fdtd.set("frequency points",3)
+    fdtd.setexpansion('through port','dft_output')
+    fdtd.set('mode selection','user select')
+    fdtd.set('selected mode numbers',1)
+
 
     fdtd.save("coupler_fsp")
 
 
 if __name__=='__main__':
+    scan_number = 1
+    scan = ["bus_wg_width","SKT_height","WG_height"]
     parser = argparse.ArgumentParser()
     parser.add_argument("radius",help="specify radius of ring",type=np.float64)
     parser.add_argument("gap",help="specify gap between ring and bus",type=np.float64)
     arg = parser.parse_args()
-    main(arg.radius,arg.gap)
+
+    print("......starting building......")
+    N = 7
+    if scan_number == 1:
+        data = np.linspace(0.21,0.213,N)
+    if scan_number == 2:
+        data = np.linspace(0.052,0.072,N)
+    if scan_number == 3:
+        data = np.linspace(0.46,0.49,N)
+    
+    print('\tcomplete building\n\nrunning simulation......\n')
+    plt.figure()
+    for i in range(len(data)):
+        print(f"\t\nRunning simulation with {scan[scan_number-1]} = {data[i]} um\n")
+        if scan_number == 1:
+            main(arg.radius,arg.gap,bus_wg_width=data[i])
+        if scan_number == 2:
+            main(arg.radius,arg.gap,SKT_height=data[i])
+        if scan_number == 3:
+            main(arg.radius,arg.gap,WG_height=data[i])
+        p1 = subprocess.Popen(['/opt/lumerical/v212/mpich2/nemesis/bin/mpiexec --hostfile host_file /opt/lumerical/v212/bin/fdtd-engine-mpich2nem coupler_fsp.fsp'],shell=True)
+        p1.wait()
+
+        fdtd = lumapi.FDTD(hide=True)
+        fdtd.load("coupler_fsp.fsp")
+        output = fdtd.getresult("mode_output","expansion for through port")
+        a = output['a']
+        f = output['f']
+        plt.plot(299792458*1e6/f,np.abs(a),label=f"{scan[scan_number-1]} = {data[i]} um")
+    plt.xlabel("Wavelength (nm)")
+    plt.ylabel("Amplitude")
+    plt.title("Mode Expansion Amplitude")
+    plt.legend()
+    plt.grid()
+    plt.savefig(f"coupler_region_{scan[scan_number-1]}.png")
+    plt.show()
+
+        
+        
