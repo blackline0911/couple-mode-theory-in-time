@@ -179,7 +179,7 @@ def main(radius,
 
 if __name__=='__main__':
     scan_number = 1
-    scan = ["bus_wg_width","SKT_height","WG_height"]
+    scan = ["bus_wg_width","SKT_height","WG_height","radius","gap"]
     parser = argparse.ArgumentParser()
     parser.add_argument("radius",help="specify radius of ring",type=np.float64)
     parser.add_argument("gap",help="specify gap between ring and bus",type=np.float64)
@@ -193,6 +193,10 @@ if __name__=='__main__':
         data = np.linspace(0.052,0.072,N)
     if scan_number == 3:
         data = np.linspace(0.46,0.49,N)
+    if scan_number == 4:
+        data = np.linspace(5,10,N)
+    if scan_number == 5:
+        data = np.linspace(0.16,0.3,N)
     
     print('\tcomplete building\n\nrunning simulation......\n')
     plt.figure()
@@ -204,6 +208,10 @@ if __name__=='__main__':
             main(arg.radius,arg.gap,SKT_height=data[i])
         if scan_number == 3:
             main(arg.radius,arg.gap,WG_height=data[i])
+        if scan_number == 4:
+            main(data[i],arg.gap)
+        if scan_number == 5:
+            main(arg.radius,data[i])
         p1 = subprocess.Popen(['/opt/lumerical/v212/mpich2/nemesis/bin/mpiexec --hostfile host_file /opt/lumerical/v212/bin/fdtd-engine-mpich2nem coupler_fsp.fsp'],shell=True)
         p1.wait()
 
@@ -212,13 +220,13 @@ if __name__=='__main__':
         output = fdtd.getresult("mode_output","expansion for through port")
         a = output['a']
         f = output['f']
-        plt.plot(299792458*1e6/f,np.abs(a),label=f"{scan[scan_number-1]} = {data[i]} um")
+        plt.plot(299792458*1e6/f,np.abs(a),label="%s = %.4f um"%(scan[scan_number-1],data[i]))
     plt.xlabel("Wavelength (nm)")
     plt.ylabel("Amplitude")
     plt.title("Mode Expansion Amplitude")
     plt.legend()
     plt.grid()
-    plt.savefig(f"coupler_region_{scan[scan_number-1]}.png")
+    plt.savefig(f"coupler_region_{scan[scan_number-1]}.png") 
     plt.show()
 
         
