@@ -22,7 +22,7 @@ wl_in = 1.559453431986187
 # wl_in = 1.5593-0.0008/100*delta_f
 Pin = 1.0 #mW
 ng = 3.9697242191825954
-radius = 7.5 #um
+radius = 10 #um
 cavity_length = 2*np.pi*radius 
 La_Lc_ratio = 2*np.pi*5/(2*np.pi*radius)
 mode_area = 0.22*0.5
@@ -32,7 +32,9 @@ me = 38 # pm/V
 x = dB(0.994898) # energy round trip loss in dB
 y = x*4*((radius-5)/radius)
 z = 10**(y/10) 
+print("x = ",x)
 print("z = ",z)
+print("total round trip loss = ",)
 Amp_RoundTripLoss_data = np.array([0.95223,0.95248,0.95273,0.95292,0.95305])*(z)**0.5
 print("Amp_RoundTripLoss_data = ",Amp_RoundTripLoss_data)
 a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La=cavity_length*La_Lc_ratio,L = cavity_length,input2 = "amp")
@@ -41,7 +43,8 @@ a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La=cavity_length*La_Lc_ra
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the coupling coefficient
 # gamma = 0.95105
-gamma = 0.94898839
+# gamma = 0.94898839
+gamma = 0.94737172
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +106,7 @@ ring_mod = ring(L=cavity_length,
             band="C",
             HE = 73,
             )
-
+print("FSR = ",(ring_mod.lambda0*1000)**2/(ng*ring_mod.L*1000)," nm")
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the heater parameters
