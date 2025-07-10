@@ -52,6 +52,7 @@ def ploting(x,*arg,x_label, title,filename='',figcolor='w',line_color='b',
        plt.grid(color=grid_color,linestyle=grid_style, alpha=grid_alpha)
        ax = plt.gca()
        ax.set_facecolor(figcolor)
+       plt.ylim([-20,0])
        if(filename!=''):
             plt.savefig(filename)
             # with open(filename, "wb") as f:
