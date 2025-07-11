@@ -234,20 +234,6 @@ def solve_scan_frequency(sim,ring:ring,
     T_coeff = sim.b0**2/( ring.ro_si*ring.cSi*Veff)
     T_args  = [ring.kappa_thermal,T_coeff]
     b_init  = 0+1j*0
-    # if ring.segment==1:
-    #     func_name = 'single_segment'
-    #     ode_func = partial(method_dict[func_name],
-    #                     SPM=SPM,FCA=FCA,TPA=TPA,
-    #                     T_args=T_args,
-    #                     ring = ring,sim=sim,
-    #                     driver=driver,Heater=Heater,alpha_1,ring.)
-    # if ring.segment==2:
-    #     func_name = 'dual_segment'
-    #     ode_func = partial(method_dict[func_name],
-    #                     SPM=SPM,FCA=FCA,TPA=TPA,
-    #                     T_args=T_args,
-    #                     ring = ring,sim=sim,
-    #                     driver=driver,Heater=Heater)
     
     sol = solve_ivp( CMT_scan_frequency ,
                     [0,time.t_max+time.buffer], 

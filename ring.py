@@ -28,7 +28,7 @@ class ring(simulation):
                  eta_h = 2.99,
                  HE = 254.3,
                  kappa_thermal = 1.95e-4, # 1/K, index change rate per Kelvin 
-                 Akerr = 0.204, # um^2
+                 Akerr = 0.1289, # um^2
                  Atpa = 0.1289, # um^2
                  Afca = 0.116, # um^2
                  n2 = 11e-9, #um^2/mW
@@ -254,6 +254,23 @@ class ring(simulation):
         \
         1j*self.D_bar*( (self.HE*1e-6)*Heater.P)*b_bar
         return da_dt
+    # def feedback_ring_cmt(self,q3,phi3,mzm_heater,f_pround_bar,b_bar,N_bar,delta_T,f_res_bar,alpha_linear,TPA,SPM,T_args,dlambda,Heater):
+    #     da_dt = 1j*2*np.pi*(f_res_bar-f_pround_bar + SPM*abs(b_bar)**2 + \
+    #     \
+    #     (-self.f_res_bar/self.ng)*T_args[0]*delta_T )*b_bar \
+    #     \
+    #     - (self.tu_e_bar_total_inv + \
+    #     \
+    #     self.vg_in_cm*( (alpha_linear - self.alpha(0))*self.L_active/self.L + self.alpha(0))/2 +\
+    #     self.vg_in_cm*TPA/2*abs(b_bar)**2 \
+    #     + self.vg_in_cm*N_bar*1e-5/2  ) *b_bar + \
+    #     \
+    #     self.input_kappa + \
+    #     \
+    #     1j*self.D_bar*dlambda*b_bar + \
+    #     \
+    #     1j*self.D_bar*( (self.HE*1e-6)*Heater.P)*b_bar
+    #     return da_dt
 
     def FC_rate_equation(self,b_bar,N_bar,FCA,tau_eff):
 

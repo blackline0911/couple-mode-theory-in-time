@@ -29,10 +29,10 @@ experiment_condition ={"mode":mode,
                         "Pin":Pin} 
 sim = simulation()
 sim.main(experiment_condition=experiment_condition)
-a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_pdk,L = 2*np.pi*radius,input = "amp")
+a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_pdk,L = 2*np.pi*radius,La = 2*np.pi*radius,input2 = "amp")
 n_fit = neff_fit(neff_data=neff_pdk)
 ring_mod = ring(L=2*np.pi*radius, 
-            L_active=2*np.pi*radius,
+            L_active=[2*np.pi*radius],
             alpha=a_fit.alpha_V,
             neff=n_fit.neff_V,
             cross_section=mode_area,
@@ -42,8 +42,6 @@ ring_mod = ring(L=2*np.pi*radius,
             tau_eff=0.5,
             sigma_FCA=1.04,
             beta_TPA=5,
-            Atpa=mode_area,
-            Afca=mode_area,
             n2=4.5e-9,
             FSR_shift=0,)
 
@@ -54,16 +52,21 @@ H = Heater(300,1.3325,0.5*150/0.6,tau_th=17.5)
 wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q*5
 wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q*5
 
+# dummy Cox, Rsi, Cp, level
 Cjs = [23.6e-15, 20e-15]
 v = driver(f_drive=50,
            v_bias=0,
            vpp=0,
-           Rs=53.9,
-           cj=Cjs)
+           Rs=[53.9],
+           cj=Cjs,
+           Cox = [15e-15],
+           Rsi = [1000],
+           Cp = [6e-15],
+           level=2)
 
 os.chdir("./test_fit/")
-exp_data = read_excel.load_excel_data("D:/Homework/Master_degree/ring/CMT/nonlinear/ring spectrum.xlsx", '10dbm')
-# exp_data = read_excel.load_excel_data("D:/Master_degree/paper/微分方程/ring spectrum.xlsx", '10dbm')
+# exp_data = read_excel.load_excel_data("D:/Homework/Master_degree/ring/CMT/nonlinear/ring spectrum.xlsx", '10dbm')
+exp_data = read_excel.load_excel_data("D:/Master_degree/paper/微分方程/ring spectrum.xlsx", '10dbm')
 wl = exp_data[:,0]
 idx_1 = np.argmin(np.abs(wl-1.56*1e-6))
 idx_2 = np.argmin(np.abs(wl-1.57*1e-6))
@@ -78,15 +81,7 @@ if sim.mode == "scan_frequency":
     sim.b,s_minus = solving(sim,ring_mod,v,t,H)
     T = Transfer_function(ring_mod,t)
     wl_sim,data = T.mapping(10*np.log10(abs(s_minus)**2/Pin))
-if sim.mode == "voltage_drive":
-    t = time(mode = "voltage_drive")
-    t.main(ring_mod,N=100,driver=v)
-    v.create_voltage(time=t)
-    v.varying_Cj()
-    b,Q,s_minus = solving(sim,ring_mod,v,t)
-    ploting(t.t_total,Q,x_label='time (ps)',title='Q',filename='Q_test')
-
-sim.save_data(ring_mod,t,v)
+sim.save_data(ring_mod,t,v,H)
 
 # ploting(t.t_total,abs(sim.b)**2,x_label='time (ps)',title='b (mJ)',filename='b_test')
 

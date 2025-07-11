@@ -204,12 +204,9 @@ class simulation():
                         f.write(str(ob.Atpa)+" um^2")
                         f.write('\n')
 
-                        f.write("\t\tFree Carrier time constant : ")
-                        f.write(str(ob.tau_eff)+" ns")
-                        f.write('\n')
 
                         f.write("\t\tFree carrier absorption area : ")
-                        f.write(str(ob.sigma_FCA)+" cm^2")
+                        f.write(str(ob.sigma_FCA*1e-17)+" cm^2")
                         f.write('\n')
 
                         f.write("\t\tFree carrier absorption mode area : ")
@@ -288,9 +285,9 @@ class simulation():
                                 f.write("\t\tWarning : This Transfer function result may not be accurate.\n\n")
 
                     case "Heater":
-                        f.write("Voltage applied to Heater is "+str(ob.V)+" V\n")
-                        f.write("Resistance of Heater is "+str(ob.R)+" ohm\n")
-                        f.write("Thermal time constant of waveguide is "+str(ob.tau_th)+" ns\n")
+                        f.write("\n\t\tVoltage applied to Heater is "+str(ob.V)+" V\n")
+                        f.write("\t\tResistance of Heater is "+str(ob.R)+" ohm\n")
+                        f.write("\t\tThermal time constant of waveguide is "+str(ob.tau_th*1e9)+" ns\n")
                         f.write("\t\tThermal mode area : ")
                         f.write(str(ob.Aeff)+" um^2")
                         f.write('\n')

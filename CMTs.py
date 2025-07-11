@@ -194,33 +194,3 @@ def CMT_scan_frequency(t_bar,eqs,SPM,TPA,FCA,T_args,ring:ring,sim:simulation,dri
                      (-c*1e-12/sim.f_pround_bar**2)*df , Heater)
     
     return [ da_dt]
-
-# def CMT_scan_frequency_single_segment(t_bar,eqs,SPM,TPA,FCA,T_args,ring:ring,sim:simulation,driver:driver,Heater:Heater):
-#     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-#     f_res_bar = ring.w_res(t_bar)
-#     b_bar  = eqs
-#     voltage = driver.v_bias
-#     alpha_linear = ring.alpha(voltage)
-#     df = -sim.f_pround_bar/ring.ng*( ring.neff(voltage) - ring.neff(0))*(ring.L_active[0]/ring.L)
-    
-#     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#     # /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#     # 不要忘記這裡的tau_o吸收是energy的吸收，不是amplitude的
-
-#     N_bar = FCA* abs(b_bar)**4
-
-#     delta_T = abs(b_bar)**2 * T_args[1] * (\
-#         \
-#         +ring.vg_in_cm*alpha_linear \
-#         \
-#         + ring.vg_in_cm *TPA*abs(b_bar)**2 \
-#         \
-#         + ring.vg_in_cm * N_bar*1e-5 \
-#         ) * Heater.tau_th/t0
-    
-#     da_dt = ring.CMT_single_segment(sim.f_pround_bar,b_bar,N_bar,delta_T*ring.self_heating_factor,f_res_bar,alpha_linear,TPA,SPM,T_args,\
-#                      (-c*1e-12/sim.f_pround_bar**2)*df , Heater)
-    
-#     return [ da_dt]
