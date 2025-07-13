@@ -4,16 +4,22 @@ class father():
         self.ear = 2
         self.nose = 1
         self.mouth = 1
-
+    def print(self):
+        print(self.eye, self.ear, self.nose, self.mouth)
 class son(father):
     def __init__(self):   # 使用了 __init 的方法
+        super().__init__()
         self.a = 100
+    def print(self):
+        print(self.eye, self.ear, self.nose, self.mouth, self.a)
 
 class son2(father):
     def __init__(self):   # 使用了 __init 的方法
         super().__init__()
         print(self.eye)
 
-oxxo = father()
-print(oxxo.a)
+# oxxo = father()
+# print(oxxo.a)
+o = son()
+o.print()
 

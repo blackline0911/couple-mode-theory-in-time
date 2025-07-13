@@ -134,7 +134,7 @@ class ring(simulation):
         self.Afca = Afca
         self.Akerr = Akerr
         self.n2 = n2
-        super().__init__()
+        # super().__init__()
         self.lambda_incident = lambda_incident
         
         self.FCA_fit_factor = FCA_fit_factor
@@ -254,29 +254,126 @@ class ring(simulation):
         \
         1j*self.D_bar*( (self.HE*1e-6)*Heater.P)*b_bar
         return da_dt
-    # def feedback_ring_cmt(self,q3,phi3,mzm_heater,f_pround_bar,b_bar,N_bar,delta_T,f_res_bar,alpha_linear,TPA,SPM,T_args,dlambda,Heater):
-    #     da_dt = 1j*2*np.pi*(f_res_bar-f_pround_bar + SPM*abs(b_bar)**2 + \
-    #     \
-    #     (-self.f_res_bar/self.ng)*T_args[0]*delta_T )*b_bar \
-    #     \
-    #     - (self.tu_e_bar_total_inv + \
-    #     \
-    #     self.vg_in_cm*( (alpha_linear - self.alpha(0))*self.L_active/self.L + self.alpha(0))/2 +\
-    #     self.vg_in_cm*TPA/2*abs(b_bar)**2 \
-    #     + self.vg_in_cm*N_bar*1e-5/2  ) *b_bar + \
-    #     \
-    #     self.input_kappa + \
-    #     \
-    #     1j*self.D_bar*dlambda*b_bar + \
-    #     \
-    #     1j*self.D_bar*( (self.HE*1e-6)*Heater.P)*b_bar
-    #     return da_dt
 
     def FC_rate_equation(self,b_bar,N_bar,FCA,tau_eff):
 
         dN_dt = -t0*N_bar/(tau_eff*1e-9) + FCA*abs(b_bar)**4
         
         return dN_dt
+
+class feedback_ring(ring):
+    def __init__(self, L:float, 
+                 L_active:np.ndarray,
+                 alpha:float,
+                 gamma:np.ndarray,
+                 cross_section:float,
+                 lambda_incident:float,
+                 neff:float,
+                 q3:float,
+                 L3:float,
+                 heater_phase:float,
+                 band = "C",
+                 lambda0=None,
+                 FSR = None,
+                 ng = None,
+                 FSR_shift = 0,
+                 beta_TPA = 5,  #1e-13 (cm/mW)
+                 tau_eff = 20,  # ns
+                 sigma_FCA = 1.04,  #1e-17 cm^2
+                 eta_h = 2.99,
+                 HE = 254.3,
+                 kappa_thermal = 1.95e-4, # 1/K, index change rate per Kelvin 
+                 Akerr = 0.1289, # um^2
+                 Atpa = 0.1289, # um^2
+                 Afca = 0.116, # um^2
+                 n2 = 11e-9, #um^2/mW
+                 FCA_fit_factor = 1,
+                 TPA_fit_factor = 1,
+                 SPM_fit_factor = 1,
+                 self_heating_factor = 1,
+                ):
+        """ L3: feedback arm length (um) """
+        """ q3: AMPLITUDE coefficient of feedback arm """
+        """ heater_phase: heater phase applied to feedback arm """
+        """ drop_kappa: time Kappa of drop port """
+        assert len(gamma)==2, "\nFeedback ring has two couple region\n"
+        super().__init__(L,L_active,alpha,gamma,cross_section,lambda_incident,neff,band,lambda0,FSR,ng,FSR_shift,beta_TPA,tau_eff,sigma_FCA,eta_h,HE,kappa_thermal,Akerr,Atpa,Afca,n2,FCA_fit_factor,TPA_fit_factor,SPM_fit_factor,self_heating_factor)
+        self.drop_kappa = (2/self.tu_e_bar[1])**0.5 
+        self.q3 = q3
+        self.heater_phase = heater_phase
+
+
+    def renew(self):
+        super().renew()
+
+    def scan_frequency(self,wl_start:float,wl_end:float,time):
+        """
+        Call this function when you wants to perform frequency scan of the ring.
+        I will perform resonant frequency scan, instead of incident frequency scan
+        input:
+        wl_min: start scanning wavelength (um)
+        wl_max: Ending scanning wavelength (um)
+        lambda_incident: incident laser wavelength (um)        
+        """
+        super().scan_frequency(wl_start,wl_end,time)
+
+    def w_res(self,t):
+        """
+        return the resonant frequency according to specified time t
+        """
+        return super().w_res(t)
+
+    def find_reference_res_wavelength(self):
+        """
+        find the reference resonant wavelength of ring
+        """
+        return super().find_reference_res_wavelength()
+
+    def find_accurate_res_frequency(self,m):
+        """
+        find the accurate resonant frequency of ring
+        """
+        return super().find_accurate_res_frequency(m)
+
+    def handle_nonlinear(self):
+        """
+        handle the nonlinear parameters of ring
+        """
+        super().handle_nonlinear()
+
+    def neff_dispersion(self,n0,f_bar):
+        return n0 + (self.ng-n0)*(f_bar/self.f_res_bar-1)
+
+    def CMT(self,f_pround_bar,b_bar,N_bar,delta_T,f_res_bar,alpha_linear,TPA,SPM,T_args,dlambda,Heater):
+        """
+        CMT equation of feedback ring
+        """
+        da_dt = 1j*2*np.pi*(f_res_bar-f_pround_bar + SPM*abs(b_bar)**2 + \
+        \
+        (-self.f_res_bar/self.ng)*T_args[0]*delta_T )*b_bar \
+        \
+        - (self.tu_e_bar_total_inv + \
+        \
+        self.vg_in_cm*( (alpha_linear - self.alpha(0))*self.L_active/self.L + self.alpha(0))/2 +\
+        self.vg_in_cm*TPA/2*abs(b_bar)**2 \
+        + self.vg_in_cm*N_bar*1e-5/2  ) *b_bar + \
+        \
+        self.input_kappa + \
+        \
+        self.drop_kappa*self.q3*np.exp(1j*( self.neff_dispersion(self.neff(0), f_pround_bar)* 2*np.pi*f_pround_bar/c *L+ self.heater_phase))*\ 
+        (1 - self.input_kappa*b_bar)+ \
+        \
+        1j*self.D_bar*dlambda*b_bar + \
+        \
+        1j*self.D_bar*( (self.HE*1e-6)*Heater.P)*b_bar
+        return da_dt
+        
+    def FC_rate_equation(self,b_bar,N_bar,FCA,tau_eff):
+        """
+        Free carrier rate equation of feedback ring
+        """
+        return super().FC_rate_equation(b_bar,N_bar,FCA,tau_eff)
+
 class Transfer_function():
     def __init__(self,ring, time):
         self.ring = ring
