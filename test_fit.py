@@ -65,8 +65,8 @@ v = driver(f_drive=50,
            level=2)
 
 os.chdir("./test_fit/")
-# exp_data = read_excel.load_excel_data("D:/Homework/Master_degree/ring/CMT/nonlinear/ring spectrum.xlsx", '10dbm')
-exp_data = read_excel.load_excel_data("D:/Master_degree/paper/微分方程/ring spectrum.xlsx", '10dbm')
+exp_data = read_excel.load_excel_data("D:/Homework/Master_degree/ring/CMT/nonlinear/ring spectrum.xlsx", '10dbm')
+# exp_data = read_excel.load_excel_data("D:/Master_degree/paper/微分方程/ring spectrum.xlsx", '10dbm')
 wl = exp_data[:,0]
 idx_1 = np.argmin(np.abs(wl-1.56*1e-6))
 idx_2 = np.argmin(np.abs(wl-1.57*1e-6))
@@ -111,15 +111,16 @@ sim.save_data(ring_mod,t,v,H)
 #         exp_data[idx_1:idx_2,1]-exp_data[idx_1:idx_2,3],
 #         x_label='wl',title='spectrum',filename='exp_data',leg=['0V'])
 
-# plt.figure()
-# plt.plot( wl_sim*1000,data,label='simulation')
-# # plt.plot(wl[idx_1:idx_2]*1e9,exp_data[idx_1:idx_2,1]-exp_data[idx_1:idx_2,3],label='experiment')
-# plt.xlabel('wavelength (nm)')
-# plt.ylabel('Transmission (dB)')
-# plt.title('Transfer function')
-# plt.legend()
-# plt.savefig('Transfer_function_comparison.png')
-# plt.show()
+plt.figure()
+plt.plot( wl_sim*1000,data,label='simulation')
+plt.plot(wl[idx_1:idx_2]*1e9,exp_data[idx_1:idx_2,1]-exp_data[idx_1:idx_2,3],label='experiment')
+plt.xlabel('wavelength (nm)')
+plt.ylabel('Transmission (dB)')
+plt.title('Transfer function')
+plt.legend()
+plt.grid()
+plt.savefig('Transfer_function_comparison.png')
+plt.show()
 
 
 wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q*5
@@ -134,8 +135,8 @@ T = Transfer_function(ring_mod,t)
 wl_sim_reverse,data_reverse = T.mapping(10*np.log10(abs(s_minus)**2/Pin))
 
 plt.figure()
-plt.plot( wl_sim*1000,data,label='simulation')
-plt.plot( wl_sim_reverse*1000,data_reverse,label='scan reverse')
+plt.plot( wl_sim*1000,data,label='from short wavelength to long wavelength')
+plt.plot( wl_sim_reverse*1000,data_reverse,label='from long wavelength to short wavelength')
 plt.grid(color='g',linestyle='--', alpha=0.5)
 plt.xlabel('wavelength (nm)')
 plt.ylabel('Transmission (dB)')

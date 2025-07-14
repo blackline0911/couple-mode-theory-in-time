@@ -11,14 +11,14 @@ Simulation Parameters and Settings
 Parameter of ring modulator
 	Structure parameter : 
 		cavity length : 31.41592653589793 um
-		Group index : 3.9838155787565697
+		Group index : 3.983815578756569
 		couple through coefficient : [0.947582]
 		Round trip loss : (energy) 0.8966043974969786
 		mode cross section : 0.11 um^2
 		Linear Energy absorption coefficient: 34.74051370464404 1/cm
 		Energy coupling coefficient: [34.27675588] 1/cm
-		Max Two Photon Absorption coefficient : 0.035436699542544574 1/cm
-		Max Free Carrier Absorption coefficient : 0.06324046454023258 1/cm
+		Max Two Photon Absorption coefficient : 0.03543669954254454 1/cm
+		Max Free Carrier Absorption coefficient : 0.0632404645402325 1/cm
 		Free Carrier time constant : 0.5 ns
 		Two photon absorption coefficient : 5e-13 cm/mW
 		Two photon absorption mode area : 0.1289 um^2
@@ -32,19 +32,19 @@ Parameter of ring modulator
 		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
 		intrinsic photon life time : 7.650191072370922 ps
-		couple extrinsic photon life time (port 1 ) : 7.75369666558376 ps
-		resonant frequency : 192.24213362563668 THz
-		resonant wavelength : 1.5594524069515467 um
+		couple extrinsic photon life time (port 1 ) : 7.753696665583759 ps
+		resonant frequency : 192.2421336256367 THz
+		resonant wavelength : 1.5594524069515465 um
 		Q factor : 2325.6759128051194
 		LineWidth : 0.6705372826734959 nm
 		Group velocity : 75252594421946.45 um/s
-		Round Trip time : 0.4174730024555257 ps
+		Round Trip time : 0.41747300245552565 ps
 
 		Input Laser photon energy : 0.0001274983842559692 fJ
 
-	The start wavelength is 1.559711912173179 um
-	The end wavelength is 1.5664172849999143 um
-	scanning frequency range for better accuracy is 0.08266075791865746 THz
+	The start wavelength is 1.5597119121731788 um
+	The end wavelength is 1.566417284999914 um
+	scanning frequency range for better accuracy is 0.08266075791865747 THz
 	Current frequency range is 0.8227952525906801 THz
 		Warning : This Transfer function result may not be accurate.
 
@@ -57,5 +57,5 @@ Simulation Parameter of time
 
 		Voltage applied to Heater is 1.3325 V
 		Resistance of Heater is 125.0 ohm
-		Thermal time constant of waveguide is 1.75e-08 ns
+		Thermal time constant of waveguide is 17.5 ns
 		Thermal mode area : 0.11 um^2

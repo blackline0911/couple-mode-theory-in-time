@@ -297,7 +297,9 @@ class feedback_ring(ring):
         """ heater_phase: heater phase applied to feedback arm """
         """ drop_kappa: time Kappa of drop port """
         assert len(gamma)==2, "\nFeedback ring has two couple region\n"
-        super().__init__(L,L_active,alpha,gamma,cross_section,lambda_incident,neff,band,lambda0,FSR,ng,FSR_shift,beta_TPA,tau_eff,sigma_FCA,eta_h,HE,kappa_thermal,Akerr,Atpa,Afca,n2,FCA_fit_factor,TPA_fit_factor,SPM_fit_factor,self_heating_factor)
+        super().__init__(L,L_active,alpha,gamma,cross_section,lambda_incident,neff,band,lambda0,
+                         FSR,ng,FSR_shift,beta_TPA,tau_eff,sigma_FCA,eta_h,HE,kappa_thermal,
+                         Akerr,Atpa,Afca,n2,FCA_fit_factor,TPA_fit_factor,SPM_fit_factor,self_heating_factor)
         self.drop_kappa = (2/self.tu_e_bar[1])**0.5 
         self.q3 = q3
         self.heater_phase = heater_phase
@@ -360,7 +362,7 @@ class feedback_ring(ring):
         \
         self.input_kappa + \
         \
-        self.drop_kappa*self.q3*np.exp(1j*( self.neff_dispersion(self.neff(0), f_pround_bar)* 2*np.pi*f_pround_bar/c *L+ self.heater_phase))*\ 
+        self.drop_kappa*self.q3*np.exp(1j*( self.neff_dispersion(self.neff(0), f_pround_bar)* 2*np.pi*f_pround_bar/c *self.L3+ self.heater_phase))*  \
         (1 - self.input_kappa*b_bar)+ \
         \
         1j*self.D_bar*dlambda*b_bar + \
