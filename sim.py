@@ -164,13 +164,8 @@ class simulation():
                         f.write('\n')
 
                         f.write("\t\tRound trip loss : (energy) ")
-                        # f.write(str(np.real(2*ob.alpha(0))))
                         f.write(str(np.exp(-ob.L*1e-4*ob.alpha(0))))
                         f.write('\n')
-
-                        # f.write("\t\tmodulation efficiency : ")
-                        # f.write(str(ob.me) + ' pm/V (for reverse bias)')
-                        # f.write('\n')
 
                         f.write("\t\tmode cross section : ")
                         f.write(str(ob.cross_section) + ' um^2')

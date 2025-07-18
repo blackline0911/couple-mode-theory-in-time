@@ -1,0 +1,21 @@
+This script is used to save the simulation variable that A simulation used. 
+Just for Future checking or further research
+
+Simulation Parameters and Settings
+	time scaling : 1e-12 sec
+	Simulation mode = scan_frequency
+	Input Laser Power : 1.0 mW
+
+	Input Laser wavelength : 1.559453431986187 um
+
+Simulation Parameter of time 
+	time resolution : 1e-14 sec
+	Max time range : 10000 ps
+	Number of bit in squence : []
+
+	Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
+
+		Voltage applied to Heater is 0 V
+		Resistance of Heater is 125.0 ohm
+		Thermal time constant of waveguide is 100.00000000000001 ns
+		Thermal mode area : 0.11 um^2

@@ -22,20 +22,21 @@ wl_in = 1.559453431986187
 # wl_in = 1.5593-0.0008/100*delta_f
 Pin = 1.0 #mW
 ng = 3.9697242191825954
-radius =20 #um
+radius = 7.5 #um
 cavity_length = 2*np.pi*radius 
 La_Lc_ratio = 2*np.pi*5/(2*np.pi*radius)
+L3 = cavity_length*3/2 
 mode_area = 0.22*0.5
 lambda_res =  1.559453431986187
 me = 38 # pm/V
+q3 = 0**0.5
+heater_phgase = 0
 
-
-x = dB(0.9976**0.5) # energy round trip loss in dB
+x = dB(0.994898) # energy round trip loss in dB
 y = x*4*((radius-5)/radius)
 z = 10**(y/10) 
 print("x = ",x)
 print("z = ",z)
-print("total round trip loss = ",)
 Amp_RoundTripLoss_data = np.array([0.95223,0.95248,0.95273,0.95292,0.95305])*(z)**0.5
 print("Amp_RoundTripLoss_data = ",Amp_RoundTripLoss_data)
 a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La=cavity_length*La_Lc_ratio,L = cavity_length,input2 = "amp")
@@ -45,7 +46,6 @@ a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La=cavity_length*La_Lc_ra
 # Define the coupling coefficient
 # gamma = 0.95105
 gamma = 0.94898839
-gamma_drop =0.9977938
 # gamma = 0.94737172
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,6 +55,7 @@ w_res = 2*np.pi*c/lambda_res
 D_bar = -2*np.pi*c/lambda_res**2
 print("delta neff/delta V = ",me*1e-6*D_bar*( -ng/(w_res) )*(1/La_Lc_ratio))
 neff0 = 2.680503
+neff0 = 80/7.5*lambda_res/(2*np.pi)
 dneff_dV = me*1e-6*D_bar*( -ng/(w_res) )*(1/La_Lc_ratio)
 neff_calculated = [neff0+dneff_dV*(-0.5),neff0, neff0+dneff_dV*0.5, neff0+dneff_dV*1, neff0+dneff_dV*1.5, neff0+dneff_dV*2]
 
@@ -92,13 +93,16 @@ sim.main(experiment_condition=experiment_condition)
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ring_mod = ring(L=cavity_length, 
+ring_mod = feedback_ring(L=cavity_length, 
             L_active = [cavity_length*La_Lc_ratio],
+            L3=L3,
+            heater_phase=heater_phgase*np.pi/180,
+            q3=q3,
             alpha=a_fit.alpha_V,
             neff=n_fit.neff_V,
             cross_section=mode_area,
             lambda_incident=wl_in,
-            gamma=[gamma,gamma_drop],
+            gamma=[gamma, gamma],
             ng=ng,
             FSR_shift=0,
             FCA_fit_factor=0,
@@ -119,8 +123,8 @@ H = Heater(300,0,0.5*150/0.6)
 # Define the wavelength range for the scan
 # The range is set based on the resonant wavelength and the heater power
 # The values can be adjusted based on the specific device characteristics
-wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q
-wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q
+wl_min =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 - ring_mod.lambda0/ring_mod.Q*2
+wl_max =  ring_mod.lambda0+ring_mod.HE*H.P*1e-6 + ring_mod.lambda0/ring_mod.Q*2
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,25 +156,34 @@ plt.show()
 ploting(V,1e6*c*1e-12/sim.f_pround_bar/ring_mod.ng*( ring_mod.neff(V) - ring_mod.neff(0))*(ring_mod.L_active[0]/ring_mod.L),\
             x_label="voltage (V)",title="resonant wavelength vs Voltage (pm/V)",filename="lambda_V")
 
-os.chdir("./eye_test_design/")
+os.chdir("./eye_test_feedback_ring_design/")
 t = time(mode = sim.mode)
 
 if sim.mode == "scan_frequency":
     # vbias = np.array([v_bias+vpp/2,v_bias,v_bias-vpp/2])
-    vbias = np.array([0,-0.5,-1,-1.5,-2])
+    # vbias = np.array([0,-0.5,-1,-1.5,-2])
+    heater_phase = np.array([0,45,90,135,180,225,270,315])
     # vbias = np.arange(-0,-0.5,-0.5)
     ring_mod.scan_frequency(wl_min ,wl_max,t)
     t.main(ring_mod,t_max=10000,resolution=1,buffer=50,driver=v)
 
     plt.figure()
-    for vb in vbias:
-        v.v_bias = vb
+    for h in heater_phase:
+        ring_mod.heater_phase = np.pi/180*h
         sim.b,s_minus = solving(sim,ring_mod,v,t,H)
         T = Transfer_function(ring_mod,t)
         wl,data = T.mapping(dB(abs(s_minus)**2/sim.Pin))
         wl,data_phase = T.mapping(180/np.pi*np.angle(s_minus))
         plt.plot(wl*1000,data,
-                 label="V = "+str(vb))
+                 label="heater = "+str(h))
+    # for vb in vbias:
+    #     v.v_bias = vb
+    #     sim.b,s_minus = solving(sim,ring_mod,v,t,H)
+    #     T = Transfer_function(ring_mod,t)
+    #     wl,data = T.mapping(dB(abs(s_minus)**2/sim.Pin))
+    #     wl,data_phase = T.mapping(180/np.pi*np.angle(s_minus))
+    #     plt.plot(wl*1000,data,
+    #              label="V = "+str(vb))
     plt.grid(color='g',linestyle='--', alpha=0.5)
     plt.xlabel('wavelength(nm)')
    

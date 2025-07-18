@@ -125,6 +125,7 @@ class ring(simulation):
         assert input_port>0 , "\nInput port should start from one\n"
         
         self.input_kappa = (2/self.tu_e_bar[input_port-1])**0.5 
+        self.output_kappa = self.input_kappa
         self.alpha_linear = np.real(2/(self.vg*1e-4*self.tu_o_bar)) #Energy absorption (1/cm)
         self.tu_t_bar = (self.tu_e_bar_total_inv+1/self.tu_o_bar)**(-1)
         self.beta_TPA = beta_TPA  #1e-13 (cm/mW)
@@ -153,7 +154,7 @@ class ring(simulation):
         
 
     def renew(self):
-        self.photon_energy = h*c/self.lambda_incident*1000/t0  #mJ
+        self.photon_energy = h*c/self.lambda_incident*1000/t0  #fJ
         self.handle_nonlinear()
 
     def scan_frequency(self,wl_start:float,wl_end:float,time):
@@ -262,6 +263,7 @@ class ring(simulation):
         return dN_dt
 
 class feedback_ring(ring):
+    id = 'feedback_ring'
     def __init__(self, L:float, 
                  L_active:np.ndarray,
                  alpha:float,
@@ -301,7 +303,10 @@ class feedback_ring(ring):
                          FSR,ng,FSR_shift,beta_TPA,tau_eff,sigma_FCA,eta_h,HE,kappa_thermal,
                          Akerr,Atpa,Afca,n2,FCA_fit_factor,TPA_fit_factor,SPM_fit_factor,self_heating_factor)
         self.drop_kappa = (2/self.tu_e_bar[1])**0.5 
+        self.output_kappa = self.drop_kappa
+        print("drop_kappa = ",self.drop_kappa)
         self.q3 = q3
+        self.L3 = L3
         self.heater_phase = heater_phase
 
 
@@ -362,7 +367,9 @@ class feedback_ring(ring):
         \
         self.input_kappa + \
         \
-        self.drop_kappa*self.q3*np.exp(1j*( self.neff_dispersion(self.neff(0), f_pround_bar)* 2*np.pi*f_pround_bar/c *self.L3+ self.heater_phase))*  \
+        self.drop_kappa*self.q3* \
+        np.exp(1j*( self.neff_dispersion(self.neff(0), f_pround_bar)* \
+        2*np.pi*f_pround_bar/(c*t0) *self.L3+ self.heater_phase))*  \
         (1 - self.input_kappa*b_bar)+ \
         \
         1j*self.D_bar*dlambda*b_bar + \

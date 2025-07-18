@@ -242,7 +242,7 @@ def solve_scan_frequency(sim,ring:ring,
                     t_eval = time.t_total,atol = atol,rtol = rtol,
                     args=(SPM,TPA,FCA,T_args,ring,sim,driver,Heater))
     b_bar = sol.y[0]
-    s_minus_bar = (1-ring.input_kappa*b_bar)
+    s_minus_bar = (1-ring.output_kappa*b_bar)
 
     return b_bar*sim.b0, s_minus_bar*sim.S0
 
