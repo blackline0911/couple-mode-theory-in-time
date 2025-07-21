@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 lumapi = importlib.machinery.SourceFileLoader('Lumapi','/opt/lumerical/v212/api/python/lumapi.py').load_module()
 
 
-
 def main(radius,
          gap,
          wg_width=0.5,
@@ -18,7 +17,7 @@ def main(radius,
     fdtd = lumapi.FDTD(hide=True)
     scale = 1e-6
     pad = 2
-    res = 5
+    res = 4
     Si = 'Si (Silicon) - Palik'
     SiO2 = 'SiO2 (Glass) - Palik'
     fdtd.switchtolayout()
@@ -83,7 +82,7 @@ def main(radius,
     fdtd.set("z",0)
     fdtd.set("z span",(3)*scale)
     fdtd.set("y span",(3)*scale)
-    
+
 
     fdtd.addmodeexpansion()
     fdtd.set("mode selection","user select")
@@ -104,7 +103,7 @@ def main(radius,
     fdtd.set('selected mode numbers',1)
     fdtd.set("frequency points",3)
 
-    
+
     fdtd.addpower()
     fdtd.set("name","bottom_right")
     fdtd.set("monitor type","2D X-normal")
@@ -113,7 +112,7 @@ def main(radius,
     fdtd.set("z",0)
     fdtd.set("z span",(3)*scale)
     fdtd.set("y span",(3)*scale)
-    
+
 
     fdtd.addmodeexpansion()
     fdtd.set("mode selection","user select")
@@ -145,9 +144,8 @@ def main(radius,
     fdtd.set("center wavelength",1.55*scale)
     fdtd.set("wavelength span",0.1*scale)
     fdtd.set("mode selection","user select")
-    fdtd.set('mode selection','user select')
     fdtd.set('selected mode number',1)
-   
+
 
     fdtd.addpower()
     fdtd.set("name","dft_output")
@@ -174,11 +172,12 @@ def main(radius,
     fdtd.set('selected mode numbers',1)
 
 
-    fdtd.save("coupler_fsp")
+    fdtd.save("coupler_"+str(int(radius))+"radius")
 
 
 if __name__=='__main__':
-    scan_number = 1
+    ifscan = False
+    scan_number = 5
     scan = ["bus_wg_width","SKT_height","WG_height","radius","gap"]
     parser = argparse.ArgumentParser()
     parser.add_argument("radius",help="specify radius of ring",type=np.float64)
@@ -186,48 +185,59 @@ if __name__=='__main__':
     arg = parser.parse_args()
 
     print("......starting building......")
-    N = 7
-    if scan_number == 1:
-        data = np.linspace(0.21,0.213,N)
-    if scan_number == 2:
-        data = np.linspace(0.052,0.072,N)
-    if scan_number == 3:
-        data = np.linspace(0.46,0.49,N)
-    if scan_number == 4:
-        data = np.linspace(5,10,N)
-    if scan_number == 5:
-        data = np.linspace(0.16,0.3,N)
-    
-    print('\tcomplete building\n\nrunning simulation......\n')
-    plt.figure()
-    for i in range(len(data)):
-        print(f"\t\nRunning simulation with {scan[scan_number-1]} = {data[i]} um\n")
+    if ifscan:
+        N = 7
         if scan_number == 1:
-            main(arg.radius,arg.gap,bus_wg_width=data[i])
+            data = np.linspace(0.21,0.213,N)
         if scan_number == 2:
-            main(arg.radius,arg.gap,SKT_height=data[i])
+            data = np.linspace(0.052,0.072,N)
         if scan_number == 3:
-            main(arg.radius,arg.gap,WG_height=data[i])
+            data = np.linspace(0.46,0.49,N)
         if scan_number == 4:
-            main(data[i],arg.gap)
+            data = np.linspace(5,10,N)
         if scan_number == 5:
-            main(arg.radius,data[i])
-        p1 = subprocess.Popen(['/opt/lumerical/v212/mpich2/nemesis/bin/mpiexec --hostfile host_file /opt/lumerical/v212/bin/fdtd-engine-mpich2nem coupler_fsp.fsp'],shell=True)
-        p1.wait()
+            data = np.linspace(0.3,0.3,N)
+                #data = np.linspace(0.1,0.2,N)
 
-        fdtd = lumapi.FDTD(hide=True)
-        fdtd.load("coupler_fsp.fsp")
-        output = fdtd.getresult("mode_output","expansion for through port")
-        a = output['a']
-        f = output['f']
+    print('\tcomplete building\n\nrunning simulation......\n')
+    print(scan)
+    if ifscan:
+        plt.figure()
+        for i in range(len(data)):
+            print(f"\t\nRunning simulation with {scan[scan_number-1]} = {data[i]} um\n")
+            if scan_number == 1:
+                    main(arg.radius,arg.gap,bus_wg_width=data[i])
+                    radius = arg.radius
+            if scan_number == 2:
+                    main(arg.radius,arg.gap,SKT_height=data[i])
+                    radius = arg.radius
+            if scan_number == 3:
+                    main(arg.radius,arg.gap,WG_height=data[i])
+                    radius = arg.radius
+            if scan_number == 4:
+                    main(data[i],arg.gap)
+                    radius = data[i]
+            if scan_number == 5:
+                main(arg.radius,data[i])
+                radius = arg.radius
+            p1 = subprocess.Popen(['/opt/lumerical/v212/mpich2/nemesis/bin/mpiexec --hostfile host_file /opt/lumerical/v212/bin/fdtd-engine-mpich2nem '+"coupler_"+str(int(radius))+"radius.fsp"],shell=True)
+            p1.wait()
+
+            fdtd = lumapi.FDTD(hide=True)
+            fdtd.load("coupler_"+str(int(radius))+"radius")
+            output = fdtd.getresult("mode_output","expansion for through port")
+            a = output['a']
+            f = output['f']
         plt.plot(299792458*1e6/f,np.abs(a),label="%s = %.4f um"%(scan[scan_number-1],data[i]))
-    plt.xlabel("Wavelength (nm)")
-    plt.ylabel("Amplitude")
-    plt.title("Mode Expansion Amplitude")
-    plt.legend()
-    plt.grid()
-    plt.savefig(f"coupler_region_{scan[scan_number-1]}.png") 
-    plt.show()
+        plt.xlabel("Wavelength (nm)")
+        plt.ylabel("Amplitude")
+        plt.title("Mode Expansion Amplitude")
+        plt.legend()
+        plt.grid() 
+        plt.savefig(f"coupler_region_{scan[scan_number-1]}.png")
+        plt.show()
+    else:
+        main(arg.radius,arg.gap)
 
         
         

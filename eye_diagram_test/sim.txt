@@ -22,12 +22,11 @@ Parameter of ring modulator
 		Free Carrier time constant : 20 ns
 		Two photon absorption coefficient : 5e-13 cm/mW
 		Two photon absorption mode area : 0.1289 um^2
-		Free Carrier time constant : 20 ns
-		Free carrier absorption area : 1.04 cm^2
+		Free carrier absorption area : 1.0400000000000002e-17 cm^2
 		Free carrier absorption mode area : 0.116 um^2
 		Heater efficiency : 73 pm/mW
 		Kerr effect coefficient (n2) : 1.1e-08 um^2/mW
-		Kerr effect mode area (Akerr) : 0.204 um^2
+		Kerr effect mode area (Akerr) : 0.1289 um^2
 		index change rate per Kelvin : 0.000195 1/K
 		Density of Silicon : 2.329e-12 g/um^3
 		specific heat capacity of silicon : 713.0 mJ/(g*K)
@@ -55,7 +54,8 @@ Simulation Parameter of time
 	Number of bit in squence : []
 
 	Note. In ScanFrequency mode ,the Max time range value may affect the accuracy of Transfer function. above 10000 or 5000 ps is better. (This value may change by case ) 
-Voltage applied to Heater is 0 V
-Resistance of Heater is 125.0 ohm
-Thermal time constant of waveguide is 1.0000000000000001e-07 ns
+
+		Voltage applied to Heater is 0 V
+		Resistance of Heater is 125.0 ohm
+		Thermal time constant of waveguide is 100.00000000000001 ns
 		Thermal mode area : 0.11 um^2
