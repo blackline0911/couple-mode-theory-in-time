@@ -200,7 +200,7 @@ if __name__=='__main__':
                 #data = np.linspace(0.1,0.2,N)
 
     print('\tcomplete building\n\nrunning simulation......\n')
-    print(scan)
+
     if ifscan:
         plt.figure()
         for i in range(len(data)):
