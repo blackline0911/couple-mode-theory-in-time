@@ -30,7 +30,7 @@ def neff_dispersion(n0,wl, ng, lambda0):
 
 
 ng = 3.98
-lambda0 = 1.5492
+lambda0 = 1.549505
 cavity__length = 2*np.pi*5/2 +15 + 2*np.pi*5/2 + 15
 
 t1 = 0.94
@@ -39,22 +39,23 @@ t2 = t1/0.95
 t1 = 0.94
 t2 = t1
 r1 = 5
-r2 = 2.5
 
 L1 = 15
 L2 = 2*np.pi*r1/2 + 15 + 2*np.pi*r1/2
 La = 15 + 2*np.pi*r1/2
-L3 = 2*np.pi*r1/2 + 25*2 -5  + 2*np.pi*r2/2
+L3 = 2*np.pi*5 *2 + 15
 straight_bus_loss = 0.999648  #per um
 junction_loss = 0.95223**(La/(2*np.pi*5))
 bend_loss_r1 = 0.995083   # 90 degree bend loss of 5 um radius
 q1 = 0.99975**L1
 q2 = junction_loss*bend_loss_r1**2
-q3 = bend_loss_r1**2 * (straight_bus_loss**(50)) * bend_loss_r1**2
+q3 = bend_loss_r1**8 * (straight_bus_loss**15) 
 a = q1*q2
 k1 = (1-t1**2)**0.5
 k2 = (1-t2**2)**0.5
 
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 w0 =  2*np.pi*c/lambda0
 # n0 = 110/radius*lambda0/(2*np.pi)
@@ -110,12 +111,13 @@ print("q1 = ",q1)
 print("q2 = ",q2)
 print("q3 = ",q3)
 print("round trip amplitude loss = ",q2*q1)
+print("junction loss = ",junction_loss)
 print("t1 = ",t1)
 print("t2 = ",t2)
 
 print("linewidth = ",(2*np.pi*c*1e3/(w0)**2)*w0/Q," nm")
 print("f_opt (optical bandwidth) = ",c/1.55/Q/1e9," GHz")
-heater_phase = 110*np.pi/180
+heater_phase = 150*np.pi/180
 dn = 9.670417578102628e-05
 V = np.array([0,0.5,1,1.5,2])
 phi2 = np.array([n*2*np.pi/wl*La,     (n+dn/2)*2*np.pi/wl*La,\
@@ -136,5 +138,5 @@ plt.grid()
 plt.savefig("Transmission of feedback ring with MZM vs voltage (a = "+str(a)+").png")
 plt.show()
 
-print("Q after heater tuning = ",lambda0*1e3/0.35)
+print("Q after heater tuning = ",lambda0*1e3/0.4)
 print("f_opt (optical bandwidth) = ",c/lambda0/(lambda0*1e3/0.35)/1e9," GHz")
