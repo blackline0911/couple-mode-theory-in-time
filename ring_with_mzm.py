@@ -33,10 +33,9 @@ ng = 3.98
 lambda0 = 1.549505
 cavity__length = 2*np.pi*5/2 +15 + 2*np.pi*5/2 + 15
 
-t1 = 0.94
-t2 = t1/0.95
 
-t1 = 0.94
+t1 = 0.9493268
+t1 = 0.951082
 t2 = t1
 r1 = 5
 
@@ -71,7 +70,7 @@ Q = np.real( ( (2*(1/tau_e1 + 1/tau_e2) + 2/tau_o  )/(w0) )**(-1) )
 
 
 wl = np.linspace(lambda0-lambda0/Q,lambda0+lambda0/Q,10000)
-# wl = np.linspace(1.54,1.56,10000)
+wl = np.linspace(1.54,1.56,10000)
 # wl = np.linspace(1.545,1.555,100000)
 w = 2*np.pi*c/wl
 n = neff_dispersion(n0,wl,ng,1.55)
@@ -89,7 +88,7 @@ print("FSR of Ring = ",1550**2/(ng*1000*abs(L2+L1))," nm")
 
 ploting(wl*1000,dB(abs(t)**2),x_label="wavelength (nm)",title="transmission of feedback ring heater_phase = "+str(0*180/np.pi),filename="transmission of feedback ring")
 
-heater_phase = np.array([0,80,110,150,180,210,249,300])*np.pi/180
+heater_phase = np.linspace(0,360,10)*np.pi/180
 plt.figure()
 for i in range(len(heater_phase)):
     t = output(t1,k1,t2,k2,q1,q2,q3,phi1,phi2,phi3+heater_phase[i])
@@ -117,7 +116,7 @@ print("t2 = ",t2)
 
 print("linewidth = ",(2*np.pi*c*1e3/(w0)**2)*w0/Q," nm")
 print("f_opt (optical bandwidth) = ",c/1.55/Q/1e9," GHz")
-heater_phase = 150*np.pi/180
+heater_phase = 0*np.pi/180
 dn = 9.670417578102628e-05
 V = np.array([0,0.5,1,1.5,2])
 phi2 = np.array([n*2*np.pi/wl*La,     (n+dn/2)*2*np.pi/wl*La,\
