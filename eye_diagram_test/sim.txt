@@ -11,12 +11,12 @@ Simulation Parameters and Settings
 Parameter of ring modulator
 	Structure parameter : 
 		cavity length : 31.41592653589793 um
-		Group index : 3.9697242191825954
-		couple through coefficient : [0.95105]
-		Round trip loss : (energy) 0.9068105954812775
+		Group index : 3.984969420600495
+		couple through coefficient : [0.96367093]
+		Round trip loss : (energy) 0.9314712482387596
 		mode cross section : 0.11 um^2
-		Linear Energy absorption coefficient: 31.13760653564299 1/cm
-		Energy coupling coefficient: [31.95108158] 1/cm
+		Linear Energy absorption coefficient: 22.596804657036504 1/cm
+		Energy coupling coefficient: [23.55837081] 1/cm
 		Max Two Photon Absorption coefficient : 0.0 1/cm
 		Max Free Carrier Absorption coefficient : 0.0 1/cm
 		Free Carrier time constant : 20 ns
@@ -31,21 +31,21 @@ Parameter of ring modulator
 		Density of Silicon : 2.329e-12 g/um^3
 		specific heat capacity of silicon : 713.0 mJ/(g*K)
 	Physical parameter : 
-		intrinsic photon life time : 8.505197506700327 ps
-		couple extrinsic photon life time (port 1 ) : 8.288655043081919 ps
-		resonant frequency : 192.242007264155 THz
-		resonant wavelength : 1.559453431986187 um
-		Q factor : 2535.223770202822
-		LineWidth : 0.6151147091293753 nm
-		Group velocity : 75519719115835.75 um/s
-		Round Trip time : 0.4159963371647435 ps
+		intrinsic photon life time : 11.764873302659545 ps
+		couple extrinsic photon life time (port 1 ) : 11.284674392346915 ps
+		resonant frequency : 191.87392708223308 THz
+		resonant wavelength : 1.5624450000000019 um
+		Q factor : 3472.0000000000055
+		LineWidth : 0.45001296082949294 nm
+		Group velocity : 75230805147514.61 um/s
+		Round Trip time : 0.4175939161397612 ps
 
 		Input Laser photon energy : 0.0001273795540132291 fJ
 
-	The start wavelength is 1.558838317277058 um
-	The end wavelength is 1.5600685466953164 um
-	scanning frequency range for better accuracy is 0.07582841780028567 THz
-	Current frequency range is 0.1516568591960663 THz
+	The start wavelength is 1.561994987039172 um
+	The end wavelength is 1.5628950129608314 um
+	scanning frequency range for better accuracy is 0.0552632278462652 THz
+	Current frequency range is 0.11052646486126605 THz
 		Warning : This Transfer function result may not be accurate.
 
 Simulation Parameter of time 
@@ -59,3 +59,5 @@ Simulation Parameter of time
 		Resistance of Heater is 125.0 ohm
 		Thermal time constant of waveguide is 100.00000000000001 ns
 		Thermal mode area : 0.11 um^2
+
+

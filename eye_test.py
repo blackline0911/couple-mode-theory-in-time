@@ -24,10 +24,9 @@ radius = 5 #um
 cavity_length = 2*np.pi*radius 
 La_Lc_ratio = 1
 mode_area = 0.22*0.5
-lambda_res =  1.559
-# Q = 3310
-Q = 2660
-me = 38 # pm/V
+lambda_res =  1.562445
+Q = 3472
+me = 30 # pm/V
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +42,7 @@ print("G_energy + alpha_energy = ",( w_res*ng/(c*1e-4))/Q," 1/cm")
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the energy absorption coefficient (varing with voltage)
 G_plus_alpha = ( w_res*ng/(c*1e-4))/Q
-ratio = 1-181/(192*2)
+ratio = 1-188/(192*2)
 alpha_energy0 =  G_plus_alpha*(1-ratio) #1/cm
 G_energy = G_plus_alpha*ratio #1/cm
 
@@ -51,19 +50,19 @@ def func(V,alpha0,b,c):
     return b*V/(abs(V)+c)**0.5+alpha0
 V = np.array([0,-0.5,-1,-1.5,-2])
 # alpha_energy_data = func(V,alpha_energy0,2,0.1)
-# d = 1.3
-# alpha_energy_data = V*d + alpha_energy0
-# Amp_RoundTripLoss_data = np.exp(-alpha_energy_data/2*2*np.pi*radius*1e-4)
-
-Amp_RoundTripLoss_data = np.array([0.95223,0.95248,0.95273,0.95292,0.95305])
+d = 0.3
+alpha_energy_data = V*d + alpha_energy0
+Amp_RoundTripLoss_data = np.exp(-alpha_energy_data/2*2*np.pi*radius*1e-4)
+print("Amp_RoundTripLoss_data = ",Amp_RoundTripLoss_data)
+# Amp_RoundTripLoss_data = np.array([0.95223,0.95248,0.95273,0.95292,0.95305])
 # Amp_RoundTripLoss_data = np.array([0.95188,0.95212,0.95246,0.95245,0.95266])
 a_fit = alpha_fit(RoundTripLoss=Amp_RoundTripLoss_data,La=cavity_length,L = cavity_length,input2 = "amp")
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # Define the coupling coefficient
-gamma = 0.95105
-# gamma = np.exp(-G_energy/2*2*np.pi*radius*1e-4) 
+# gamma = 0.95105
+gamma = np.exp(-G_energy/2*2*np.pi*radius*1e-4) 
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +71,7 @@ gamma = 0.95105
 D_bar = -2*np.pi*c/lambda_res**2
 print("ng = ",ng)
 print("delta neff/delta V = ",me*1e-6*D_bar*( -ng/(w_res) )*(1/La_Lc_ratio))
-neff0 = 2.680503
+neff0 = 2.4867084505921646
 dneff_dV = me*1e-6*D_bar*( -ng/(w_res) )*(1/La_Lc_ratio)
 # neff_calculated = [2.51105,neff0, 2.51113, 2.51116, 2.51118, 2.5112]
 # neff_calculated = [2.51461,2.51464, 2.51467, 2.5147, 2.51473, 2.51475]

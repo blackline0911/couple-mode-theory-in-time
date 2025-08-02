@@ -30,12 +30,12 @@ def neff_dispersion(n0,wl, ng, lambda0):
 
 
 ng = 3.98
-lambda0 = 1.549505
+lambda0 = 1.55507
 cavity__length = 2*np.pi*5/2 +15 + 2*np.pi*5/2 + 15
 
 
 t1 = 0.9493268
-t1 = 0.951082
+t1 = 0.95646
 t2 = t1
 r1 = 5
 
@@ -44,7 +44,8 @@ L2 = 2*np.pi*r1/2 + 15 + 2*np.pi*r1/2
 La = 15 + 2*np.pi*r1/2
 L3 = 2*np.pi*5 *2 + 15
 straight_bus_loss = 0.999648  #per um
-junction_loss = 0.95223**(La/(2*np.pi*5))
+# junction_loss = 0.95223**(La/(2*np.pi*5))
+junction_loss = 0.96512758**(La/(2*np.pi*5))
 bend_loss_r1 = 0.995083   # 90 degree bend loss of 5 um radius
 q1 = 0.99975**L1
 q2 = junction_loss*bend_loss_r1**2
@@ -59,7 +60,7 @@ k2 = (1-t2**2)**0.5
 w0 =  2*np.pi*c/lambda0
 # n0 = 110/radius*lambda0/(2*np.pi)
 # n0 =  2.466901617924378
-n0 = 2.4968
+n0 = 2.4867084505921646
 print("n0 = ",n0)
 
 
@@ -70,8 +71,7 @@ Q = np.real( ( (2*(1/tau_e1 + 1/tau_e2) + 2/tau_o  )/(w0) )**(-1) )
 
 
 wl = np.linspace(lambda0-lambda0/Q,lambda0+lambda0/Q,10000)
-wl = np.linspace(1.54,1.56,10000)
-# wl = np.linspace(1.545,1.555,100000)
+# wl = np.linspace(1.54,1.57,10000) 
 w = 2*np.pi*c/wl
 n = neff_dispersion(n0,wl,ng,1.55)
 
@@ -88,7 +88,7 @@ print("FSR of Ring = ",1550**2/(ng*1000*abs(L2+L1))," nm")
 
 ploting(wl*1000,dB(abs(t)**2),x_label="wavelength (nm)",title="transmission of feedback ring heater_phase = "+str(0*180/np.pi),filename="transmission of feedback ring")
 
-heater_phase = np.linspace(0,360,10)*np.pi/180
+heater_phase = np.linspace(0,100,10)*np.pi/180
 plt.figure()
 for i in range(len(heater_phase)):
     t = output(t1,k1,t2,k2,q1,q2,q3,phi1,phi2,phi3+heater_phase[i])
@@ -116,19 +116,21 @@ print("t2 = ",t2)
 
 print("linewidth = ",(2*np.pi*c*1e3/(w0)**2)*w0/Q," nm")
 print("f_opt (optical bandwidth) = ",c/1.55/Q/1e9," GHz")
-heater_phase = 0*np.pi/180
+heater_phase = 110*np.pi/180
 dn = 9.670417578102628e-05
+dn =  7.651410617206657e-05
 V = np.array([0,0.5,1,1.5,2])
 phi2 = np.array([n*2*np.pi/wl*La,     (n+dn/2)*2*np.pi/wl*La,\
                           (n+dn)*2*np.pi/wl*La, (n+dn*1.5)*2*np.pi/wl*La,\
                           (n+dn*2)*2*np.pi/wl*La]) + n*2*np.pi/wl*(L2-La)
-junction_loss = np.array([0.95223,0.95248,0.95273,0.95292,0.95305])**(La/(2*np.pi*5))
+# junction_loss = np.array([0.95223,0.95248,0.95273,0.95292,0.95305])**(La/(2*np.pi*5))
+junction_loss = np.array([0.96512758 ,0.96535501 ,0.96558249 ,0.96581003 ,0.96603762])**(La/(2*np.pi*5))
+print("junction_loss = ",junction_loss)
 q2 = junction_loss*bend_loss_r1**2
 plt.figure()
 for i in range(len(V)):
     t = output(t1,k1,t2,k2,q1,q2[i],q3,phi1,phi2[i],phi3+heater_phase)
     plt.plot(wl*1000,dB(abs(t)**2),label=str(-V[i])+" V")
-    # plt.plot(wl*1000,map_angle(180/np.pi*np.angle(t)),label=str(-V[i])+" V")
 plt.xlabel("wavelength (nm)")
 plt.ylabel("transmission (dB)")
 plt.title("Transmission of feedback ring with MZM vs voltage (a = "+str(a)+")")
@@ -137,5 +139,5 @@ plt.grid()
 plt.savefig("Transmission of feedback ring with MZM vs voltage (a = "+str(a)+").png")
 plt.show()
 
-print("Q after heater tuning = ",lambda0*1e3/0.4)
-print("f_opt (optical bandwidth) = ",c/lambda0/(lambda0*1e3/0.35)/1e9," GHz")
+print("Q after heater tuning = ",lambda0*1e3/0.3)
+print("f_opt (optical bandwidth) = ",c/lambda0/(lambda0*1e3/0.3)/1e9," GHz")
